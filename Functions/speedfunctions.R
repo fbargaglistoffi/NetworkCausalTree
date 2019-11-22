@@ -257,7 +257,7 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
   do_splits <- TRUE
   
   #CREATE OUTPUT DATASET
-  tree_info <- data.frame(NODE = 1, NOBS = nrow(data_tree), FILTER = NA, TERMINAL = "SPLIT",
+  tree_info <- data.frame(NODE = 1, GOF=0, NOBS = nrow(data_tree), FILTER = NA, TERMINAL = "SPLIT",
                           stringsAsFactors = FALSE)
   
   while(do_splits){
@@ -278,8 +278,8 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
                              Ne=Ne[this_data$idunit],p=p[this_data$idunit],
                              Peff = Peff)
       
-      #GET THE MIN GOF
-      tmp_splitter <- as.numeric(splitting[1])
+      #GET THE MAX GOF
+      maxgof <- as.numeric(splitting[1])
       mn <- max(tree_info$NODE)
       
       
@@ -314,13 +314,14 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
       }
       
       #STOP IF INSUFFICIENT MINSIZE
-      if (any(tmp_nobs <= minsize)) {
+      if (any(as.numeric(table(this_data$W,this_data$G))< minsize)) {
         split_here <- rep(FALSE, 2)
         print('split has stopped for insufficient minsize')
       }
       
       #CREATE CHILDREN DATASET
       children <- data.frame(NODE = c(mn+1, mn+2),
+                             GOF=c(rep(maxgof,2)),
                              NOBS = tmp_nobs,
                              FILTER = tmp_filter,
                              TERMINAL = rep("SPLIT", 2),
@@ -410,7 +411,7 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p){
         tree_info$EFFTAU0100[j]<-EffTau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit]) 
         
       }}
-    colnames(tree_info)<-c("FILTER","NUMTREE","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
+    colnames(tree_info)<-c("GOF","NOBS","FILTER","NUMTREE","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
      }
   
   return(tree_info)
@@ -522,7 +523,7 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
                    N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff),
     .progress = "text" )
   
-  Forest<-data.frame(IDTREE=NA,NODE = NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
+  Forest<-data.frame(IDTREE=NA,NODE = NA, GOF=NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
                      stringsAsFactors = FALSE)
   
   
@@ -535,7 +536,7 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
   
   Forest=Forest[-1,]
   
-  Results<-data.frame(FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))),NUMTREE=NA,
+  Results<-data.frame(GOF=Forest$GOF,NOBS=Forest$NOBS ,  FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))), NUMTREE=NA,
                       stringsAsFactors = FALSE)
   
   for(j in as.vector(na.omit(unique(Forest$FILTER)))){
@@ -545,7 +546,7 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
 
   if(nrow(Results)==1){
     warning('No split has been made')
-  }
+  } 
   # coerce to data.frame
   #estimation set
   sampgroup_est=sample(setdiff(1:m,sampgroup_train),size=mest,replace=FALSE) 
@@ -708,4 +709,54 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
 
 }
 
+plot.NetworkCausalTrees=function(NCT,vcolor,vlabelcolor,
+                                 ewidth,elabelcex, efamily, ecolor,elabelfamily, elabelcolor,
+                                 vsize, vsize2,vshape,
+                                 vlabelfont, vlabelcex,
+                                 vframecolor,title,cex.main,col.main,adj){
+  
+  NCT$FILTER<-gsub(pattern = "data_tree",replacement ="",x=as.character(NCT$FILTER) )
+  NCT$FILTER<-gsub(pattern = "[$]",replacement ="",x=as.character( NCT$FILTER ) )
+  NCT$FILTER[which(NCT$FILTER!="NA")]<-paste0(" & ", NCT$FILTER[which(NCT$FILTER!="NA")])
+  NCT$FILTER[which(NCT$FILTER!="NA")]<-paste0(" NA ",NCT$FILTER[which(NCT$FILTER!="NA")])
+  
+  tree_data<-as.Node(NCT, mode = "table",
+                     pathName = "FILTER", pathDelimiter = " & ", colLevels = NULL,
+                     na.rm = TRUE)
+  lati_tree<-ToDataFrameNetwork(tree_data)
+  lati_tree<-as.matrix(lati_tree)
+  nomelati<-NULL
+  for(i in 1:nrow(lati_tree)){
+    nomelati_i<-tail(strsplit(lati_tree[,2], "/")[[i]],n=1)
+    nomelati_i<-gsub(pattern = "X.",replacement="",x=nomelati_i)
+    nomelati=c(nomelati,nomelati_i)
+  } 
+  grafo_tree<-graph_from_edgelist(lati_tree, directed = TRUE)
+  V(grafo_tree)$TAU1000<-NCT$EFF1000_EST
+  V(grafo_tree)$SE1000<-NCT$SE1000_EST
+  V(grafo_tree)$TAU1101<-NCT$EFF1101_EST
+  V(grafo_tree)$SE1101<-NCT$SE1101_EST
+  V(grafo_tree)$TAU1110<-NCT$EFF1110_EST
+  V(grafo_tree)$SE1110<-NCT$SE1110_EST
+  V(grafo_tree)$TAU0100<-NCT$EFF0100_EST
+  V(grafo_tree)$SE0100<-NCT$SE0100_EST
+  E(grafo_tree)$label<-nomelati
+  
+  
+  eff1<-paste(round(NCT$EFF1000_EST,2),"(",round(NCT$SE1000_EST,2),")",sep="")
+  eff2<-paste(round(NCT$EFF1101_EST,2),"(",round(NCT$SE1101_EST,2),")",sep="")
+  eff3<-paste(round(NCT$EFF1110_EST,2),"(",round(NCT$SE1110_EST,2),")",sep="")
+  eff4<-paste(round(NCT$EFF0100_EST,2),"(",round(NCT$SE0100_EST,2),")",sep="")  
+  V(grafo_tree)$labels<-paste(eff1,eff2,eff3,eff4,sep="\n")
+  NCTPLOT<-plot(grafo_tree,layout=layout_as_tree(grafo_tree), edge.label.color=elabelcolor,
+                edge.width=ewidth,edge.label.cex=elabelcex, edge.label.family=elabelfamily, vertex.color=vcolor,
+                vertex.label.dist = 0, vertex.label.color=vlabelcolor,
+                vertex.label=V(grafo_tree)$labels,  vertex.label.font=vlabelfont, vertex.label.cex=vlabelcex,
+                vertex.frame.color=vframecolor, edge.color=ecolor,
+                edge.label=E(grafo_tree)$label,vertex.shape=vshape,vertex.size=vsize,vertex.size2=vsize2)
+  legend('topleft', text.col="darkblue", xjust=0, adj=0.3,
+         legend=c("tau(10,00)","tau(11,01)","eta(11,10)","eta(01,00)"),title = "Effects",title.col ="red")
+  title(title,cex.main=cex.main,col.main=col.main,adj=adj)
+  return(NCTPLOT)
+}
 
