@@ -379,7 +379,7 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p){
     tree_info$EFFTAU0100[j]<-EffTau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])  
     tree_info$SETAU0100[j]<- sqrt(Vartau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nelsub))
   }}
-  colnames(tree_info)<-c("FILTER","NUMTREE","EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST","EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST")
+  colnames(tree_info)<-c("GOF","NOBS","FILTER","NUMTREE","EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST","EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST")
   
   }
 
@@ -639,9 +639,8 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
                    N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff),
     .progress = "text" )
   
-  Forest<-data.frame(IDTREE=NA,NODE = NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
+  Forest<-data.frame(IDTREE=NA,NODE = NA, GOF=NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
                      stringsAsFactors = FALSE)
-  
   
   for(i in 1:n_trees){   
     tree=NA
@@ -652,7 +651,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
   
   Forest=Forest[-1,]
   
-  Results<-data.frame(FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))),NUMTREE=NA,
+  Results<-data.frame(GOF=Forest$GOF,NOBS=Forest$NOBS ,  FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))), NUMTREE=NA,
                       stringsAsFactors = FALSE)
   
   for(j in as.vector(na.omit(unique(Forest$FILTER)))){
@@ -682,7 +681,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
   Neighest=Ne[sampleidest]
   pest=p[sampleidest]
   
-    Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest)
+  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest)
 
   #testing set
   sampgroup_test=setdiff(1:m,c(sampgroup_train,sampgroup_est))
@@ -702,9 +701,10 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
   
 
   Results_test<-alleffect(output=output,tree_info = Results,N=Ntest,W=Wtest,G=Gtest,Y=Ytest,X=Xtest,Ne=Neightest,p=ptest,Nel=Neltest)
+  
   colnames(Results_test)<-gsub(colnames(Results_test),pattern = "_EST",replacement = "_TEST")
   
-  Results<-cbind(Results,Results_est[,-c(1,2)],Results_test[,-c(1,2)])
+  Results<-cbind(Results,Results_est[,-c(1:4)],Results_test[,-c(1:4)])
   return(Results) 
 
 }
