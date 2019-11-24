@@ -176,7 +176,7 @@ system.time({
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize = 5,
+                                 minsize = 20,
                                  n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -551,7 +551,7 @@ system.time({
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize = 5,
+                                 minsize = 20,
                                  n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -1022,7 +1022,7 @@ system.time({
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize = 5,
+                                 minsize = 20,
                                  n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -1512,7 +1512,7 @@ system.time({
                                     minpopfrac = 1,
                                     depth = 2,
                                     fracpredictors = 1,
-                                    minsize = 5,
+                                    minsize = 20,
                                     n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -2001,7 +2001,7 @@ system.time({
                                     minpopfrac = 1,
                                     depth = 2,
                                     fracpredictors = 1,
-                                    minsize = 5,
+                                    minsize = 20,
                                     n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -2496,7 +2496,7 @@ system.time({
                                     minpopfrac = 1,
                                     depth = 2,
                                     fracpredictors = 1,
-                                    minsize = 5,
+                                    minsize = 20,
                                     n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
