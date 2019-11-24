@@ -69,6 +69,7 @@ system.time({
     se.tau.est.1000 <- data.frame()
     tau.test.1000 <- data.frame()
     se.tau.test.1000 <- data.frame()
+    vi.x1 <- vi.x2 <- vi.X <- data.frame()
     
     for (i in seq)   {
       
@@ -175,7 +176,7 @@ system.time({
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize = 10,
+                                 minsize = 5,
                                  n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -187,6 +188,20 @@ system.time({
                                 rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
       correct.rules[j, which(seq==i)] <- correct
+      
+      ## Variables Importance
+      
+      vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
+      vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
+      vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3") | 
+                       str_detect(SNCT$FILTER, "X.4") |
+                       str_detect(SNCT$FILTER, "X.5") |
+                       str_detect(SNCT$FILTER, "X.6") |
+                       str_detect(SNCT$FILTER, "X.7") |
+                       str_detect(SNCT$FILTER, "X.8") |
+                       str_detect(SNCT$FILTER, "X.9") |
+                       str_detect(SNCT$FILTER, "X.10")])
+      
       
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
       
@@ -285,7 +300,7 @@ system.time({
     
     ## Return the values
     
-    list(correct.rules, tau.est.1000, se.tau.est.1000, tau.test.1000, se.tau.test.1000)
+    list(correct.rules, tau.est.1000, se.tau.est.1000, tau.test.1000, se.tau.test.1000, vi.x1, vi.x2, vi.X)
   }
 })
 
@@ -296,10 +311,20 @@ tau_est_1000 <- na.omit(matrix[[2]])
 se_tau_est_1000 <- na.omit(matrix[[3]])
 tau_test_1000 <- na.omit(matrix[[4]])
 se_tau_test_1000 <- na.omit(matrix[[5]])
+vi_x1 <- na.omit(matrix[[6]])
+vi_x2 <- na.omit(matrix[[7]])
+vi_X <- na.omit(matrix[[8]])
+
 
 ## Correct Rules
 
 avg_correct_rules <- colMeans(correct_rules)
+
+## Variable Importance 
+
+vi_x1 <- colMeans(vi_x1)
+vi_x2 <- colMeans(vi_x2)
+vi_X <- colMeans(vi_X)
 
 # Exclude Rules that were not discovered
 
@@ -365,14 +390,16 @@ coverage_test_1000 <- colMeans(coverage_test_1000, na.rm = TRUE)
 results_nctree <- cbind(avg_correct_rules,
                 mse_tau_est_1000, bias_tau_est_1000,
                 mse_tau_test_1000, bias_tau_test_1000,
-                coverage_est_1000, coverage_test_1000)
+                coverage_est_1000, coverage_test_1000, 
+                vi_x1, vi_x2, vi_X)
 colnames(results_nctree) <- c("correct_rules",
                       "mse_tau_est_1000", 
                       "bias_tau_est_1000",
                       "mse_tau_test_1000", 
                       "bias_tau_test_1000",
                       "coverage_est_1000",
-                      "coverage_test_1000")
+                      "coverage_test_1000",
+                      "vi_x1", "vi_x2", "vi_X")
 
 ## Save the Results
 
@@ -410,6 +437,7 @@ system.time({
     tau.test.1101 <- data.frame()
     se.tau.test.1000 <- data.frame()
     se.tau.test.1101 <- data.frame()
+    vi.x1 <- vi.x2 <- vi.X <- data.frame()
     
     for (i in seq)   {
       
@@ -523,7 +551,7 @@ system.time({
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize = 10,
+                                 minsize = 5,
                                  n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -535,6 +563,19 @@ system.time({
                                 rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
       correct.rules[j, which(seq==i)] <- correct
+      
+      ## Variables Importance
+      
+      vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
+      vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
+      vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3") | 
+                                               str_detect(SNCT$FILTER, "X.4") |
+                                               str_detect(SNCT$FILTER, "X.5") |
+                                               str_detect(SNCT$FILTER, "X.6") |
+                                               str_detect(SNCT$FILTER, "X.7") |
+                                               str_detect(SNCT$FILTER, "X.8") |
+                                               str_detect(SNCT$FILTER, "X.9") |
+                                               str_detect(SNCT$FILTER, "X.10")])
       
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
       
@@ -683,7 +724,7 @@ system.time({
     ## Return the values
     
     list(correct.rules, tau.est.1000, tau.est.1101, se.tau.est.1000, se.tau.est.1101,
-         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101)
+         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101, vi.x1, vi.x2, vi.X)
   }
 })
 
@@ -698,10 +739,20 @@ tau_test_1000 <- na.omit(matrix[[6]])
 tau_test_1101 <- na.omit(matrix[[7]])
 se_tau_test_1000 <- na.omit(matrix[[8]])
 se_tau_test_1101 <- na.omit(matrix[[9]])
+vi_x1 <- na.omit(matrix[[10]])
+vi_x2 <- na.omit(matrix[[11]])
+vi_X <- na.omit(matrix[[12]])
+
 
 ## Correct Rules
 
 avg_correct_rules <- colMeans(correct_rules)
+
+## Variable Importance 
+
+vi_x1 <- colMeans(vi_x1)
+vi_x2 <- colMeans(vi_x2)
+vi_X <- colMeans(vi_X)
 
 ## Exclude Rules that were not discovered
 
@@ -818,14 +869,15 @@ for(i in seq){
 ## Create a Matrix for the Results
 
 nctree <- cbind(avg_correct_rules, mse_tau_est_1000, mse_tau_est_1101, bias_tau_est_1000, bias_tau_est_1101, coverage_est_1000, coverage_est_1101,
-                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101)
+                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101, vi_x1, vi_x2, vi_X)
 colnames(nctree) <- c("correct_rules",
                       "mse_tau_est_1000", "mse_tau_est_1101",
                       "bias_tau_est_1000", "bias_tau_est_1101",
                       "coverage_est_1000", "coverage_est_1101",
                       "mse_tau_test_1000", "mse_tau_test_1101",
                       "bias_tau_test_1000", "bias_tau_test_1101",
-                      "coverage_test_1000", "coverage_test_1101")
+                      "coverage_test_1000", "coverage_test_1101",
+                      "vi_x1", "vi_x2", "vi_X")
 write.csv(nctree, file = "two_main_effects.csv")
 
 
@@ -856,6 +908,7 @@ system.time({
     eta.0100 <- data.frame()
     se.eta.1110 <- data.frame()
     se.eta.0100 <- data.frame()
+    vi.x1 <- vi.x2 <- vi.X <- data.frame()
     
     for (i in seq)   {
       
@@ -969,7 +1022,7 @@ system.time({
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize = 10,
+                                 minsize = 5,
                                  n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -981,6 +1034,19 @@ system.time({
                                 rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
       correct.rules[j, which(seq==i)] <- correct
+      
+      ## Variables Importance
+      
+      vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
+      vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
+      vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3") | 
+                                               str_detect(SNCT$FILTER, "X.4") |
+                                               str_detect(SNCT$FILTER, "X.5") |
+                                               str_detect(SNCT$FILTER, "X.6") |
+                                               str_detect(SNCT$FILTER, "X.7") |
+                                               str_detect(SNCT$FILTER, "X.8") |
+                                               str_detect(SNCT$FILTER, "X.9") |
+                                               str_detect(SNCT$FILTER, "X.10")])
       
       ## Extract the Correct Rules
       
@@ -1137,7 +1203,7 @@ system.time({
     ## Return the values
     
     list(correct.rules, eta.est.1110, eta.est.0100, se.eta.est.1110, se.eta.est.0100,
-         eta.test.1110, eta.test.0100, se.eta.test.1110, se.eta.test.0100)
+         eta.test.1110, eta.test.0100, se.eta.test.1110, se.eta.test.0100, vi.x1, vi.x2, vi.X)
   }
 })
 
@@ -1152,10 +1218,20 @@ eta_test_1110 <- na.omit(matrix[[6]])
 eta_test_0100 <- na.omit(matrix[[7]])
 se_eta_test_1110 <- na.omit(matrix[[8]])
 se_eta_test_0100 <- na.omit(matrix[[9]])
+vi_x1 <- na.omit(matrix[[10]])
+vi_x2 <- na.omit(matrix[[11]])
+vi_X <- na.omit(matrix[[12]])
+
 
 ## Correct Rules
 
 avg_correct_rules <- colMeans(correct_rules)
+
+## Variable Importance 
+
+vi_x1 <- colMeans(vi_x1)
+vi_x2 <- colMeans(vi_x2)
+vi_X <- colMeans(vi_X)
 
 ## Exclude Rules that were not discovered
 
@@ -1272,14 +1348,15 @@ for(i in seq){
 ## Create a Matrix for the Results
 
 nctree <- cbind(avg_correct_rules, mse_eta_est_1110, mse_eta_est_0100, bias_eta_est_1110, bias_eta_est_0100, coverage_est_1110, coverage_est_0100,
-                mse_eta_test_1110, mse_eta_test_0100, bias_eta_test_1110, bias_eta_test_0100, coverage_test_1110, coverage_test_0100)
+                mse_eta_test_1110, mse_eta_test_0100, bias_eta_test_1110, bias_eta_test_0100, coverage_test_1110, coverage_test_0100, vi_x1, vi_x2, vi_X)
 colnames(nctree) <- c("correct_rules",
                       "mse_eta_est_1110", "mse_eta_est_0100",
                       "bias_eta_est_1110", "bias_eta_est_0100",
                       "coverage_est_1110", "coverage_est_0100",
                       "mse_eta_test_1110", "mse_eta_test_0100",
                       "bias_eta_test_1110", "bias_eta_test_0100",
-                      "coverage_test_1110", "coverage_test_0100")
+                      "coverage_test_1110", "coverage_test_0100",
+                      "vi_x1", "vi_x2", "vi_X")
 write.csv(nctree, file = "two_spillover_effects.csv")
 
 
@@ -1321,6 +1398,7 @@ system.time({
     tau.test.1101 <- data.frame()
     se.tau.test.1000 <- data.frame()
     se.tau.test.1101 <- data.frame()
+    vi.x1 <- vi.x2 <- vi.x3 <- vi.X <- data.frame()
     
     for (i in seq)   {
       
@@ -1434,7 +1512,7 @@ system.time({
                                     minpopfrac = 1,
                                     depth = 2,
                                     fracpredictors = 1,
-                                    minsize = 10,
+                                    minsize = 5,
                                     n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -1448,6 +1526,19 @@ system.time({
                                 rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
       correct.rules[j, which(seq==i)] <- correct
+      
+      ## Variables Importance
+      
+      vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
+      vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
+      vi.x3[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3")])
+      vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.4") |
+                                               str_detect(SNCT$FILTER, "X.5") |
+                                               str_detect(SNCT$FILTER, "X.6") |
+                                               str_detect(SNCT$FILTER, "X.7") |
+                                               str_detect(SNCT$FILTER, "X.8") |
+                                               str_detect(SNCT$FILTER, "X.9") |
+                                               str_detect(SNCT$FILTER, "X.10")])
       
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
       
@@ -1596,7 +1687,7 @@ system.time({
     ## Return the values
     
     list(correct.rules, tau.est.1000, tau.est.1101, se.tau.est.1000, se.tau.est.1101,
-         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101)
+         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101, vi.x1, vi.x2, vi.3, vi.X)
   }
 })
 
@@ -1611,10 +1702,22 @@ tau_test_1000 <- na.omit(matrix[[6]])
 tau_test_1101 <- na.omit(matrix[[7]])
 se_tau_test_1000 <- na.omit(matrix[[8]])
 se_tau_test_1101 <- na.omit(matrix[[9]])
+vi_x1 <- na.omit(matrix[[10]])
+vi_x2 <- na.omit(matrix[[11]])
+vi_x3 <- na.omit(matrix[[12]])
+vi_X <- na.omit(matrix[[13]])
+
 
 ## Correct Rules
 
 avg_correct_rules <- colMeans(correct_rules)
+
+## Variable Importance 
+
+vi_x1 <- colMeans(vi_x1)
+vi_x2 <- colMeans(vi_x2)
+vi_x3 <- colMeans(vi_x3)
+vi_X <- colMeans(vi_X)
 
 ## Exclude Rules that were not discovered
 
@@ -1731,14 +1834,15 @@ for(i in seq){
 ## Create a Matrix for the Results
 
 nctree <- cbind(avg_correct_rules, mse_tau_est_1000, mse_tau_est_1101, bias_tau_est_1000, bias_tau_est_1101, coverage_est_1000, coverage_est_1101,
-                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101)
+                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101, vi_x1, vi_x2, vi_3, vi_X)
 colnames(nctree) <- c("correct_rules",
                       "mse_tau_est_1000", "mse_tau_est_1101",
                       "bias_tau_est_1000", "bias_tau_est_1101",
                       "coverage_est_1000", "coverage_est_1101",
                       "mse_tau_test_1000", "mse_tau_test_1101",
                       "bias_tau_test_1000", "bias_tau_test_1101",
-                      "coverage_test_1000", "coverage_test_1101")
+                      "coverage_test_1000", "coverage_test_1101",
+                      "vi_x1", "vi_x2", "vi_x3", "vi_X")
 write.csv(nctree, file = "two_main_effects_overlap.csv")
 
 ##################################
@@ -1783,6 +1887,7 @@ system.time({
     tau.test.1101 <- data.frame()
     se.tau.test.1000 <- data.frame()
     se.tau.test.1101 <- data.frame()
+    vi.x1 <- vi.x2 <- xi.x3 <- vi.X <- data.frame()
     
     for (i in seq)   {
       
@@ -1896,7 +2001,7 @@ system.time({
                                     minpopfrac = 1,
                                     depth = 2,
                                     fracpredictors = 1,
-                                    minsize = 10,
+                                    minsize = 5,
                                     n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -1910,6 +2015,19 @@ system.time({
                                 rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
       correct.rules[j, which(seq==i)] <- correct
+      
+      ## Variables Importance
+      
+      vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
+      vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
+      vi.x3[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3")])
+      vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.4") |
+                                               str_detect(SNCT$FILTER, "X.5") |
+                                               str_detect(SNCT$FILTER, "X.6") |
+                                               str_detect(SNCT$FILTER, "X.7") |
+                                               str_detect(SNCT$FILTER, "X.8") |
+                                               str_detect(SNCT$FILTER, "X.9") |
+                                               str_detect(SNCT$FILTER, "X.10")])
       
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
       
@@ -2058,7 +2176,7 @@ system.time({
     ## Return the values
     
     list(correct.rules, tau.est.1000, tau.est.1101, se.tau.est.1000, se.tau.est.1101,
-         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101)
+         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101, vi.x1, vi.x2, vi.x3, vi.X)
   }
 })
 
@@ -2073,10 +2191,21 @@ tau_test_1000 <- na.omit(matrix[[6]])
 tau_test_1101 <- na.omit(matrix[[7]])
 se_tau_test_1000 <- na.omit(matrix[[8]])
 se_tau_test_1101 <- na.omit(matrix[[9]])
+vi_x1 <- na.omit(matrix[[10]])
+vi_x2 <- na.omit(matrix[[11]])
+vi_x3 <- na.omit(matrix[[12]])
+vi_X <- na.omit(matrix[[13]])
 
 ## Correct Rules
 
 avg_correct_rules <- colMeans(correct_rules)
+
+## Variable Importance 
+
+vi_x1 <- colMeans(vi_x1)
+vi_x2 <- colMeans(vi_x2)
+vi_x3 <- colMeans(vi_x3)
+vi_X <- colMeans(vi_X)
 
 ## Exclude Rules that were not discovered
 
@@ -2193,14 +2322,15 @@ for(i in seq){
 ## Create a Matrix for the Results
 
 nctree <- cbind(avg_correct_rules, mse_tau_est_1000, mse_tau_est_1101, bias_tau_est_1000, bias_tau_est_1101, coverage_est_1000, coverage_est_1101,
-                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101)
+                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101, vi_x1, vi_x2, vi_x3, vi.X)
 colnames(nctree) <- c("correct_rules",
                       "mse_tau_est_1000", "mse_tau_est_1101",
                       "bias_tau_est_1000", "bias_tau_est_1101",
                       "coverage_est_1000", "coverage_est_1101",
                       "mse_tau_test_1000", "mse_tau_test_1101",
                       "bias_tau_test_1000", "bias_tau_test_1101",
-                      "coverage_test_1000", "coverage_test_1101")
+                      "coverage_test_1000", "coverage_test_1101",
+                      "vi_x1", "vi_x2", "vi_x3", "vi_X")
 write.csv(nctree, file = "two_main_effects_overlap_effect_size.csv")
 
 
@@ -2252,6 +2382,7 @@ system.time({
     tau.test.1101 <- data.frame()
     se.tau.test.1000 <- data.frame()
     se.tau.test.1101 <- data.frame()
+    vi.x1 <- vi.x2 <- vi.X <- data.frame()
     
     for (i in seq)   {
       
@@ -2365,7 +2496,7 @@ system.time({
                                     minpopfrac = 1,
                                     depth = 2,
                                     fracpredictors = 1,
-                                    minsize = 10,
+                                    minsize = 5,
                                     n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
@@ -2377,6 +2508,19 @@ system.time({
                                 rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
       correct.rules[j, which(seq==i)] <- correct
+      
+      ## Variables Importance
+      
+      vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
+      vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
+      vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3") | 
+                                               str_detect(SNCT$FILTER, "X.4") |
+                                               str_detect(SNCT$FILTER, "X.5") |
+                                               str_detect(SNCT$FILTER, "X.6") |
+                                               str_detect(SNCT$FILTER, "X.7") |
+                                               str_detect(SNCT$FILTER, "X.8") |
+                                               str_detect(SNCT$FILTER, "X.9") |
+                                               str_detect(SNCT$FILTER, "X.10")])
       
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
       
@@ -2525,7 +2669,7 @@ system.time({
     ## Return the values
     
     list(correct.rules, tau.est.1000, tau.est.1101, se.tau.est.1000, se.tau.est.1101,
-         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101)
+         tau.test.1000, tau.test.1101, se.tau.test.1000, se.tau.test.1101, vi.x1, vi.x2, vi.X)
   }
 })
 
@@ -2540,10 +2684,19 @@ tau_test_1000 <- na.omit(matrix[[6]])
 tau_test_1101 <- na.omit(matrix[[7]])
 se_tau_test_1000 <- na.omit(matrix[[8]])
 se_tau_test_1101 <- na.omit(matrix[[9]])
+vi_x1 <- na.omit(matrix[[10]])
+vi_x2 <- na.omit(matrix[[11]])
+vi_X <- na.omit(matrix[[12]])
 
 ## Correct Rules
 
 avg_correct_rules <- colMeans(correct_rules)
+
+## Variable Importance 
+
+vi_x1 <- colMeans(vi_x1)
+vi_x2 <- colMeans(vi_x2)
+vi_X <- colMeans(vi_X)
 
 ## Exclude Rules that were not discovered
 
@@ -2660,14 +2813,15 @@ for(i in seq){
 ## Create a Matrix for the Results
 
 nctree <- cbind(avg_correct_rules, mse_tau_est_1000, mse_tau_est_1101, bias_tau_est_1000, bias_tau_est_1101, coverage_est_1000, coverage_est_1101,
-                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101)
+                mse_tau_test_1000, mse_tau_test_1101, bias_tau_test_1000, bias_tau_test_1101, coverage_test_1000, coverage_test_1101, vi.x1, vi.x2, vi.X)
 colnames(nctree) <- c("correct_rules",
                       "mse_tau_est_1000", "mse_tau_est_1101",
                       "bias_tau_est_1000", "bias_tau_est_1101",
                       "coverage_est_1000", "coverage_est_1101",
                       "mse_tau_test_1000", "mse_tau_test_1101",
                       "bias_tau_test_1000", "bias_tau_test_1101",
-                      "coverage_test_1000", "coverage_test_1101")
+                      "coverage_test_1000", "coverage_test_1101",
+                      "vi_x1", "vi_x2", "vi_X")
 write.csv(nctree, file = "two_main_effects_correlated.csv")
 
 stopCluster()
