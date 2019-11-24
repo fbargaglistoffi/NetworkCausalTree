@@ -4,7 +4,10 @@ sharedn=function(i,j,Nel){
 
 
 pi<-function(i,w,g,p,Ne){
-pi<-((p[i]^w)*(1-p[i])^(1-w))*(((1-(1-p[i])^Ne[i])^g)*((1-p[i])^Ne[i])^(1-g))
+pi<-((p[i]^w)*
+    (1-p[i])^(1-w))*
+    (((1-(1-p[i])^Ne[i])^g)*
+    ((1-p[i])^Ne[i])^(1-g))
 return(pi)
   }
 
@@ -13,7 +16,7 @@ pij=((p[i]^wi)*(1-p[i])^(1-wi))*
     ((p[j]^wj)*(1-p[j])^(1-wj))*
     (((1-(1-p[i])^(Ne[i]-ifelse(Ne[i]<=Ne[j],sharedn(i,j,Nel=Nel),0)))^gi)*
     ((1-p[i])^(Ne[i])-ifelse(Ne[i]<=Ne[j],sharedn(i,j,Nel=Nel),0))^(1-gi))*
-    (((1-(1-p[j])^(Ne[j]-ifelse(Ne[i]>Ne[j],sharedn(i,Nel=Nel),0)))^gj)*
+    (((1-(1-p[j])^(Ne[j]-ifelse(Ne[i]>Ne[j],sharedn(i,j,Nel=Nel),0)))^gj)*
     ((1-p[j])^(Ne[j])-ifelse(Ne[i]>Ne[j],sharedn(i,j,Nel=Nel),0))^(1-gj))
 return(pij)  
 }
@@ -44,60 +47,70 @@ EffTau0100=function(N,W,G,Y,p,Ne){
 
 Vartau1000=function(N,Y,W,G,p,Ne,Nel){
   
+  if(length(which(W==1 & G==0))>1){
     for (i in which(W==1 & G==0)) {
     for (j in which(W==1 & G==0)) {
     if (i!=j){
-      vary10=sum(pi(which(W==1 & G==0),1,0,p,Ne)*
+      vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
              (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
-             sum( (pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
-                  (pij(i,j,1,0,1,0,Ne,Nel,p=p))*
-                  (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)) )  
-    }}}  
+             sum(((pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
+                (pij(i,j,1,0,1,0,Ne,Nel,p=p)))*
+                (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)) )  
+    }}}}else{vary10=NA}
 
-  for (i in which(W==0 & G==0)) {
-  for (j in which(W==0 & G==0)) {
-    if (i!=j){
-      vary00=sum(pi(which(W==0 & G==0),0,0,p,Ne)*
-             (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
-             sum( (pij(i,j,0,0,0,0,Ne,Nel,p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
-                  (pij(i,j,0,0,0,0,Ne,Nel,p)) *
+  if(length(which(W==0 & G==0))>1){
+    for (i in which(W==0 & G==0)) {
+      for (j in which(W==0 & G==0)) {
+        if (i!=j){
+          vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
+                  (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
+                  sum(((pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
+                  (pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p))) *
                   (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)) )  
-    }}}  
+     }}}}else{vary00=NA}
          
-for (i in which(W==1 & G==0)) {
+  if(length(which(W==1 & G==0))>1 & length(which(W==0 & G==0))>1){
+  for (i in which(W==1 & G==0)) {
   for (j in which(W==0 & G==0)) {
       covy10y00=sum(1/pij(i,j,1,0,0,0,Ne,Nel,p=p)*
                 (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
                 (pij(i,j,1,0,0,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,0,0,p,Ne))-
                 (sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))) +
                  sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
-  }} 
+  }}}else{covy10y00=NA}
   
-var1000=(1/N^{2})*(vary10+vary00-2*covy10y00)  
+  if(any(is.na(c(vary10,vary00)))){
+    var1000=NA
+  }else{  
+var1000=(1/N^{2})*(vary10+vary00-2*covy10y00)} 
 return(var1000) 
 }
 
 Vartau1101=function(N,Y,W,G,p,Ne,Nel){
-  for (i in which(W==1 & G==1)) {
-    for (j in which(W==1 & G==1)) {
-      if (i!=j){
-        vary11=sum(pi(which(W==1 & G==1),1,1,p,Ne)*
-               (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
-               sum( (pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
-                    (pij(i,j,1,1,1,1,Ne,Nel,p=p))*
-                    (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne)) )  
-      }}}  
   
+  if(length(which(W==1 & G==1))>1){
+    for (i in which(W==1 & G==1)) {
+      for (j in which(W==1 & G==1)) {
+        if (i!=j){
+          vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
+                       (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
+            sum( ((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
+                   (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
+                   (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne)) )  
+        }}}}else{vary11=NA}
+  
+  if(length(which(W==0 & G==1))>1){
   for (i in which(W==0 & G==1)) {
     for (j in which(W==0 & G==1)) {
       if (i!=j){
-        vary01=sum(pi(which(W==0 & G==1),0,1,p,Ne)*
+        vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
                   (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
-               sum( (pij(i,j,0,1,0,1,Ne,Nel,p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
-                    (pij(i,j,0,1,0,1,Ne,Nel,p)) *
+               sum( ((pij(i,j,0,1,0,1,Ne,Nel,p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
+                    (pij(i,j,0,1,0,1,Ne,Nel,p))) *
                     (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)) )  
-      }}}  
-  
+      }}}}else{vary01=NA}
+ 
+  if(length(which(W==1 & G==1))>1 & length(which(W==0 & G==1))>1){
   for (i in which(W==1 & G==1)) {
     for (j in which(W==0 & G==1)) {
       covy11y01=sum(1/pij(i,j,1,1,0,1,Ne,Nel,p=p)*
@@ -105,34 +118,40 @@ Vartau1101=function(N,Y,W,G,p,Ne,Nel){
                 (pij(i,j,1,1,0,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,0,1,p,Ne)) -
                 (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
                 sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))))  
-    }} 
+    }}}else{covy11y01=NA}
   
-  var1101=(1/N^{2})*(vary11+vary01-2*covy11y01)  
+  if(any(is.na(c(vary11,vary01)))){
+    var1101=NA
+  }else{
+  var1101=(1/N^{2})*(vary11+vary01-2*covy11y01)}
   return(var1101) 
 }
 
 Vartau1110=function(N,Y,W,G,p,Ne,Nel){
   
+  if(length(which(W==1 & G==1))>1){
   for (i in which(W==1 & G==1)) {
     for (j in which(W==1 & G==1)) {
       if (i!=j){
-        vary11=sum(pi(which(W==1 & G==1),1,1,p,Ne)*
-                     (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
-          sum( (pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
-                 (pij(i,j,1,1,1,1,Ne,Nel,p=p))*
+        vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
+               (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
+          sum( ((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
+                 (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
                  (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne)) )  
-      }}}  
+      }}}}else{vary11=NA}
   
+  if(length(which(W==1 & G==0))>1){
   for (i in which(W==1 & G==0)) {
     for (j in which(W==1 & G==0)) {
       if (i!=j){
-        vary10=sum(pi(which(W==1 & G==0),1,0,p,Ne)*
+        vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
                      (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
-          sum( (pij(i,j,1,0,1,0,Ne,Nel,p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
-                 (pij(i,j,1,0,1,0,Ne,Nel,p))*
+          sum( ((pij(i,j,1,0,1,0,Ne,Nel,p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
+                 (pij(i,j,1,0,1,0,Ne,Nel,p)))*
                  (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)) )  
-      }}}  
+      }}}}else{vary10=NA}
   
+  if(length(which(W==1 & G==1))>1 & length(which(W==1 & G==0))>1){
   for (i in which(W==1 & G==1)) {
     for (j in which(W==1 & G==0)) {
       covy11y10=sum(1/pij(i,j,1,1,1,0,Ne,Nel,p=p)*
@@ -140,44 +159,53 @@ Vartau1110=function(N,Y,W,G,p,Ne,Nel){
                 (pij(i,j,1,1,1,0,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,0,p,Ne))-
                 (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
                 sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))))  
-    }} 
+    }}}else{covy11y10=NA}
   
-  var1110=(1/N^{2})*(vary11+vary10-2*covy11y10)  
+  if(any(is.na(c(vary11,vary10)))){
+  var1110=NA
+  }else{
+  var1110=(1/N^{2})*(vary11+vary10-2*covy11y10)}  
   return(var1110) 
 }
 
 Vartau0100=function(N,Y,W,G,p,Ne,Nel){
   
+  if(length(which(W==0 & G==1))>1){
   for (i in which(W==0 & G==1)) {
     for (j in which(W==0 & G==1)) {
       if (i!=j){
-        vary01=sum(pi(which(W==0 & G==1),0,1,p,Ne)*
+        vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
                      (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
-          sum( (pij(i,j,0,1,0,1,Ne,Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
-                (pij(i,j,0,1,0,1,Ne,Nel,p=p)) *
+          sum( ((pij(i,j,0,1,0,1,Ne,Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
+                (pij(i,j,0,1,0,1,Ne,Nel,p=p)))*
                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)) )  
-      }}}  
+      }}}}else{vary01=NA}
   
+  if(length(which(W==0 & G==0))>1){
   for (i in which(W==0 & G==0)) {
     for (j in which(W==0 & G==0)) {
       if (i!=j){
-        vary00=sum(pi(which(W==0 & G==0),0,0,p,Ne)*
+        vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
                      (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
-          sum( (pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
-               (pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p)) *
+          sum( ((pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
+               (pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p))) *
                (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)) )  
-      }}}  
+      }}}}else{vary00=NA}
   
-  for (i in which(W==0 & G==1)) {
+  if(length(which(W==0 & G==1))>1 & length(which(W==0 & G==0))>1){
+   for (i in which(W==0 & G==1)) {
     for (j in which(W==0 & G==0)) {
       covy01y00=sum(1/pij(i,j,0,1,0,0,Ne,Nel,p=p)*
                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
-                (pij(i=i,j=j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,0,p,Ne))-
-               (sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))) +
-                sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
-    }} 
+                (pij(i=i,j=j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,0,p,Ne)) -
+                (sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))) +
+                 sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
+    }}}else{covy01y00=NA}
   
-  var0100=(1/N^{2})*(vary01+vary00-2*covy01y00)  
+  if(any(is.na(c(vary01,vary00)))){
+  var0100=NA
+  }else{
+  var0100=(1/N^{2})*(vary01+vary00-2*covy01y00)}
   return(var0100) 
 }
 
@@ -242,11 +270,18 @@ Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Peff){
 
   if(all(is.na(gof))){
     warning('gof returns all NANs')
+    gofres<-NA
+    splitres<-NA
+    varres<-NA
+  }else{
+    gofres<-max(na.omit(gof))
+    splitres<-values[which.max(gof)]
+    varres<-name[which.max(gof)]
   }
   
 
   #find the minimum value of the gof and returns the variable and the value where the minimum is reached.  
-  return(c(gof = max(na.omit(gof)), split = values[which.max(gof)], var=name[which.max(gof)]))
+  return(c(gof = gofres , split = splitres , var=varres))
 
   }
 
@@ -278,6 +313,11 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
                              Ne=Ne[this_data$idunit],p=p[this_data$idunit],
                              Peff = Peff)
       
+      if (any(is.na(splitting))) {
+        split_here <- rep(FALSE, 2)
+        print('splits has stopped couse gof is all NA')
+      }else{
+      
       #GET THE MAX GOF
       maxgof <- as.numeric(splitting[1])
       mn <- max(tree_info$NODE)
@@ -288,7 +328,7 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
                             as.numeric(splitting[2]),sep=""),
                       paste("data_tree$",splitting[3], "<", 
                             as.numeric(splitting[2]),sep=""))
-      
+      }
       #CHECK IF THE CURRENT SPLITTING RULE HAS ALREADY BEEN USED
       split_here  <- !sapply(tmp_filter,
                              FUN = function(x,y) any(grepl(x, x = y)),
@@ -329,7 +369,7 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
       
       #ASSIGN PARENTS OR LEAF IF SPLIT_HERE IS ACTIVE OR NOT 
       tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "PARENT")
-      tree_info <- rbind(tree_info, children)
+      tree_info <- rbind(tree_info, children) 
       #STOP SPLITTING IF THERE AREN'T NODES WITH "SPLIT"
       do_splits <- !all(tree_info$TERMINAL != "SPLIT")
     } 
@@ -340,7 +380,7 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
 }
 
 
-alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p){
+alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
 
   if(output=="estimation"){
   data_est <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X)  
@@ -364,7 +404,7 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p){
     
     texts=gsub(pattern="data_tree",replace="data_est",tree_info[j, "FILTER"])
     this_data <- subset(data_est, eval(parse(text=texts)))
-    if(any(as.numeric(table(this_data$W,this_data$G))<3)){
+    if(any(as.numeric(table(this_data$W,this_data$G))<minsize/2)){
       warning('subpopulations not sufficiently represented')  
     }
     
@@ -564,10 +604,10 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
   Neighest=Ne[sampleidest]
   pest=p[sampleidest]
   
-  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest)
+  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest,minsize=minsize)
    return(Results_est)
 }
-
+ 
 
 
 
@@ -681,7 +721,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
   Neighest=Ne[sampleidest]
   pest=p[sampleidest]
   
-  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest)
+  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest,minsize=minsize)
 
   #testing set
   sampgroup_test=setdiff(1:m,c(sampgroup_train,sampgroup_est))
@@ -700,7 +740,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
   ptest=p[sampleidtest]
   
 
-  Results_test<-alleffect(output=output,tree_info = Results,N=Ntest,W=Wtest,G=Gtest,Y=Ytest,X=Xtest,Ne=Neightest,p=ptest,Nel=Neltest)
+  Results_test<-alleffect(output=output,tree_info = Results,N=Ntest,W=Wtest,G=Gtest,Y=Ytest,X=Xtest,Ne=Neightest,p=ptest,Nel=Neltest,minsize=minsize)
   
   colnames(Results_test)<-gsub(colnames(Results_test),pattern = "_EST",replacement = "_TEST")
   
