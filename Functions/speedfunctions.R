@@ -142,7 +142,7 @@ Vartau1000=function(N,Y,W,G,p,Ne,Nel){
   if(any(is.na(c(vary10,vary00)))){
     var1000=NA
   }else{ 
-  var1000=(1/(N^2))*(vary10+vary00-2*covy10y00)
+  var1000=abs((1/(N^2))*(vary10+vary00-2*covy10y00))
   }
 return(var1000) 
 }
@@ -209,7 +209,7 @@ Vartau1101=function(N,Y,W,G,p,Ne,Nel){
   if(any(is.na(c(vary11,vary01)))){
     var1101=NA
   }else{  
-  var1101=(1/(N^2))*(vary11+vary01-2*covy11y01)
+  var1101=abs((1/(N^2))*(vary11+vary01-2*covy11y01))
    }
   return(var1101) 
 }
@@ -279,7 +279,7 @@ Vartau1110=function(N,Y,W,G,p,Ne,Nel){
   if(any(is.na(c(vary11,vary10)))){
   var1110=NA
   }else{ 
-  var1110=(1/(N^2))*(vary11+vary10-2*covy11y10)
+  var1110=abs((1/(N^2))*(vary11+vary10-2*covy11y10))
   }
   return(var1110) 
 }
@@ -348,7 +348,7 @@ Vartau0100=function(N,Y,W,G,p,Ne,Nel){
   if(any(is.na(c(vary01,vary00)))){
   var0100=NA
   }else{
-  var0100=(1/(N^(2)))*(vary01+vary00-2*covy01y00)
+  var0100=abs((1/(N^(2)))*(vary01+vary00-2*covy01y00))
   }
   return(var0100) 
 }
