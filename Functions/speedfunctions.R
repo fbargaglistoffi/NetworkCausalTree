@@ -1,23 +1,59 @@
+genmultnet=function(m,N,method,param){
+  comba<-matrix(0,N,N)
+  gsize<-N/m
+  
+  for (i in 1:m){
+    if(method=="er"){
+      g=erdos.renyi.game(gsize, p=param, type = "gnp")}
+    if(method=="sf"){
+    g=barabasi.game(gsize)}
+    adj<-as.matrix(get.adjacency(g))
+    comba[(gsize*i-(gsize-1)):(gsize*i),(gsize*i-(gsize-1)):(gsize*i)]<-adj
+  }
+  
+  return(comba)
+}
+
+
+expand.grid.unique <- function(x, y, include.equals=FALSE)
+{
+  x <- unique(x)
+  
+  y <- unique(y)
+  
+  g <- function(i)
+  {
+    z <- setdiff(y, x[seq_len(i-include.equals)])
+    
+    if(length(z)) cbind(x[i], z, deparse.level=0)
+  }
+  
+  do.call(rbind, lapply(seq_along(x), g))
+}
+
+
+
 sharedn=function(i,j,Nel){
   return(length(intersect(Nel[[i]],Nel[[j]])))
 }
 
 
 pi<-function(i,w,g,p,Ne){
-pi<-((p[i]^w)*
-    (1-p[i])^(1-w))*
-    (((1-(1-p[i])^Ne[i])^g)*
-    ((1-p[i])^Ne[i])^(1-g))
+pi<-(p[i]^w)*
+    (1-p[i])^(1-w)*
+    ((1-(1-p[i])^Ne[i])^g)*
+    ((1-p[i])^Ne[i])^(1-g)
 return(pi)
   }
 
 pij<-function(i,j,wi,wj,gi,gj,Ne,Nel,p){
-pij=((p[i]^wi)*(1-p[i])^(1-wi))*
-    ((p[j]^wj)*(1-p[j])^(1-wj))*
-    (((1-(1-p[i])^(Ne[i]-ifelse(Ne[i]<=Ne[j],sharedn(i,j,Nel=Nel),0)))^gi)*
-    ((1-p[i])^(Ne[i])-ifelse(Ne[i]<=Ne[j],sharedn(i,j,Nel=Nel),0))^(1-gi))*
-    (((1-(1-p[j])^(Ne[j]-ifelse(Ne[i]>Ne[j],sharedn(i,j,Nel=Nel),0)))^gj)*
-    ((1-p[j])^(Ne[j])-ifelse(Ne[i]>Ne[j],sharedn(i,j,Nel=Nel),0))^(1-gj))
+pij=  ((p[i]^wi)*(1-p[i])^(1-wi))*
+  ((p[j]^wj)*(1-p[j])^(1-wj))*
+  ((1-(1-p[i])^(Ne[i]-ifelse(Ne[i]>=Ne[j] & Ne[i]>sharedn(i,j,Nel=Nel) ,sharedn(i,j,Nel=Nel),0)))^gi)*
+  ((1-p[i])^(Ne[i]-ifelse(Ne[i]>=Ne[j] & Ne[i]>sharedn(i,j,Nel=Nel),sharedn(i,j,Nel=Nel),0)))^(1-gi)*
+  ((1-(1-p[j])^(Ne[j]-ifelse(Ne[i]<Ne[j],sharedn(i,j,Nel=Nel),0)))^gj)*
+  ((1-p[j])^(Ne[j]-ifelse(Ne[i]<Ne[j],sharedn(i,j,Nel=Nel),0))^(1-gj))
+
 return(pij)  
 }
 
@@ -47,165 +83,273 @@ EffTau0100=function(N,W,G,Y,p,Ne){
 
 Vartau1000=function(N,Y,W,G,p,Ne,Nel){
   
-  if(length(which(W==1 & G==0))>1){
-    for (i in which(W==1 & G==0)) {
-    for (j in which(W==1 & G==0)) {
-    if (i!=j){
-      vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
+  varzero=NULL
+  variab=c()
+  if (length(which(W==1 & G==0))>1){
+  pairs<-expand.grid.unique(which(W==1 & G==0),which(W==1 & G==0),include.equals = FALSE)
+  for (k in 1:nrow(pairs)){
+  i=pairs[k,1]
+  j=pairs[k,2]
+  if ( sharedn(i=i,j=j,Nel=Nel)>0 ){
+      variab=c(varzero,sum(((pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
+                       (pij(i,j,1,0,1,0,Ne,Nel,p=p)))*
+                       (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne))))
+  }}
+  vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
              (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
-             sum(((pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
-                (pij(i,j,1,0,1,0,Ne,Nel,p=p)))*
-                (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)) )  
-    }}}}else{vary10=NA}
+             sum(variab)
+  rm(pairs)
+  }else{vary10=NA}
+ 
 
+  varzero=NULL
+  variab=c()
   if(length(which(W==0 & G==0))>1){
-    for (i in which(W==0 & G==0)) {
-      for (j in which(W==0 & G==0)) {
-        if (i!=j){
-          vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
-                  (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
-                  sum(((pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
-                  (pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p))) *
-                  (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)) )  
-     }}}}else{vary00=NA}
-         
+    pairs<-expand.grid.unique(which(W==0 & G==0),which(W==0 & G==0),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if (sharedn(i=i,j=j,Nel=Nel)>0){
+          variab=c(varzero,sum(((pij(i,j,0,0,0,0,Ne,Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
+                                  (pij(i,j,0,0,0,0,Ne,Nel,p=p)))*
+                                 (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne))))
+        }}
+   vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
+         (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
+         sum(variab)
+   rm(pairs)
+  }else{vary00=NA}
+
+  varzero=NULL
+  variab=c()    
   if(length(which(W==1 & G==0))>1 & length(which(W==0 & G==0))>1){
-  for (i in which(W==1 & G==0)) {
-  for (j in which(W==0 & G==0)) {
-      covy10y00=sum(1/pij(i,j,1,0,0,0,Ne,Nel,p=p)*
+  pairs<-expand.grid.unique(which(W==1 & G==0),which(W==0 & G==0),include.equals = FALSE)
+  for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+    if(sharedn(i,j,Nel=Nel)>0){
+     variab=c(varzero,sum(1/pij(i,j,1,0,0,0,Ne,Nel,p=p)*
                 (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
-                (pij(i,j,1,0,0,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,0,0,p,Ne))-
-                (sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))) +
-                 sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
-  }}}else{covy10y00=NA}
+                (pij(i,j,1,0,0,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,0,0,p,Ne)))
+               
+  }}
+    covy10y00=sum(variab)-(sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))) +
+    sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
+    rm(pairs)
+      }else{covy10y00=NA}
+
   
   if(any(is.na(c(vary10,vary00)))){
     var1000=NA
-  }else{  
-var1000=(1/N^{2})*(vary10+vary00-2*covy10y00)} 
+  }else{ 
+  var1000=(1/(N^2))*(vary10+vary00-2*covy10y00)
+  }
 return(var1000) 
 }
 
 Vartau1101=function(N,Y,W,G,p,Ne,Nel){
   
+  varzero=NULL
+  variab=c()
   if(length(which(W==1 & G==1))>1){
-    for (i in which(W==1 & G==1)) {
-      for (j in which(W==1 & G==1)) {
-        if (i!=j){
-          vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
-                       (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
-            sum( ((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
-                   (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
-                   (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne)) )  
-        }}}}else{vary11=NA}
+  pairs<-expand.grid.unique(which(W==1 & G==1),which(W==1 & G==1),include.equals = FALSE)
+  for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if ( sharedn(i=i,j=j,Nel=Nel)>0){
+          variab=c(varzero,sum(((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
+                                  (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
+                                 (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne))))
+  }}
+    
+    vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
+            (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
+            sum(variab)
+    rm(pairs)
+  }else{vary11=NA}
+
   
+  varzero=NULL
+  variab=c()
   if(length(which(W==0 & G==1))>1){
-  for (i in which(W==0 & G==1)) {
-    for (j in which(W==0 & G==1)) {
-      if (i!=j){
-        vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
-                  (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
-               sum( ((pij(i,j,0,1,0,1,Ne,Nel,p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
-                    (pij(i,j,0,1,0,1,Ne,Nel,p))) *
-                    (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)) )  
-      }}}}else{vary01=NA}
- 
+  pairs<-expand.grid.unique(which(W==0 & G==1),which(W==0 & G==1),include.equals = FALSE)
+  for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if (sharedn(i=i,j=j,Nel=Nel)>0){
+        variab=c(varzero,sum(((pij(i,j,0,1,0,1,Ne,Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
+                                  (pij(i,j,0,1,0,1,Ne,Nel,p=p)))*
+                                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne))))
+  }}
+       vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
+              (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
+              sum(variab)
+    rm(pairs)
+  }else{vary01=NA}
+  
+  varzero=NULL
+  variab=c()    
   if(length(which(W==1 & G==1))>1 & length(which(W==0 & G==1))>1){
-  for (i in which(W==1 & G==1)) {
-    for (j in which(W==0 & G==1)) {
-      covy11y01=sum(1/pij(i,j,1,1,0,1,Ne,Nel,p=p)*
-                (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)))*
-                (pij(i,j,1,1,0,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,0,1,p,Ne)) -
-                (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
-                sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))))  
-    }}}else{covy11y01=NA}
+    pairs<-expand.grid.unique(which(W==1 & G==1),which(W==0 & G==1),include.equals = FALSE)
+    for (k in 1:nrow(pairs)){
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if(sharedn(i=i,j=j,Nel=Nel)>0){
+          variab=c(varzero,sum(1/pij(i,j,1,1,0,1,Ne,Nel,p=p)*
+                           (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)))*
+                           (pij(i,j,1,1,0,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,0,1,p,Ne)))
+    }}
+    covy11y01=sum(variab)-
+              (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
+              sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))))  
+    rm(pairs)
+      }else{covy11y01=NA}
+
   
   if(any(is.na(c(vary11,vary01)))){
     var1101=NA
-  }else{
-  var1101=(1/N^{2})*(vary11+vary01-2*covy11y01)}
+  }else{  
+  var1101=(1/(N^2))*(vary11+vary01-2*covy11y01)
+   }
   return(var1101) 
 }
 
 Vartau1110=function(N,Y,W,G,p,Ne,Nel){
   
+  varzero=NULL
+  variab=c()
   if(length(which(W==1 & G==1))>1){
-  for (i in which(W==1 & G==1)) {
-    for (j in which(W==1 & G==1)) {
-      if (i!=j){
-        vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
-               (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
-          sum( ((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
-                 (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
-                 (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne)) )  
-      }}}}else{vary11=NA}
+    pairs<-expand.grid.unique(which(W==1 & G==1),which(W==1 & G==1),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if ( sharedn(i,j,Nel=Nel)>0 ){
+          variab=c(varzero,sum(((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
+                               (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
+                               (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne))))
+        }}
+     vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
+            (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
+            sum(variab)
+    rm(pairs)
+  }else{vary11=NA}
+
   
+  varzero=NULL
+  variab=c()
   if(length(which(W==1 & G==0))>1){
-  for (i in which(W==1 & G==0)) {
-    for (j in which(W==1 & G==0)) {
-      if (i!=j){
-        vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
-                     (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
-          sum( ((pij(i,j,1,0,1,0,Ne,Nel,p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
-                 (pij(i,j,1,0,1,0,Ne,Nel,p)))*
-                 (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)) )  
-      }}}}else{vary10=NA}
+    pairs<-expand.grid.unique(which(W==1 & G==0),which(W==1 & G==0),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if (sharedn(i,j,Nel=Nel)>0 ){
+          variab=c(varzero,sum(((pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
+                                  (pij(i,j,1,0,1,0,Ne,Nel,p=p)))*
+                                 (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne))))
+    }}
+    
+    vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
+           (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
+           sum(variab)
+    rm(pairs)  
+  }else{vary10=NA}
+
+
   
+  varzero=NULL
+  variab=c()    
   if(length(which(W==1 & G==1))>1 & length(which(W==1 & G==0))>1){
-  for (i in which(W==1 & G==1)) {
-    for (j in which(W==1 & G==0)) {
-      covy11y10=sum(1/pij(i,j,1,1,1,0,Ne,Nel,p=p)*
-                (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)))*
-                (pij(i,j,1,1,1,0,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,0,p,Ne))-
-                (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
-                sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))))  
-    }}}else{covy11y10=NA}
+    pairs<-expand.grid.unique(which(W==1 & G==1),which(W==1 & G==0),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if(sharedn(i,j,Nel=Nel)>0){
+          variab=c(varzero,sum(1/pij(i,j,1,1,1,0,Ne,Nel,p=p)*
+                   (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)))*
+                   (pij(i,j,1,1,1,0,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,0,p,Ne)))
+          
+       }}
+    covy11y10=sum(variab)-
+      (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
+       sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))))  
+    rm(pairs)  
+      }else{covy11y10=NA}
+
   
   if(any(is.na(c(vary11,vary10)))){
   var1110=NA
-  }else{
-  var1110=(1/N^{2})*(vary11+vary10-2*covy11y10)}  
+  }else{ 
+  var1110=(1/(N^2))*(vary11+vary10-2*covy11y10)
+  }
   return(var1110) 
 }
 
 Vartau0100=function(N,Y,W,G,p,Ne,Nel){
   
+  varzero=NULL
+  variab=c()
   if(length(which(W==0 & G==1))>1){
-  for (i in which(W==0 & G==1)) {
-    for (j in which(W==0 & G==1)) {
-      if (i!=j){
-        vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
-                     (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
-          sum( ((pij(i,j,0,1,0,1,Ne,Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
-                (pij(i,j,0,1,0,1,Ne,Nel,p=p)))*
-                (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)) )  
-      }}}}else{vary01=NA}
+    pairs<-expand.grid.unique(which(W==0 & G==1),which(W==0 & G==1),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if ( sharedn(i,j,Nel=Nel)>0 ){
+          variab=c(varzero,sum(((pij(i,j,0,1,0,1,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
+                                  (pij(i,j,0,1,0,1,Ne=Ne,Nel=Nel,p=p)))*
+                                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne))))
+        }}
+    
+    vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
+           (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
+           sum(variab)
+    rm(pairs)  
+  }else{vary01=NA}
+
   
+  varzero=NULL
+  variab=c()
   if(length(which(W==0 & G==0))>1){
-  for (i in which(W==0 & G==0)) {
-    for (j in which(W==0 & G==0)) {
-      if (i!=j){
-        vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
-                     (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
-          sum( ((pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
-               (pij(i=i,j=j,0,0,0,0,Ne,Nel=Nel,p=p))) *
-               (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)) )  
-      }}}}else{vary00=NA}
+    pairs<-expand.grid.unique(which(W==0 & G==0),which(W==0 & G==0),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if (i!=j & sharedn(i,j,Nel=Nel)>0 ){
+          variab=c(varzero,sum(((pij(i,j,0,0,0,0,Ne,Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
+                                  (pij(i,j,0,0,0,0,Ne,Nel,p=p)))*
+                                 (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne))))
+        }}
+    
+    vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
+           (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
+           sum(variab)
+    rm(pairs)  
+  }else{vary00=NA}
+
   
+  varzero=NULL
+  variab=c()    
   if(length(which(W==0 & G==1))>1 & length(which(W==0 & G==0))>1){
-   for (i in which(W==0 & G==1)) {
-    for (j in which(W==0 & G==0)) {
-      covy01y00=sum(1/pij(i,j,0,1,0,0,Ne,Nel,p=p)*
-                (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
-                (pij(i=i,j=j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,0,p,Ne)) -
-                (sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))) +
-                 sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
-    }}}else{covy01y00=NA}
+    pairs<-expand.grid.unique(which(W==0 & G==1),which(W==0 & G==0),include.equals = FALSE)
+    for (k in 1:nrow(pairs)) {
+      i=pairs[k,1]
+      j=pairs[k,2]
+        if(sharedn(i,j,Nel=Nel)>0){
+          variab=c(varzero,sum(1/pij(i,j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)*
+                                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
+                     (pij(i,j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,0,p,Ne)))
+          
+      }}
+    covy01y00=sum(variab)-
+              (sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))) +
+               sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
+    rm(pairs)  
+    }else{covy01y00=NA}
   
   if(any(is.na(c(vary01,vary00)))){
   var0100=NA
   }else{
-  var0100=(1/N^{2})*(vary01+vary00-2*covy01y00)}
+  var0100=(1/(N^(2)))*(vary01+vary00-2*covy01y00)
+  }
   return(var0100) 
 }
 
@@ -269,7 +413,6 @@ Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Peff){
   }
 
   if(all(is.na(gof))){
-    warning('gof returns all NANs')
     gofres<-NA
     splitres<-NA
     varres<-NA
@@ -405,7 +548,10 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
     texts=gsub(pattern="data_tree",replace="data_est",tree_info[j, "FILTER"])
     this_data <- subset(data_est, eval(parse(text=texts)))
     if(any(as.numeric(table(this_data$W,this_data$G))<minsize/2)){
-      warning('subpopulations not sufficiently represented')  
+      print('subpopulations not sufficiently represented in some nodes of the EST/TEST SET')  
+    }
+    if(any(as.numeric(table(this_data$W,this_data$G))==0)){
+      print('there are empty subpop in some nodes of EST/TEST SET')  
     }
     
     Nelsub=Nel[this_data$idunit]
