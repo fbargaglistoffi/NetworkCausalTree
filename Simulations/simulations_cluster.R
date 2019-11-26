@@ -79,11 +79,21 @@ system.time({
       ##########################
       
       # Cluster construction
-      M <- randomizr::complete_ra(N = N, num_arms = m)
-      levels(M) <- c(1:m)
-      Mg <- as.numeric(table(M)) #groups size
+      gsize=N/m
       
-      # Generate treatment
+      #if N=1500 then param ==0.035, if N=3000 then param 0.01
+      param=0.01
+      #keep prob (=treatment assignment probability) fixed at 0.4
+      prob=0.4
+      
+      adiac_matrix<-genmultnet(N=N,m=15,method="er",param = param)
+      
+      #group Indicator 
+      M=c(rep(1:m,gsize))
+      M=sort(M)
+      levels(M)<-c(1:m)
+      
+      #Generate treatment (keep prob fixed at 0.4)
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -105,21 +115,10 @@ system.time({
       binomvars = qbinom(pvars, 1, 0.5) 
       X = binomvars
       
-      # Generate outcome  variable
+      # Generate outcome variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Adjacency matrix (generate Erdos-Reni within clusters)
-      pl <- runif(m, min = 0.005, max = 0.01) 
-      adiac_matrix <- matrix(0, N, N)
-      for (k in 1:nrow(adiac_matrix)){
-        for (q in 1:ncol(adiac_matrix)){
-          if(k != q & M[k] == M[q]){
-            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
-          }  
-        }
-      }
-      
-      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
+      # Neighbors
       neigh <- rowSums(adiac_matrix)
       
       # Compute number of treated neighbors and consequently G_i
@@ -445,11 +444,21 @@ system.time({
       ##########################
       
       # Cluster construction
-      M <- randomizr::complete_ra(N = N, num_arms = m)
-      levels(M) <- c(1:m)
-      Mg <- as.numeric(table(M)) #groups size
+      gsize=N/m
       
-      # Generate treatment
+      #if N=1500 then param ==0.035, if N=3000 then param 0.01
+      param=0.01
+      #keep prob (=treatment assignment probability) fixed at 0.4
+      prob=0.4
+      
+      adiac_matrix<-genmultnet(N=N,m=15,method="er",param = param)
+      
+      #group Indicator 
+      M=c(rep(1:m,gsize))
+      M=sort(M)
+      levels(M)<-c(1:m)
+      
+      #Generate treatment (keep prob fixed at 0.4)
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -474,18 +483,7 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Adjacency matrix (generate Erdos-Reni within clusters)
-      pl <- runif(m, min = 0.005, max = 0.01) 
-      adiac_matrix <- matrix(0, N, N)
-      for (k in 1:nrow(adiac_matrix)){
-        for (q in 1:ncol(adiac_matrix)){
-          if(k != q & M[k] == M[q]){
-            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
-          }  
-        }
-      }
-      
-      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
+      # Neighbors
       neigh <- rowSums(adiac_matrix)
       
       # Compute number of treated neighbors and consequently G_i
@@ -914,11 +912,21 @@ system.time({
       ##########################
       
       # Cluster construction
-      M <- randomizr::complete_ra(N = N, num_arms = m)
-      levels(M) <- c(1:m)
-      Mg <- as.numeric(table(M)) #groups size
+      gsize=N/m
       
-      # Generate treatment
+      #if N=1500 then param ==0.035, if N=3000 then param 0.01
+      param=0.01
+      #keep prob (=treatment assignment probability) fixed at 0.4
+      prob=0.4
+      
+      adiac_matrix<-genmultnet(N=N,m=15,method="er",param = param)
+      
+      #group Indicator 
+      M=c(rep(1:m,gsize))
+      M=sort(M)
+      levels(M)<-c(1:m)
+      
+      #Generate treatment (keep prob fixed at 0.4)
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -943,18 +951,7 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Adjacency matrix (generate Erdos-Reni within clusters)
-      pl <- runif(m, min = 0.005, max = 0.01) 
-      adiac_matrix <- matrix(0, N, N)
-      for (k in 1:nrow(adiac_matrix)){
-        for (q in 1:ncol(adiac_matrix)){
-          if(k != q & M[k] == M[q]){
-            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
-          }  
-        }
-      }
-      
-      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
+      # Neighbors
       neigh <- rowSums(adiac_matrix)
       
       # Compute number of treated neighbors and consequently G_i
@@ -1402,11 +1399,21 @@ system.time({
       ##########################
       
       # Cluster construction
-      M <- randomizr::complete_ra(N = N, num_arms = m)
-      levels(M) <- c(1:m)
-      Mg <- as.numeric(table(M)) #groups size
+      gsize=N/m
       
-      # Generate treatment
+      #if N=1500 then param ==0.035, if N=3000 then param 0.01
+      param=0.01
+      #keep prob (=treatment assignment probability) fixed at 0.4
+      prob=0.4
+      
+      adiac_matrix<-genmultnet(N=N,m=15,method="er",param = param)
+      
+      #group Indicator 
+      M=c(rep(1:m,gsize))
+      M=sort(M)
+      levels(M)<-c(1:m)
+      
+      #Generate treatment (keep prob fixed at 0.4)
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -1431,18 +1438,7 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Adjacency matrix (generate Erdos-Reni within clusters)
-      pl <- runif(m, min = 0.005, max = 0.01) 
-      adiac_matrix <- matrix(0, N, N)
-      for (k in 1:nrow(adiac_matrix)){
-        for (q in 1:ncol(adiac_matrix)){
-          if(k != q & M[k] == M[q]){
-            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
-          }  
-        }
-      }
-      
-      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
+      # Neighbors
       neigh <- rowSums(adiac_matrix)
       
       # Compute number of treated neighbors and consequently G_i
@@ -1889,11 +1885,21 @@ system.time({
       ##########################
       
       # Cluster construction
-      M <- randomizr::complete_ra(N = N, num_arms = m)
-      levels(M) <- c(1:m)
-      Mg <- as.numeric(table(M)) #groups size
+      gsize=N/m
       
-      # Generate treatment
+      #if N=1500 then param ==0.035, if N=3000 then param 0.01
+      param=0.01
+      #keep prob (=treatment assignment probability) fixed at 0.4
+      prob=0.4
+      
+      adiac_matrix<-genmultnet(N=N,m=15,method="er",param = param)
+      
+      #group Indicator 
+      M=c(rep(1:m,gsize))
+      M=sort(M)
+      levels(M)<-c(1:m)
+      
+      #Generate treatment (keep prob fixed at 0.4)
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -1918,18 +1924,7 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Adjacency matrix (generate Erdos-Reni within clusters)
-      pl <- runif(m, min = 0.005, max = 0.01) 
-      adiac_matrix <- matrix(0, N, N)
-      for (k in 1:nrow(adiac_matrix)){
-        for (q in 1:ncol(adiac_matrix)){
-          if(k != q & M[k] == M[q]){
-            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
-          }  
-        }
-      }
-      
-      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
+      # Neighbors
       neigh <- rowSums(adiac_matrix)
       
       # Compute number of treated neighbors and consequently G_i
@@ -2382,11 +2377,21 @@ system.time({
       ##########################
       
       # Cluster construction
-      M <- randomizr::complete_ra(N = N, num_arms = m)
-      levels(M) <- c(1:m)
-      Mg <- as.numeric(table(M)) #groups size
+      gsize=N/m
       
-      # Generate treatment
+      #if N=1500 then param ==0.035, if N=3000 then param 0.01
+      param=0.01
+      #keep prob (=treatment assignment probability) fixed at 0.4
+      prob=0.4
+      
+      adiac_matrix<-genmultnet(N=N,m=15,method="er",param = param)
+      
+      #group Indicator 
+      M=c(rep(1:m,gsize))
+      M=sort(M)
+      levels(M)<-c(1:m)
+      
+      #Generate treatment (keep prob fixed at 0.4)
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -2411,18 +2416,7 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Adjacency matrix (generate Erdos-Reni within clusters)
-      pl <- runif(m, min = 0.005, max = 0.01) 
-      adiac_matrix <- matrix(0, N, N)
-      for (k in 1:nrow(adiac_matrix)){
-        for (q in 1:ncol(adiac_matrix)){
-          if(k != q & M[k] == M[q]){
-            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
-          }  
-        }
-      }
-      
-      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
+      # Neighbors
       neigh <- rowSums(adiac_matrix)
       
       # Compute number of treated neighbors and consequently G_i
