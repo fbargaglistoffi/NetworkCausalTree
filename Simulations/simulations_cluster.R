@@ -24,7 +24,7 @@ library(dplyr)
 # seq: Effect Size Magnitudes
 # nsim: number of datasets created
 # m: group indicator for clusters
-N = 3000
+N = 1500
 n_cov = 10
 prob = 0.4 
 mu = rep(0, n_cov)
@@ -35,7 +35,7 @@ m =  15
 
 # Set up Parallel Computation
 #setup parallel backend to use many processors
-cl <- makeCluster(15)
+cl <- makeCluster(20)
 registerDoParallel(cl)
 
 # This function takes an arbitrary number of lists x all of which much have the same structure    
@@ -78,15 +78,12 @@ system.time({
       # Data Generating Process #
       ##########################
       
-      # Adjacency matrix
-      adiac_matrix <- genmultnet(N=N, m=15, method="er", param = 0.05)
-      
-      # Group Indicator 
-      M <- c(rep(1:m, N/m))
-      M <- sort(M)
+      # Cluster construction
+      M <- randomizr::complete_ra(N = N, num_arms = m)
       levels(M) <- c(1:m)
+      Mg <- as.numeric(table(M)) #groups size
       
-      # Generate treatment
+      #Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -111,8 +108,21 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Degree
+      # Adjacency matrix (generate Erdos-Reni within clusters)
+      pl <- runif(m, min = 0.005, max = 0.01) 
+      adiac_matrix <- matrix(0, N, N)
+      for (k in 1:nrow(adiac_matrix)){
+        for (q in 1:ncol(adiac_matrix)){
+          if(k != q & M[k] == M[q]){
+            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
+          }  
+        }
+      }
+      
+      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
+      
+      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
       
       #Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
@@ -159,16 +169,16 @@ system.time({
       
       ## Run the  whole function
       SNCT <- SimNetworkCausalTrees(effweights = c(1,0,0,0), method = "singular", # composite
-                                 output = "estimation", # detection, estimation
-                                 A = adiac_matrix,
-                                 p = rep(probT,n), Ne = NeighNum,
-                                 W = w, Y = y, X = X, M = M, G = g,
-                                 mdisc = 5, mest = 5, 
-                                 minpopfrac = 1,
-                                 depth = 2,
-                                 fracpredictors = 1,
-                                 minsize = 10,
-                                 n_trees = 1) 
+                                    output = "estimation", # detection, estimation
+                                    A = adiac_matrix,
+                                    p = rep(probT,n), Ne = NeighNum,
+                                    W = w, Y = y, X = X, M = M, G = g,
+                                    mdisc = 5, mest = 5, 
+                                    minpopfrac = 1,
+                                    depth = 2,
+                                    fracpredictors = 1,
+                                    minsize = 20,
+                                    n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
       
@@ -185,13 +195,13 @@ system.time({
       vi.x1[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.1")])
       vi.x2[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.2")])
       vi.X[j, which(seq==i)] <- sum(SNCT$GOF[str_detect(SNCT$FILTER, "X.3") | 
-                       str_detect(SNCT$FILTER, "X.4") |
-                       str_detect(SNCT$FILTER, "X.5") |
-                       str_detect(SNCT$FILTER, "X.6") |
-                       str_detect(SNCT$FILTER, "X.7") |
-                       str_detect(SNCT$FILTER, "X.8") |
-                       str_detect(SNCT$FILTER, "X.9") |
-                       str_detect(SNCT$FILTER, "X.10")])
+                                               str_detect(SNCT$FILTER, "X.4") |
+                                               str_detect(SNCT$FILTER, "X.5") |
+                                               str_detect(SNCT$FILTER, "X.6") |
+                                               str_detect(SNCT$FILTER, "X.7") |
+                                               str_detect(SNCT$FILTER, "X.8") |
+                                               str_detect(SNCT$FILTER, "X.9") |
+                                               str_detect(SNCT$FILTER, "X.10")])
       
       
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
@@ -354,7 +364,7 @@ for(i in seq){
   for(j in 1:nrow(tau_est_1000)) {
     if (is.na(tau_est_1000[j,which(seq==i)])==FALSE) {
       coverage_est_1000[j,which(seq==i)] <- between(i, abs(tau_est_1000[j,which(seq==i)]) - 1.96*se_tau_est_1000[j,which(seq==i)],
-                                                  abs(tau_est_1000[j,which(seq==i)]) + 1.96*se_tau_est_1000[j,which(seq==i)])
+                                                    abs(tau_est_1000[j,which(seq==i)]) + 1.96*se_tau_est_1000[j,which(seq==i)])
     }
     else {
       coverage_est_1000[j,which(seq==i)] <- NA
@@ -367,7 +377,7 @@ for(i in seq){
   for(j in 1:nrow(tau_test_1000)) {
     if (is.na(tau_test_1000[j,which(seq==i)])==FALSE) {
       coverage_test_1000[j,which(seq==i)] <- between(i, abs(tau_test_1000[j,which(seq==i)]) - 1.96*se_tau_test_1000[j,which(seq==i)],
-                                                    abs(tau_test_1000[j,which(seq==i)]) + 1.96*se_tau_test_1000[j,which(seq==i)])
+                                                     abs(tau_test_1000[j,which(seq==i)]) + 1.96*se_tau_test_1000[j,which(seq==i)])
     }
     else {
       coverage_test_1000[j,which(seq==i)] <- NA
@@ -379,18 +389,18 @@ coverage_test_1000 <- colMeans(coverage_test_1000, na.rm = TRUE)
 ## Create a Matrix for the Results
 
 results_nctree <- cbind(avg_correct_rules,
-                mse_tau_est_1000, bias_tau_est_1000,
-                mse_tau_test_1000, bias_tau_test_1000,
-                coverage_est_1000, coverage_test_1000, 
-                vi_x1, vi_x2, vi_X)
+                        mse_tau_est_1000, bias_tau_est_1000,
+                        mse_tau_test_1000, bias_tau_test_1000,
+                        coverage_est_1000, coverage_test_1000, 
+                        vi_x1, vi_x2, vi_X)
 colnames(results_nctree) <- c("correct_rules",
-                      "mse_tau_est_1000", 
-                      "bias_tau_est_1000",
-                      "mse_tau_test_1000", 
-                      "bias_tau_test_1000",
-                      "coverage_est_1000",
-                      "coverage_test_1000",
-                      "vi_x1", "vi_x2", "vi_X")
+                              "mse_tau_est_1000", 
+                              "bias_tau_est_1000",
+                              "mse_tau_test_1000", 
+                              "bias_tau_test_1000",
+                              "coverage_est_1000",
+                              "coverage_test_1000",
+                              "vi_x1", "vi_x2", "vi_X")
 
 ## Save the Results
 
@@ -436,15 +446,12 @@ system.time({
       # Data Generating Process #
       ##########################
       
-      # Adjacency matrix
-      adiac_matrix <- genmultnet(N=N, m=15, method="er", param = 0.05)
-      
-      # Group Indicator 
-      M <- c(rep(1:m, N/m))
-      M <- sort(M)
+      # Cluster construction
+      M <- randomizr::complete_ra(N = N, num_arms = m)
       levels(M) <- c(1:m)
+      Mg <- as.numeric(table(M)) #groups size
       
-      # Generate treatment
+      #Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -469,10 +476,23 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Degree
+      # Adjacency matrix (generate Erdos-Reni within clusters)
+      pl <- runif(m, min = 0.005, max = 0.01) 
+      adiac_matrix <- matrix(0, N, N)
+      for (k in 1:nrow(adiac_matrix)){
+        for (q in 1:ncol(adiac_matrix)){
+          if(k != q & M[k] == M[q]){
+            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
+          }  
+        }
+      }
+      
+      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      # Compute number of treated neighbors and consequently G_i
+      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
+      
+      #Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -524,16 +544,16 @@ system.time({
       
       ## Run the  whole function
       SNCT <- SimNetworkCausalTrees(effweights = c(0.5,0.5,0,0), method = "composite", # singular
-                                 output = "estimation", # detection, estimation
-                                 A = adiac_matrix,
-                                 p = rep(probT,n), Ne = NeighNum,
-                                 W = w, Y = y, X = X, M = M, G = g,
-                                 mdisc = 5, mest = 5,
-                                 minpopfrac = 1,
-                                 depth = 2,
-                                 fracpredictors = 1,
-                                 minsize = 20,
-                                 n_trees = 1) 
+                                    output = "estimation", # detection, estimation
+                                    A = adiac_matrix,
+                                    p = rep(probT,n), Ne = NeighNum,
+                                    W = w, Y = y, X = X, M = M, G = g,
+                                    mdisc = 5, mest = 5,
+                                    minpopfrac = 1,
+                                    depth = 2,
+                                    fracpredictors = 1,
+                                    minsize = 20,
+                                    n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
       
@@ -897,15 +917,12 @@ system.time({
       # Data Generating Process #
       ##########################
       
-      # Adjacency matrix
-      adiac_matrix <- genmultnet(N=N, m=15, method="er", param = 0.05)
-      
-      # Group Indicator 
-      M <- c(rep(1:m, N/m))
-      M <- sort(M)
+      # Cluster construction
+      M <- randomizr::complete_ra(N = N, num_arms = m)
       levels(M) <- c(1:m)
+      Mg <- as.numeric(table(M)) #groups size
       
-      # Generate treatment
+      #Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -930,8 +947,21 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Degree
+      # Adjacency matrix (generate Erdos-Reni within clusters)
+      pl <- runif(m, min = 0.005, max = 0.01) 
+      adiac_matrix <- matrix(0, N, N)
+      for (k in 1:nrow(adiac_matrix)){
+        for (q in 1:ncol(adiac_matrix)){
+          if(k != q & M[k] == M[q]){
+            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
+          }  
+        }
+      }
+      
+      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
+      
+      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
       
       #Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
@@ -985,16 +1015,16 @@ system.time({
       
       ## Run the  whole function
       SNCT <- SimNetworkCausalTrees(effweights = c(0,0,0.5,0.5), method = "composite", # singular
-                                 output = "estimation", # detection, estimation
-                                 A = adiac_matrix,
-                                 p = rep(probT,n), Ne = NeighNum,
-                                 W = w, Y = y, X = X, M = M, G = g,
-                                 mdisc = 5, mest = 5,
-                                 minpopfrac = 1,
-                                 depth = 2,
-                                 fracpredictors = 1,
-                                 minsize = 20,
-                                 n_trees = 1) 
+                                    output = "estimation", # detection, estimation
+                                    A = adiac_matrix,
+                                    p = rep(probT,n), Ne = NeighNum,
+                                    W = w, Y = y, X = X, M = M, G = g,
+                                    mdisc = 5, mest = 5,
+                                    minpopfrac = 1,
+                                    depth = 2,
+                                    fracpredictors = 1,
+                                    minsize = 20,
+                                    n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
       
@@ -1377,15 +1407,12 @@ system.time({
       # Data Generating Process #
       ##########################
       
-      # Adjacency matrix
-      adiac_matrix <- genmultnet(N=N, m=15, method="er", param = 0.05)
-      
-      # Group Indicator 
-      M <- c(rep(1:m, N/m))
-      M <- sort(M)
+      # Cluster construction
+      M <- randomizr::complete_ra(N = N, num_arms = m)
       levels(M) <- c(1:m)
+      Mg <- as.numeric(table(M)) #groups size
       
-      # Generate treatment
+      #Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -1410,8 +1437,21 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Degree
+      # Adjacency matrix (generate Erdos-Reni within clusters)
+      pl <- runif(m, min = 0.005, max = 0.01) 
+      adiac_matrix <- matrix(0, N, N)
+      for (k in 1:nrow(adiac_matrix)){
+        for (q in 1:ncol(adiac_matrix)){
+          if(k != q & M[k] == M[q]){
+            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
+          }  
+        }
+      }
+      
+      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
+      
+      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
       
       #Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
@@ -1856,15 +1896,12 @@ system.time({
       # Data Generating Process #
       ##########################
       
-      # Adjacency matrix
-      adiac_matrix <- genmultnet(N=N, m=15, method="er", param = 0.05)
-      
-      # Group Indicator 
-      M <- c(rep(1:m, N/m))
-      M <- sort(M)
+      # Cluster construction
+      M <- randomizr::complete_ra(N = N, num_arms = m)
       levels(M) <- c(1:m)
+      Mg <- as.numeric(table(M)) #groups size
       
-      # Generate treatment
+      #Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -1889,10 +1926,23 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Degree
+      # Adjacency matrix (generate Erdos-Reni within clusters)
+      pl <- runif(m, min = 0.005, max = 0.01) 
+      adiac_matrix <- matrix(0, N, N)
+      for (k in 1:nrow(adiac_matrix)){
+        for (q in 1:ncol(adiac_matrix)){
+          if(k != q & M[k] == M[q]){
+            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
+          }  
+        }
+      }
+      
+      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      # Compute number of treated neighbors and consequently G_i
+      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
+      
+      #Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -2341,15 +2391,12 @@ system.time({
       # Data Generating Process #
       ##########################
       
-      # Adjacency matrix
-      adiac_matrix <- genmultnet(N=N, m=15, method="er", param = 0.05)
-      
-      # Group Indicator 
-      M <- c(rep(1:m, N/m))
-      M <- sort(M)
+      # Cluster construction
+      M <- randomizr::complete_ra(N = N, num_arms = m)
       levels(M) <- c(1:m)
+      Mg <- as.numeric(table(M)) #groups size
       
-      # Generate treatment
+      #Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -2374,10 +2421,23 @@ system.time({
       # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
-      # Degree
+      # Adjacency matrix (generate Erdos-Reni within clusters)
+      pl <- runif(m, min = 0.005, max = 0.01) 
+      adiac_matrix <- matrix(0, N, N)
+      for (k in 1:nrow(adiac_matrix)){
+        for (q in 1:ncol(adiac_matrix)){
+          if(k != q & M[k] == M[q]){
+            adiac_matrix[k,q] <- rbinom(1, 1, prob = pl[M[k]])
+          }  
+        }
+      }
+      
+      adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      # Compute number of treated neighbors and consequently G_i
+      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
+      
+      #Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
