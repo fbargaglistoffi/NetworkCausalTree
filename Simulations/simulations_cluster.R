@@ -83,7 +83,7 @@ system.time({
       levels(M) <- c(1:m)
       Mg <- as.numeric(table(M)) #groups size
       
-      #Generate treatment
+      # Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -122,9 +122,7 @@ system.time({
       adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
-      
-      #Compute number of treated neighbors and consequently G_i
+      # Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -451,7 +449,7 @@ system.time({
       levels(M) <- c(1:m)
       Mg <- as.numeric(table(M)) #groups size
       
-      #Generate treatment
+      # Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -490,9 +488,7 @@ system.time({
       adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
-      
-      #Compute number of treated neighbors and consequently G_i
+      # Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -922,7 +918,7 @@ system.time({
       levels(M) <- c(1:m)
       Mg <- as.numeric(table(M)) #groups size
       
-      #Generate treatment
+      # Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -961,9 +957,7 @@ system.time({
       adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
-      
-      #Compute number of treated neighbors and consequently G_i
+      # Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -1412,7 +1406,7 @@ system.time({
       levels(M) <- c(1:m)
       Mg <- as.numeric(table(M)) #groups size
       
-      #Generate treatment
+      # Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -1451,9 +1445,7 @@ system.time({
       adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
-      
-      #Compute number of treated neighbors and consequently G_i
+      # Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -1901,7 +1893,7 @@ system.time({
       levels(M) <- c(1:m)
       Mg <- as.numeric(table(M)) #groups size
       
-      #Generate treatment
+      # Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -1940,9 +1932,7 @@ system.time({
       adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
-      
-      #Compute number of treated neighbors and consequently G_i
+      # Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
@@ -2396,7 +2386,7 @@ system.time({
       levels(M) <- c(1:m)
       Mg <- as.numeric(table(M)) #groups size
       
-      #Generate treatment
+      # Generate treatment
       p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
@@ -2435,9 +2425,7 @@ system.time({
       adiac_matrix[lower.tri(adiac_matrix)] <- t(adiac_matrix)[lower.tri(adiac_matrix)]
       neigh <- rowSums(adiac_matrix)
       
-      net <- graph_from_adjacency_matrix(adiac_matrix, mode = "undirected") 
-      
-      #Compute number of treated neighbors and consequently G_i
+      # Compute number of treated neighbors and consequently G_i
       num_tr_neigh <- as.vector(adiac_matrix %*% treat) 
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
