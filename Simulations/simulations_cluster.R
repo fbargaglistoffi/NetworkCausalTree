@@ -11,6 +11,7 @@ library(doParallel)
 library(foreach)
 library(randomizr)
 library(MLmetrics)
+library(dplyr)
 
 ###########################
 ## Initialize Parameters ##
@@ -23,7 +24,7 @@ library(MLmetrics)
 # seq: Effect Size Magnitudes
 # nsim: number of datasets created
 # m: group indicator for clusters
-N = 1500
+N = 3000
 n_cov = 10
 prob = 0.4 
 mu = rep(0, n_cov)
