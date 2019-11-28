@@ -3,8 +3,8 @@
 This code implements a number of Monte Carlo simulations to investigate the fit of the _Network Causal Tree_ algorithm.
 The general data generating process (dgp) is the following: for each simulation we built 15 clusters (of size 100 and 200, respectively) and 10 covariates.
 Out of these 15 clusters, 5 were used for the _discovery sample_, 5 for the _estimation sample_ and 5 for the _test sample_.
-We introduced a various numer of _true causal rules_ (2 and 3) each of them with depth 2 (e.g.,  x1==0 & x2==0, namely two _heterogeneity driving variables_ [HDVs]).
-The results that are reported in the _excel tables_ were obtained by aggregating, for each effect size, on 100 different datasets.
+We introduced two _true causal rules_, each of them with depth two (e.g.,  x1==0 & x2==0, namely _x1_ and _x2_ are the two _heterogeneity driving variables_ [HDVs]).
+The results are reported in the _excel tables_, and were obtained by aggregating, for each effect size, on 100 different datasets.
 
 ## Parameters used for the simulations
 
