@@ -46,9 +46,5 @@ The following results were reported:
 * <tt>`vi_x2`</tt>: variable importance for _x2_ 
 * <tt>`vi_X`</tt>: variable importance for all the variables with the exclusion of _x1_ and _x2_ 
 
-N.B.: (i) the same results are reported for spillover effect but instead of _tau(10,00)_, _tau(11,01)_ we have _eta(11,10)_, _eta(01,00)_; (ii) the variable importance refers to the average increase in splitting criterion due to split on that variable (the larger the higher the importance of the variable); (iii) in case of <tt>`three_main_effects_overlap`</tt> the variable importance is reported also for _x3_.
-
-
-
-
+N.B.: (i) the same results are reported for spillover effect but instead of _tau(10,00)_, _tau(11,01)_ we have _eta(11,10)_, _eta(01,00)_; (ii) the variable importance refers to the average increase in splitting criterion due to split on that variable (the larger this number, the higher the importance of the variable); (iii) in case of <tt>`three_main_effects_overlap`</tt> the variable importance is reported also for _x3_.
 
