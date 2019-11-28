@@ -9,7 +9,7 @@ The results are reported in a number of _excel tables_, and were obtained by agg
 ## Parameters used for the simulations
 
 * <tt>`N`</tt>: number of data points (1500/3000)
-* <tt>`n_cov`</tt>: number of variables (10)
+* <tt>`n_cov`</tt>: number of covariates (10)
 * <tt>`rho`</tt>: correlation within the covariates (0/0.25)
 * <tt>`prob`</tt>: treatment assignment probability (0.4)
 * <tt>`crls`</tt>: number of causal rules (2/3)
