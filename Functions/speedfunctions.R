@@ -18,16 +18,12 @@ genmultnet=function(m,N,method,param){
 expand.grid.unique <- function(x, y, include.equals=FALSE)
 {
   x <- unique(x)
-  
   y <- unique(y)
-  
   g <- function(i)
   {
     z <- setdiff(y, x[seq_len(i-include.equals)])
-    
-    if(length(z)) cbind(x[i], z, deparse.level=0)
+      if(length(z)) cbind(x[i], z, deparse.level=0)
   }
-  
   do.call(rbind, lapply(seq_along(x), g))
 }
 
@@ -81,63 +77,54 @@ EffTau0100=function(N,W,G,Y,p,Ne){
   return(tau0100)
 }
 
-Vartau1000=function(N,Y,W,G,p,Ne,Nel){
-  
+Vary=function(N,w,g,Y,W,G,p,Ne,Nel){
   varzero=NULL
   variab=c()
-  if (length(which(W==1 & G==0))>1){
-  pairs<-expand.grid.unique(which(W==1 & G==0),which(W==1 & G==0),include.equals = FALSE)
-  for (k in 1:nrow(pairs)){
-  i=pairs[k,1]
-  j=pairs[k,2]
-  if ( sharedn(i=i,j=j,Nel=Nel)>0 ){
-      variab=c(varzero,sum(((pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
-                       (pij(i,j,1,0,1,0,Ne,Nel,p=p)))*
-                       (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne))))
-  }}
-  vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
-             (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
-             sum(variab)
-  rm(pairs)
-  }else{vary10=NA}
- 
+  if (length(which(W==w & G==g))>1){
+    pairs<-expand.grid.unique(which(W==w & G==g),which(W==w & G==g),include.equals = FALSE)
+    for (k in 1:nrow(pairs)){
+      i=pairs[k,1]
+      j=pairs[k,2]
+      if ( sharedn(i=i,j=j,Nel=Nel)>0 ){
+        variab=c(varzero,sum(((pij(i,j,w,g,w,g,Ne,Nel,p=p)-pi(i,w,g,p,Ne)*pi(j,w,g,p,Ne))/
+                                (pij(i,j,w,g,w,g,Ne,Nel,p=p)))*
+                               (Y[i]/pi(i,w,g,p,Ne))*(Y[j]/pi(j,w,g,p,Ne))))
+      }}
+    vary=sum((1-pi(which(W==w & G==g),w,g,p,Ne))*
+         (Y[which(W==w & G==g)]/pi(which(W==w & G==g),w,g,p,Ne))^2) +  
+         sum(variab)
+  }else{vary=NA}
 
+  return(vary)
+}  
+
+Covy=function(w1,g1,w2,g2,N,Y,W,G,p,Ne,Nel){
   varzero=NULL
-  variab=c()
-  if(length(which(W==0 & G==0))>1){
-    pairs<-expand.grid.unique(which(W==0 & G==0),which(W==0 & G==0),include.equals = FALSE)
+  variab=c()    
+  if(length(which(W==w1 & G==g1))>1 & length(which(W==w2 & G==g2))>1){
+    pairs<-expand.grid.unique(which(W==w1 & G==g1),which(W==w2 & G==g2),include.equals = FALSE)
     for (k in 1:nrow(pairs)) {
       i=pairs[k,1]
       j=pairs[k,2]
-        if (sharedn(i=i,j=j,Nel=Nel)>0){
-          variab=c(varzero,sum(((pij(i,j,0,0,0,0,Ne,Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
-                                  (pij(i,j,0,0,0,0,Ne,Nel,p=p)))*
-                                 (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne))))
-        }}
-   vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
-         (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
-         sum(variab)
-   rm(pairs)
-  }else{vary00=NA}
+      if(sharedn(i,j,Nel=Nel)>0){
+        variab=c(varzero,sum(1/pij(i,j,w1,g1,w2,g2,Ne,Nel,p=p)*
+                (Y[i]/pi(i,w1,g1,p,Ne))*(Y[j]/pi(j,w2,g2,p,Ne)))*
+                (pij(i,j,w1,g1,w2,g2,Ne,Nel,p=p)-pi(i,w1,g1,p,Ne)*pi(j,w2,g2,p,Ne)))
+        
+      }}
+    covy=sum(variab)-(sum(((Y[which(W==w1 & G==g1)])^2)/(2*pi(which(W==w1 & G==g1),w1,g1,p,Ne))) +
+                             sum(((Y[which(W==w2 & G==g2)])^2)/(2*pi(which(W==w2 & G==g2),w2,g2,p,Ne))))  
+  }else{covy=NA}
+}
 
-  varzero=NULL
-  variab=c()    
-  if(length(which(W==1 & G==0))>1 & length(which(W==0 & G==0))>1){
-  pairs<-expand.grid.unique(which(W==1 & G==0),which(W==0 & G==0),include.equals = FALSE)
-  for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-    if(sharedn(i,j,Nel=Nel)>0){
-     variab=c(varzero,sum(1/pij(i,j,1,0,0,0,Ne,Nel,p=p)*
-                (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
-                (pij(i,j,1,0,0,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,0,0,p,Ne)))
-               
-  }}
-    covy10y00=sum(variab)-(sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))) +
-    sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
-    rm(pairs)
-      }else{covy10y00=NA}
+  
+Vartau1000=function(N,Y,W,G,p,Ne,Nel){
+  
+  vary10<-Vary(w=1,g=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
+  
+  vary00<-Vary(w=0,g=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
 
+  covy10y00 <-Covy(w1=1,g1=0,w2=0,g2=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
   if(any(is.na(c(vary10,vary00)))){
     var1000=NA
@@ -149,62 +136,11 @@ return(var1000)
 
 Vartau1101=function(N,Y,W,G,p,Ne,Nel){
   
-  varzero=NULL
-  variab=c()
-  if(length(which(W==1 & G==1))>1){
-  pairs<-expand.grid.unique(which(W==1 & G==1),which(W==1 & G==1),include.equals = FALSE)
-  for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if ( sharedn(i=i,j=j,Nel=Nel)>0){
-          variab=c(varzero,sum(((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
-                                  (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
-                                 (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne))))
-  }}
-    
-    vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
-            (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
-            sum(variab)
-    rm(pairs)
-  }else{vary11=NA}
-
+  vary11<-Vary(w=1,g=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
-  varzero=NULL
-  variab=c()
-  if(length(which(W==0 & G==1))>1){
-  pairs<-expand.grid.unique(which(W==0 & G==1),which(W==0 & G==1),include.equals = FALSE)
-  for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if (sharedn(i=i,j=j,Nel=Nel)>0){
-        variab=c(varzero,sum(((pij(i,j,0,1,0,1,Ne,Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
-                                  (pij(i,j,0,1,0,1,Ne,Nel,p=p)))*
-                                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne))))
-  }}
-       vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
-              (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
-              sum(variab)
-    rm(pairs)
-  }else{vary01=NA}
+  vary01<-Vary(w=0,g=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
-  varzero=NULL
-  variab=c()    
-  if(length(which(W==1 & G==1))>1 & length(which(W==0 & G==1))>1){
-    pairs<-expand.grid.unique(which(W==1 & G==1),which(W==0 & G==1),include.equals = FALSE)
-    for (k in 1:nrow(pairs)){
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if(sharedn(i=i,j=j,Nel=Nel)>0){
-          variab=c(varzero,sum(1/pij(i,j,1,1,0,1,Ne,Nel,p=p)*
-                           (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne)))*
-                           (pij(i,j,1,1,0,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,0,1,p,Ne)))
-    }}
-    covy11y01=sum(variab)-
-              (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
-              sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))))  
-    rm(pairs)
-      }else{covy11y01=NA}
-
+  covy11y01 <-Covy(w1=1,g1=1,w2=0,g2=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
   if(any(is.na(c(vary11,vary01)))){
     var1101=NA
@@ -216,65 +152,11 @@ Vartau1101=function(N,Y,W,G,p,Ne,Nel){
 
 Vartau1110=function(N,Y,W,G,p,Ne,Nel){
   
-  varzero=NULL
-  variab=c()
-  if(length(which(W==1 & G==1))>1){
-    pairs<-expand.grid.unique(which(W==1 & G==1),which(W==1 & G==1),include.equals = FALSE)
-    for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if ( sharedn(i,j,Nel=Nel)>0 ){
-          variab=c(varzero,sum(((pij(i,j,1,1,1,1,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,1,p,Ne))/
-                               (pij(i,j,1,1,1,1,Ne,Nel,p=p)))*
-                               (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,1,p,Ne))))
-        }}
-     vary11=sum((1-pi(which(W==1 & G==1),1,1,p,Ne))*
-            (Y[which(W==1 & G==1)]/pi(which(W==1 & G==1),1,1,p,Ne))^2) +  
-            sum(variab)
-    rm(pairs)
-  }else{vary11=NA}
-
+  vary11<-Vary(w=1,g=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
-  varzero=NULL
-  variab=c()
-  if(length(which(W==1 & G==0))>1){
-    pairs<-expand.grid.unique(which(W==1 & G==0),which(W==1 & G==0),include.equals = FALSE)
-    for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if (sharedn(i,j,Nel=Nel)>0 ){
-          variab=c(varzero,sum(((pij(i,j,1,0,1,0,Ne,Nel,p=p)-pi(i,1,0,p,Ne)*pi(j,1,0,p,Ne))/
-                                  (pij(i,j,1,0,1,0,Ne,Nel,p=p)))*
-                                 (Y[i]/pi(i,1,0,p,Ne))*(Y[j]/pi(j,1,0,p,Ne))))
-    }}
-    
-    vary10=sum((1-pi(which(W==1 & G==0),1,0,p,Ne))*
-           (Y[which(W==1 & G==0)]/pi(which(W==1 & G==0),1,0,p,Ne))^2) +  
-           sum(variab)
-    rm(pairs)  
-  }else{vary10=NA}
-
-
+  vary10<-Vary(w=1,g=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
-  varzero=NULL
-  variab=c()    
-  if(length(which(W==1 & G==1))>1 & length(which(W==1 & G==0))>1){
-    pairs<-expand.grid.unique(which(W==1 & G==1),which(W==1 & G==0),include.equals = FALSE)
-    for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if(sharedn(i,j,Nel=Nel)>0){
-          variab=c(varzero,sum(1/pij(i,j,1,1,1,0,Ne,Nel,p=p)*
-                   (Y[i]/pi(i,1,1,p,Ne))*(Y[j]/pi(j,1,0,p,Ne)))*
-                   (pij(i,j,1,1,1,0,Ne,Nel,p=p)-pi(i,1,1,p,Ne)*pi(j,1,0,p,Ne)))
-          
-       }}
-    covy11y10=sum(variab)-
-      (sum(((Y[which(W==1 & G==1)])^2)/(2*pi(which(W==1 & G==1),1,1,p,Ne))) +
-       sum(((Y[which(W==1 & G==0)])^2)/(2*pi(which(W==1 & G==0),1,0,p,Ne))))  
-    rm(pairs)  
-      }else{covy11y10=NA}
-
+  covy11y10 <-Covy(w1=1,g1=1,w2=1,g2=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
   if(any(is.na(c(vary11,vary10)))){
   var1110=NA
@@ -286,64 +168,11 @@ Vartau1110=function(N,Y,W,G,p,Ne,Nel){
 
 Vartau0100=function(N,Y,W,G,p,Ne,Nel){
   
-  varzero=NULL
-  variab=c()
-  if(length(which(W==0 & G==1))>1){
-    pairs<-expand.grid.unique(which(W==0 & G==1),which(W==0 & G==1),include.equals = FALSE)
-    for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if ( sharedn(i,j,Nel=Nel)>0 ){
-          variab=c(varzero,sum(((pij(i,j,0,1,0,1,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,1,p,Ne))/
-                                  (pij(i,j,0,1,0,1,Ne=Ne,Nel=Nel,p=p)))*
-                                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,1,p,Ne))))
-        }}
-    
-    vary01=sum((1-pi(which(W==0 & G==1),0,1,p,Ne))*
-           (Y[which(W==0 & G==1)]/pi(which(W==0 & G==1),0,1,p,Ne))^2) +  
-           sum(variab)
-    rm(pairs)  
-  }else{vary01=NA}
-
+  vary01<-Vary(w=0,g=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
-  varzero=NULL
-  variab=c()
-  if(length(which(W==0 & G==0))>1){
-    pairs<-expand.grid.unique(which(W==0 & G==0),which(W==0 & G==0),include.equals = FALSE)
-    for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if (i!=j & sharedn(i,j,Nel=Nel)>0 ){
-          variab=c(varzero,sum(((pij(i,j,0,0,0,0,Ne,Nel,p=p)-pi(i,0,0,p,Ne)*pi(j,0,0,p,Ne))/
-                                  (pij(i,j,0,0,0,0,Ne,Nel,p=p)))*
-                                 (Y[i]/pi(i,0,0,p,Ne))*(Y[j]/pi(j,0,0,p,Ne))))
-        }}
-    
-    vary00=sum((1-pi(which(W==0 & G==0),0,0,p,Ne))*
-           (Y[which(W==0 & G==0)]/pi(which(W==0 & G==0),0,0,p,Ne))^2) +  
-           sum(variab)
-    rm(pairs)  
-  }else{vary00=NA}
-
+  vary00<-Vary(w=0,g=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
-  varzero=NULL
-  variab=c()    
-  if(length(which(W==0 & G==1))>1 & length(which(W==0 & G==0))>1){
-    pairs<-expand.grid.unique(which(W==0 & G==1),which(W==0 & G==0),include.equals = FALSE)
-    for (k in 1:nrow(pairs)) {
-      i=pairs[k,1]
-      j=pairs[k,2]
-        if(sharedn(i,j,Nel=Nel)>0){
-          variab=c(varzero,sum(1/pij(i,j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)*
-                                 (Y[i]/pi(i,0,1,p,Ne))*(Y[j]/pi(j,0,0,p,Ne)))*
-                     (pij(i,j,0,1,0,0,Ne=Ne,Nel=Nel,p=p)-pi(i,0,1,p,Ne)*pi(j,0,0,p,Ne)))
-          
-      }}
-    covy01y00=sum(variab)-
-              (sum(((Y[which(W==0 & G==1)])^2)/(2*pi(which(W==0 & G==1),0,1,p,Ne))) +
-               sum(((Y[which(W==0 & G==0)])^2)/(2*pi(which(W==0 & G==0),0,0,p,Ne))))  
-    rm(pairs)  
-    }else{covy01y00=NA}
+  covy01y00 <-Covy(w1=0,g1=1,w2=0,g2=0,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
   
   if(any(is.na(c(vary01,vary00)))){
   var0100=NA
@@ -366,14 +195,36 @@ popeff=function(N,W,G,Y,p,Ne){
 
 ######Function thst computes the composite GOF (objective function)
 
-GOF=function(method,alpha,beta,gamma,delta,N,W,G,Y,p,Ne,Peff){
+GOF=function(method,alpha,beta,gamma,delta,N,W,G,Y,p,Ne,Nel,Peff,vartot,leafs){
   
   if(method=="composite"){
     ingof<-alpha*(((EffTau1000(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[1])^2)+
-            beta*(((EffTau1101(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[2])^2)+
-            gamma*(((EffTau1110(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[3])^2)+
-            delta*(((EffTau0100(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[4])^2)  
+           beta*(((EffTau1101(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[2])^2)+
+           gamma*(((EffTau1110(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[3])^2)+
+           delta*(((EffTau0100(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[4])^2)  
   } 
+  
+  if(method=="penalized")  
+    {l=leafs
+    ingof<-
+      alpha*(
+      ((EffTau1000(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2) -
+      2/l*sum(c(vartot,Vartau1000(N=N,W=W,Y=Y,G=G,p=p,Ne=Ne,Nel=Nel)))
+      ) +
+      beta*(
+      ((EffTau1101(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)-
+        2/l*sum(c(vartot,Vartau1101(N=N,W=W,Y=Y,G=G,p=p,Ne=Ne,Nel=Nel)))
+      ) *  
+     gamma*(
+    ((EffTau1110(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)-
+      2/l*sum(c(vartot,Vartau1110(N=N,W=W,Y=Y,G=G,p=p,Ne=Ne,Nel=Nel)))
+     )+  
+    delta*(
+    ((EffTau0100(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)- 
+      2/l*sum(c(vartot,Vartau0100(N=N,W=W,Y=Y,G=G,p=p,Ne=Ne,Nel=Nel)))
+    )
+  }
+  
   if (method=="singular")
   {ingof<-alpha*((EffTau1000(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)+
           beta*((EffTau1101(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)+
@@ -383,7 +234,7 @@ GOF=function(method,alpha,beta,gamma,delta,N,W,G,Y,p,Ne,Peff){
   return(ingof)
 }
 
-Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Peff){
+Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Nel,Peff,vartot,leafs){
   
   #initialize
   gof <- c()
@@ -399,8 +250,8 @@ Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Peff){
     for(i in seq_along(splits)){
       sp <- splits[i]
       if (all(as.numeric(table(W[x>=sp],G[x>=sp]))>2) & all(as.numeric(table(W[x<sp],G[x<sp]))>2)) {   
-        gofx[i]<- 1/2*(GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x<sp)),W=W[x < sp],G=G[x < sp],Y=Y[x < sp],Ne=Ne[x < sp],p=p[x < sp],Peff=Peff) +
-                       GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x>=sp)),W=W[x >= sp],G=G[x >= sp],Y=Y[x >= sp],Ne=Ne[x >= sp],p=p[x >= sp], Peff = Peff))
+         gofx[i]<- 1/2*(GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x<sp)),W=W[x < sp],G=G[x < sp],Y=Y[x < sp],Ne=Ne[x < sp],p=p[x < sp],Peff=Peff,Nel=Nel[x < sp],vartot=vartot,leafs=leafs) +
+                        GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x>=sp)),W=W[x >= sp],G=G[x >= sp],Y=Y[x >= sp],Ne=Ne[x >= sp],p=p[x >= sp], Peff = Peff,Nel=Nel[x >= sp],vartot=vartot,leafs=leafs))
       } else {gofx[i]<-0}
     }
     namex=rep(colnames(X)[j],length(unique(x)))
@@ -428,7 +279,7 @@ Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Peff){
 
   }
 
-netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,Peff)
+netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,Nel,Peff)
 {
   
   data_tree <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X)  
@@ -437,7 +288,7 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
   #CREATE OUTPUT DATASET
   tree_info <- data.frame(NODE = 1, GOF=0, NOBS = nrow(data_tree), FILTER = NA, TERMINAL = "SPLIT",
                           stringsAsFactors = FALSE)
-  
+  vartot=NULL
   while(do_splits){
     to_calculate <- which(tree_info$TERMINAL == "SPLIT")
     
@@ -449,12 +300,14 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
       } else {
         this_data<- data_tree}
       
+      leafs=nrow(tree_info)
       #SPLIT WRT GOF OVER THE SUBSET
       splitting <- Gof_Split(method=method,alpha=alpha,beta=beta,gamma=gamma,delta=delta,
                              N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,
                              X=this_data[, grepl("X.",names(this_data))],
                              Ne=Ne[this_data$idunit],p=p[this_data$idunit],
-                             Peff = Peff)
+                             Nel=Nel[this_data$idunit],
+                             Peff = Peff,leafs=leafs,vartot = vartot)
       
       if (any(is.na(splitting))) {
         split_here <- rep(FALSE, 2)
@@ -502,6 +355,8 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
         print('split has stopped for insufficient minsize')
       }
       
+      
+      
       #CREATE CHILDREN DATASET
       children <- data.frame(NODE = c(mn+1, mn+2),
                              GOF=c(rep(maxgof,2)),
@@ -509,6 +364,14 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
                              FILTER = tmp_filter,
                              TERMINAL = rep("SPLIT", 2),
                              row.names = NULL)[split_here,]
+      
+      if(method=="penalized"){
+        varchild=alpha*(Vartau1000(N=nrow(this_data),W=this_data$W,Y=this_data$Y,G=this_data$G,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nel[this_data$idunit]))+
+          beta*(Vartau1101(N=nrow(this_data),W=this_data$W,Y=this_data$Y,G=this_data$G,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nel[this_data$idunit]))+
+          gamma*(Vartau1110(N=nrow(this_data),W=this_data$W,Y=this_data$Y,G=this_data$G,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nel[this_data$idunit]))+
+          delta*(Vartau0100(N=nrow(this_data),W=this_data$W,Y=this_data$Y,G=this_data$G,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nel[this_data$idunit]))
+          vartot=c(vartot,varchild)
+      }
       
       #ASSIGN PARENTS OR LEAF IF SPLIT_HERE IS ACTIVE OR NOT 
       tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "PARENT")
@@ -528,10 +391,12 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
   if(output=="estimation"){
   data_est <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X)  
   
+  NOBS_EST<-c(rep(0,nrow(tree_info)))
   EFFTAU1000=EFFTAU1101=EFFTAU1110=EFFTAU0100=c(rep(0,nrow(tree_info)))
   SETAU1000=SETAU1101=SETAU1110=SETAU0100=c(rep(0,nrow(tree_info)))
-  tree_info<-cbind(tree_info,EFFTAU1000,SETAU1000,EFFTAU1101,SETAU1101,EFFTAU1110,SETAU1110,EFFTAU0100,SETAU0100)
+  tree_info<-cbind(tree_info,NOBS_EST,EFFTAU1000,SETAU1000,EFFTAU1101,SETAU1101,EFFTAU1110,SETAU1110,EFFTAU0100,SETAU0100)
 
+  tree_info$NOBS_EST[1]<-N
   tree_info$EFFTAU1000[1]<-EffTau1000(N=nrow(data_est),W=data_est$W,G=data_est$G,Y=data_est$Y,p=p[data_est$idunit],Ne=Ne[data_est$idunit])
   tree_info$EFFTAU1101[1]<-EffTau1101(N=nrow(data_est),W=data_est$W,G=data_est$G,Y=data_est$Y,p=p[data_est$idunit],Ne=Ne[data_est$idunit])
   tree_info$EFFTAU1110[1]<-EffTau1110(N=nrow(data_est),W=data_est$W,G=data_est$G,Y=data_est$Y,p=p[data_est$idunit],Ne=Ne[data_est$idunit])
@@ -555,7 +420,7 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
     }
     
     Nelsub=Nel[this_data$idunit]
-   
+    tree_info$NOBS_EST[j]<-nrow(this_data)
     tree_info$EFFTAU1000[j]<-EffTau1000(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
     tree_info$SETAU1000[j]<- sqrt(Vartau1000(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nelsub))
     tree_info$EFFTAU1101[j]<-EffTau1101(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
@@ -565,16 +430,17 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
     tree_info$EFFTAU0100[j]<-EffTau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])  
     tree_info$SETAU0100[j]<- sqrt(Vartau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nelsub))
   }}
-  colnames(tree_info)<-c("GOF","NOBS","FILTER","NUMTREE","EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST","EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST")
+  colnames(tree_info)<-c("GOF","NOBS_TR","FILTER","NUMTREE","NOBS_EST","EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST","EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST")
   
   }
 
   if(output=="detection"){
     data_est <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X)  
     
-    EFFTAU1000=EFFTAU1101=EFFTAU1110=EFFTAU0100=c(rep(0,nrow(tree_info)))
-    tree_info<-cbind(tree_info,EFFTAU1000,EFFTAU1101,EFFTAU1110,EFFTAU0100)
+    NOBS_EST=EFFTAU1000=EFFTAU1101=EFFTAU1110=EFFTAU0100=c(rep(0,nrow(tree_info)))
+    tree_info<-cbind(tree_info,NOBS_EST,EFFTAU1000,EFFTAU1101,EFFTAU1110,EFFTAU0100)
     
+    tree_info$NOBS_EST[1]<-N
     tree_info$EFFTAU1000[1]<-EffTau1000(N=nrow(data_est),W=data_est$W,G=data_est$G,Y=data_est$Y,p=p[data_est$idunit],Ne=Ne[data_est$idunit])
     tree_info$EFFTAU1101[1]<-EffTau1101(N=nrow(data_est),W=data_est$W,G=data_est$G,Y=data_est$Y,p=p[data_est$idunit],Ne=Ne[data_est$idunit])
     tree_info$EFFTAU1110[1]<-EffTau1110(N=nrow(data_est),W=data_est$W,G=data_est$G,Y=data_est$Y,p=p[data_est$idunit],Ne=Ne[data_est$idunit])
@@ -590,21 +456,21 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
         if(any(as.numeric(table(this_data$W,this_data$G))<3)){
           warning('subpopulations not sufficiently represented')  
         }
-        
+        tree_info$NOBS_EST[j]<-nrow(this_data)
         tree_info$EFFTAU1000[j]<-EffTau1000(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
         tree_info$EFFTAU1101[j]<-EffTau1101(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
         tree_info$EFFTAU1110[j]<-EffTau1110(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
         tree_info$EFFTAU0100[j]<-EffTau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit]) 
         
       }}
-    colnames(tree_info)<-c("GOF","NOBS","FILTER","NUMTREE","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
+    colnames(tree_info)<-c("GOF","NOBS_TR","FILTER","NUMTREE","NOBS_EST","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
      }
   
   return(tree_info)
   
 }
 
-sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,M,p,Ne,Peff){
+sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,M,p,Ne,Peff,Nel){
   
   # coerce to data.frame
   data <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X,M=M)  
@@ -633,7 +499,7 @@ sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,
   
   tree_info<-netctree(method=method,alpha=alpha,beta=beta,gamma=gamma,delta=delta,N=length(sampleid),
                       depth=depth,minsize=minsize,W=W,G=G,Y=Y,X=X,
-                      p=p[sampleid],Ne=Ne[sampleid],Peff=Peff)
+                      p=p[sampleid],Ne=Ne[sampleid],Nel=Nel[sampleid],Peff=Peff)
   
   return(list(tree=tree_info,predictors_used=colnames(data[,samppredictors])))
 }
@@ -656,7 +522,7 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
     stop('weights have to sum up to one')
   }
   
-  if(length(which(effweights>0))>1 & method=="singular"){
+  if(length(which(effweights>0))>1 & (method=="singular" | method=="penalized")){
     stop('if method is set to singular only one effect should have positive weight')
   }
   
@@ -680,7 +546,7 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
    Ne<-rowSums(A)
   }
   
-  if(output=="estimation"){
+  if(output=="estimation" | method=="penalized"){
     if(is.null(G)){
       nt <-as.vector(A %*% W) 
       G=rep(1,N) 
@@ -706,7 +572,7 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
     n_trees,
     sproutnetctree(method=method,sampgroup=sampgroup_train,fracpredictors=fracpredictors,m=m,minpopfrac=minpopfrac,
                    depth=depth,minsize=minsize,alpha=alpha,beta=beta,gamma=gamma,delta=delta,
-                   N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff),
+                   N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff,Nel=Nel),
     .progress = "text" )
   
   Forest<-data.frame(IDTREE=NA,NODE = NA, GOF=NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
@@ -775,7 +641,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
     stop('weights have to sum up to one')
   }
   
-  if(length(which(effweights>0))>1 & method=="singular"){
+  if(length(which(effweights>0))>1 & (method=="singular" | method=="penalized")){
     stop('if method is set to singular only one effect should have positive weight')
   }
   
@@ -799,7 +665,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
     Ne<-rowSums(A)
   }
   
-  if(output=="estimation"){
+  if(output=="estimation" | method=="penalized"){
     if(is.null(G)){
       nt <-as.vector(A %*% W) 
       G=rep(1,N) 
@@ -822,7 +688,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
     n_trees,
     sproutnetctree(method=method,sampgroup=sampgroup_train,fracpredictors=fracpredictors,m=m,minpopfrac=minpopfrac,
                    depth=depth,minsize=minsize,alpha=alpha,beta=beta,gamma=gamma,delta=delta,
-                   N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff),
+                   N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff,Nel=Nel),
     .progress = "text" )
   
   Forest<-data.frame(IDTREE=NA,NODE = NA, GOF=NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
@@ -837,7 +703,7 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
   
   Forest=Forest[-1,]
   
-  Results<-data.frame(GOF=Forest$GOF,NOBS=Forest$NOBS ,  FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))), NUMTREE=NA,
+  Results<-data.frame(GOF=Forest$GOF,NOBS_TR=Forest$NOBS ,  FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))), NUMTREE=NA,
                       stringsAsFactors = FALSE)
   
   for(j in as.vector(na.omit(unique(Forest$FILTER)))){
