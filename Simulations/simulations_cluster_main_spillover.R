@@ -615,7 +615,7 @@ colnames(results_nctree) <- c("correct_rules",
                               "Rule 2 se(eta(01,00))",
                               "Coverage eta(01,00)",
                               "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_three_effects_composite_1500.csv")
+write.csv(results_nctree, file = "two_main_spillover_effects_composite_1500.csv")
 
 ## Singular (Main)
 
