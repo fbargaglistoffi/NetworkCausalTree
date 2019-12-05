@@ -35,7 +35,7 @@ param = 0.01
 mu = rep(0, n_cov)
 rho = 0
 seq <- seq(0.1, 10.1, 1)
-nsim = 10
+nsim = 100
 
 # Set up Parallel Computation
 # Setup parallel backend to use many processors
@@ -618,20 +618,26 @@ for(i in seq){
 ## Create a Matrix for the Results
 results_nctree <- cbind(avg_correct_rules,
                         mse_tau_est_1000, bias_tau_est_1000,
-                        avg_tau_1000, avg_se_1000,
+                        avg_tau_1000_1, avg_se_1000_1,
+                        avg_tau_1000_2, avg_se_1000_2,
                         mse_eta_est_0100, bias_eta_est_0100,
-                        avg_tau_0100, avg_se_0100,
+                        avg_eta_0100_1, avg_se_0100_1,
+                        avg_eta_0100_2, avg_se_0100_2,
                         vi_x1, vi_x2, vi_x3, vi_X)
 
 colnames(results_nctree) <- c("correct_rules",
                               "MSE tau(10,00)", 
                               "Bias tau(10,00)",
-                              "Rule tau(10,00)",
-                              "Rule se(tau(10,00))", 
+                              "Rule 1 tau(10,00)",
+                              "Rule 1 se(tau(10,00))",
+                              "Rule 2 tau(10,00)",
+                              "Rule 2 se(tau(10,00))", 
                               "MSE eta(01,00)", 
                               "Bias eta(01,00)",
-                              "Rule eta(01,00)", 
-                              "Rule se(eta(01,00))",
+                              "Rule 1 eta(01,00)", 
+                              "Rule 1 se(eta(01,00))",
+                              "Rule 2 eta(01,00)", 
+                              "Rule 2 se(eta(01,00))",
                               "VI x1", "VI x2", "VI x3", "VI X")
 write.csv(results_nctree, file = "two_main_spillover_four_effects_composite_1500.csv")
 
@@ -640,12 +646,12 @@ write.csv(results_nctree, file = "two_main_spillover_four_effects_composite_1500
 #####################
 
 ## Extract Rules
-correct_rules_main <- na.omit(matrix[[10]])
-correct_rules_composite <- na.omit(matrix[[24]])
-correct_rules_spil <- na.omit(matrix[[26]])
+correct_rules <- na.omit(matrix[[10]])
+correct_composite <- na.omit(matrix[[12]])
+correct_spil <- na.omit(matrix[[14]])
 
 ## Correct Rules
-avg_correct_main <- colMeans(correct_rules)
+avg_correct_rules <- colMeans(correct_rules)
 avg_correct_composite <- colMeans(correct_composite)
 avg_correct_spil <- colMeans(correct_spil)
 
@@ -657,24 +663,25 @@ colnames(results_nctree) <- c("correct_main",
                               "correct_spil")
 write.csv(results_nctree, file = "two_main_spillover_four_effects_singular_main_1500.csv")
 
-
-## Singular (Spillover)
+##########################
+## Singular (Spillover) ##
+##########################
 
 ## Extract Rules
-correct_rules_spil <- na.omit(matrix[[17]])
-correct_rules_composite <- na.omit(matrix[[25]])
-correct_rules_main <- na.omit(matrix[[27]])
+correct_rules <- na.omit(matrix[[11]])
+correct_composite <- na.omit(matrix[[13]])
+correct_main <- na.omit(matrix[[15]])
 
 ## Correct Rules
-avg_correct_spil <- colMeans(correct_rules)
+avg_correct_rules <- colMeans(correct_rules)
 avg_correct_composite <- colMeans(correct_composite)
-avg_correct_main <- colMeans(correct_spil)
+avg_correct_main <- colMeans(correct_main)
 
 results_nctree <- cbind(avg_correct_rules,
                         avg_correct_composite,
-                        avg_correct_spil)
+                        avg_correct_main)
 colnames(results_nctree) <- c("correct_main",
                               "correct_composite",
-                              "correct_spil")
+                              "correct_main")
 write.csv(results_nctree, file = "two_main_spillover_four_effects_singular_spil_1500.csv")
 
