@@ -1,15 +1,27 @@
-genmultnet=function(m,N,method,param){
+genmultnet=function(m,N,method,param,coefergm){
   comba<-matrix(0,N,N)
   gsize<-N/m
   
   for (i in 1:m){
+    
+    if(method=="ergm"){
+      test.net <- network(gsize, directed = FALSE, density = 0)
+      test.net%v%"x1" = x1[(gsize*i-(gsize-1))]
+      g.sim <- simulate(test.net ~ nodematch("x1") + edges,
+                        coef = coefergm)
+      comba[(gsize*i-(gsize-1)):(gsize*i),(gsize*i-(gsize-1)):(gsize*i)]<-as.matrix(g.sim) 
+    }
+    
+    if(method=="er" | method=="sf"){
     if(method=="er"){
       g=erdos.renyi.game(gsize, p=param, type = "gnp")}
     if(method=="sf"){
     g=barabasi.game(gsize)}
     adj<-as.matrix(get.adjacency(g))
     comba[(gsize*i-(gsize-1)):(gsize*i),(gsize*i-(gsize-1)):(gsize*i)]<-adj
-  }
+    }
+    
+    }
   
   return(comba)
 }
@@ -230,7 +242,7 @@ GOF=function(method,alpha,beta,gamma,delta,N,W,G,Y,p,Ne,Nel,Peff,vartot,leafs){
           beta*((EffTau1101(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)+
           gamma*((EffTau1110(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)+
           delta*((EffTau0100(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)  
-            }
+          }
   return(ingof)
 }
 
@@ -763,12 +775,20 @@ SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,
 
 plot.NetworkCausalTrees=function(NCT,vcolor,vlabelcolor,
                                  ewidth,elabelcex, efamily, ecolor,elabelfamily, elabelcolor,
-                                 vsize, vsize2,vshape,
+                                 vsize, vsize2,vshape, varnames,
                                  vlabelfont, vlabelcex,
                                  vframecolor,title,cex.main,col.main,adj){
+   
+  NCT$NOBS<-NCT$NOBS_EST+NCT$NOBS_TR
+  NCT$OT<-NCT$OT
+  NCT$OT_NODES_BC
+  for (p in 1:length(varnames)) {
+    NCT$FILTER<-gsub(pattern = paste("x",p,sep=""),replacement = varnames[p],x=as.character(NCT$FILTER) )
+      }
   
   NCT$FILTER<-gsub(pattern = "data_tree",replacement ="",x=as.character(NCT$FILTER) )
   NCT$FILTER<-gsub(pattern = "[$]",replacement ="",x=as.character( NCT$FILTER ) )
+  NCT$FILTER<-gsub(pattern = "_bin",replacement ="",x=as.character( NCT$FILTER ) )
   NCT$FILTER[which(NCT$FILTER!="NA")]<-paste0(" & ", NCT$FILTER[which(NCT$FILTER!="NA")])
   NCT$FILTER[which(NCT$FILTER!="NA")]<-paste0(" NA ",NCT$FILTER[which(NCT$FILTER!="NA")])
   
@@ -792,22 +812,51 @@ plot.NetworkCausalTrees=function(NCT,vcolor,vlabelcolor,
   V(grafo_tree)$SE1110<-NCT$SE1110_EST
   V(grafo_tree)$TAU0100<-NCT$EFF0100_EST
   V(grafo_tree)$SE0100<-NCT$SE0100_EST
-  E(grafo_tree)$label<-nomelati
   
+  latinomefine<-rep(NULL,length(nomelati))
+  edgelabel<-vector(mode = "list", length = length(nomelati))
+  for (l in 1:length(nomelati)){
+    if(length(grep(x=nomelati[l],pattern=">="))>0){
+    edgelabel[[l]][1]<-strsplit(nomelati[l],"(?=[>=])",perl = TRUE)[[1]][1]
+    edgelabel[[l]][2]<-paste(value=strsplit(nomelati[l],"(?=[>=])",perl = TRUE)[[1]][2:
+    (lengths(gregexpr(",", strsplit(nomelati[l],"(?=[>=])",perl = TRUE))) + 1)],collapse = " ")
+    }
+    if(length(grep(x=nomelati[l],pattern="<="))>0){
+      edgelabel[[l]][1]<-strsplit(nomelati[l],"(?=[<=])",perl = TRUE)[[1]][1]
+      edgelabel[[l]][2]<-paste(value=strsplit(nomelati[l],"(?=[<=])",perl = TRUE)[[1]][2:
+     (lengths(gregexpr(",", strsplit(nomelati[l],"(?=[<=])",perl = TRUE))) + 1)],collapse = " ")
+    }
+    if(length(grep(x=nomelati[l],pattern="<="))==0 & length(grep(x=nomelati[l],pattern="<"))>0){
+      edgelabel[[l]][1]<-strsplit(nomelati[l],"(?=[<])",perl = TRUE)[[1]][1]
+      edgelabel[[l]][2]<-paste(value=strsplit(nomelati[l],"(?=[<])",perl = TRUE)[[1]][2:
+    (lengths(gregexpr(",", strsplit(nomelati[l],"(?=[<])",perl = TRUE))) + 1)],collapse = " ")
+    }
+    if(length(grep(x=nomelati[l],pattern=">="))==0 & length(grep(x=nomelati[l],pattern=">"))>0){
+      edgelabel[[l]][1]<-strsplit(nomelati[l],"(?=[>])",perl = TRUE)[[1]][1]
+      edgelabel[[l]][2]<-paste(value=strsplit(nomelati[l],"(?=[>])",perl = TRUE)[[1]][2:
+    (lengths(gregexpr(",", strsplit(nomelati[l],"(?=[>])",perl = TRUE))) + 1)],collapse = " ")
+    }
+    latinomefine[l]<-paste(edgelabel[[l]][1],gsub("\\s", "", x=edgelabel[[l]][2]),sep="\n")
+    
+  }
+  latinomefine=gsub(x=latinomefine,pattern = ">=1",replacement = "=1")
+  latinomefine=gsub(x=latinomefine,pattern = "<1",replacement = "=0")
   
+  E(grafo_tree)$label<-latinomefine
   eff1<-paste(round(NCT$EFF1000_EST,2),"(",round(NCT$SE1000_EST,2),")",sep="")
   eff2<-paste(round(NCT$EFF1101_EST,2),"(",round(NCT$SE1101_EST,2),")",sep="")
   eff3<-paste(round(NCT$EFF1110_EST,2),"(",round(NCT$SE1110_EST,2),")",sep="")
-  eff4<-paste(round(NCT$EFF0100_EST,2),"(",round(NCT$SE0100_EST,2),")",sep="")  
-  V(grafo_tree)$labels<-paste(eff1,eff2,eff3,eff4,sep="\n")
+  eff4<-paste(round(NCT$EFF0100_EST,2),"(",round(NCT$SE0100_EST,2),")",sep="") 
+  ot<-paste("(", as.numeric(round(NCT$OT,2)),";",as.numeric(round(NCT$OT_NODES_BC,2)),")",sep = "")
+  V(grafo_tree)$labels<-paste(eff1,eff3,NCT$NOBS,ot,sep="\n")
   NCTPLOT<-plot(grafo_tree,layout=layout_as_tree(grafo_tree), edge.label.color=elabelcolor,
                 edge.width=ewidth,edge.label.cex=elabelcex, edge.label.family=elabelfamily, vertex.color=vcolor,
                 vertex.label.dist = 0, vertex.label.color=vlabelcolor,
                 vertex.label=V(grafo_tree)$labels,  vertex.label.font=vlabelfont, vertex.label.cex=vlabelcex,
                 vertex.frame.color=vframecolor, edge.color=ecolor,
                 edge.label=E(grafo_tree)$label,vertex.shape=vshape,vertex.size=vsize,vertex.size2=vsize2)
-  legend('topleft', text.col="darkblue", xjust=0, adj=0.3,
-         legend=c("tau(10,00)","tau(11,01)","eta(11,10)","eta(01,00)"),title = "Effects",title.col ="red")
+  legend('topleft', text.col="darkblue", xjust=0, adj=0.2,
+         legend=c(expression(paste(tau,"(10,00)",sep="")),expression(paste(tau,"(01,00)",sep="")),"N","Opt.Tr"),title = "Legend",title.col ="red")
   title(title,cex.main=cex.main,col.main=col.main,adj=adj)
   return(NCTPLOT)
 }
