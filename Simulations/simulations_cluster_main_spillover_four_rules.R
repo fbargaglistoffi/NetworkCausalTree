@@ -680,7 +680,7 @@ avg_correct_main <- colMeans(correct_main)
 results_nctree <- cbind(avg_correct_rules,
                         avg_correct_composite,
                         avg_correct_main)
-colnames(results_nctree) <- c("correct_main",
+colnames(results_nctree) <- c("correct_spil",
                               "correct_composite",
                               "correct_main")
 write.csv(results_nctree, file = "two_main_spillover_four_effects_singular_spil_1500.csv")
