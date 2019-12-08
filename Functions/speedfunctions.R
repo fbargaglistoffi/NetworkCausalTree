@@ -1,4 +1,4 @@
-genmultnet=function(m,N,method,param,coefergm){
+genmultnet=function(m,N,method,param,varhom,coefergm){
   comba<-matrix(0,N,N)
   gsize<-N/m
   
@@ -6,7 +6,7 @@ genmultnet=function(m,N,method,param,coefergm){
     
     if(method=="ergm"){
       test.net <- network(gsize, directed = FALSE, density = 0)
-      test.net%v%"x1" = x1[(gsize*i-(gsize-1))]
+      test.net%v%"x1" = varhom[(gsize*i-(gsize-1))]
       g.sim <- simulate(test.net ~ nodematch("x1") + edges,
                         coef = coefergm)
       comba[(gsize*i-(gsize-1)):(gsize*i),(gsize*i-(gsize-1)):(gsize*i)]<-as.matrix(g.sim) 
