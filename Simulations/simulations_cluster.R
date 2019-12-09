@@ -2569,6 +2569,6 @@ colnames(results_nctree) <- c("correct_rules",
                               "VI x1", "VI x2", "VI X")
 write.csv(results_nctree, file = "two_main_effects_correlated_1500.csv")
 
-stopCluster()
+stopCluster(cl)
 
 ## End of Simulations

@@ -496,8 +496,8 @@ system.time({
       ## Extract the Correct Rules (Treatment Tree)
       correct.singlemain <- length(which(rule.main=="data_tree$X.1>=1 & data_tree$X.3>=1" | 
                                                 rule.main=="data_tree$X.3>=1 & data_tree$X.1>=1" | 
-                                                rule.main=="data_tree$X.1<1 & data_tree$X.2<1" |
-                                                rule.main=="data_tree$X.2<1 & data_tree$X.1<1"))
+                                                rule.main=="data_tree$X.1<1 & data_tree$X.3<1" |
+                                                rule.main=="data_tree$X.3<1 & data_tree$X.1<1"))
       correct.singlemain.spil[j, which(seq==i)] <- correct.singlemain
       
       ## Extract the Correct Rules (Spillover Tree)
