@@ -1,7 +1,7 @@
 # Monte Carlo Simulations
 
 This code implements a number of Monte Carlo simulations to investigate the fit of the _Network Causal Tree_ algorithm.
-The general data generating process (dgp) is the following: for each simulation we built 15 clusters (of size 100 and 200, respectively), generating an Erdős–Rényi network within each cluster, and 10 covariates.
+The general data generating process (dgp) is the following: for each simulation we built 15 clusters (of size 100 and 200, respectively), generating either (i) an Erdős–Rényi network or, (ii) an Homophily network within each cluster, and 10 covariates.
 Out of these 15 clusters, 8 were used for the _discovery sample_ and 7 for the _estimation sample_.
 We introduced two _true causal rules_, each of them with depth two (e.g.,  x1==0 & x2==0, namely _x1_ and _x2_ are the two _heterogeneity driving variables_ [HDVs]).
 The results are reported in a number of _excel tables_, and were obtained by aggregating the results, for each effect size, on 100 different datasets.
