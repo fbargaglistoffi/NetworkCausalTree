@@ -12,7 +12,7 @@ The results are reported in a number of _excel tables_, and were obtained by agg
 * <tt>`n_cov`</tt>: number of covariates (10)
 * <tt>`rho`</tt>: correlation within the covariates (0/0.25)
 * <tt>`prob`</tt>: treatment assignment probability (0.4)
-* <tt>`crls`</tt>: number of causal rules (2/3)
+* <tt>`crls`</tt>: number of causal rules (2/4)
 * <tt>`seq`</tt>: effect size magnitude (varying between 0.1 and 10.1)
 * <tt>`nsim`</tt>: number of datasets created (100)
 * <tt>`gsize`</tt>: size of each cluster (100/200)
