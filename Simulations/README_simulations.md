@@ -1,6 +1,7 @@
 # Monte Carlo Simulations
 
-The codes <a href="https://github.com/fbargaglistoffi/Network-Causal-Tree/tree/master/Simulations">in this folder</a> implement a number of Monte Carlo simulations to investigate the fit of the _Network Causal Tree_ algorithm. </br>
+The codes <a href="https://github.com/fbargaglistoffi/Network-Causal-Tree/tree/master/Simulations">in this folder</a> implement a number of Monte Carlo simulations to investigate the fit of the _Network Causal Tree_ algorithm.
+
 The general data generating process (dgp) is the following: for each simulation we build a number of clusters each of size 100, generating an Erdős–Rényi network within each cluster, and 10 covariates. </br>
 Out of these generated clusters, a half are used for the _discovery sample_ and the other half for the _estimation sample_.
 We introduced two and four _true causal rules_, each of them with depth two (e.g.,  x1==0 & x2==0, namely _x1_ and _x2_ are the two _heterogeneity driving variables_ [HDVs]).
