@@ -13,7 +13,7 @@ The results are reported in the paper, and were obtained by aggregating the resu
 The code files used to implement the simulations are the following:
 * <tt>`simulations_main_spillover`</tt>:  two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), uncorrelated regressors, 1000/2000/3000 data points and 10/20/30 clusters;
 * <tt>`simulations_main_spillover_correlated`</tt>: two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), correlated regressors (<tt>`rho`</tt> = 0.25/0.50), 3000 data points and 30 clusters;
-* <tt>`simulations_main_homophily`</tt>:  two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), homophily network, uncorrelated regressors, 3000 data points and 30 clusters;
+* <tt>`simulations_main_spillover_homophily`</tt>:  two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), homophily network, uncorrelated regressors, 3000 data points and 30 clusters;
 * <tt>`simulations_different_main_spillover`</tt>: four causal rules for the main and spillover effect with three different HDVs (_x1, x2, x3_), uncorrelated regressors, 3000 data points and 30 clusters.
 
 ### Parameters used for the simulations
