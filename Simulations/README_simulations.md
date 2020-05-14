@@ -1,50 +1,30 @@
 # Monte Carlo Simulations
 
-This code implements a number of Monte Carlo simulations to investigate the fit of the _Network Causal Tree_ algorithm.
-The general data generating process (dgp) is the following: for each simulation we built 15 clusters (of size 100 and 200, respectively), generating either (i) an Erdős–Rényi network or, (ii) an Homophily network within each cluster, and 10 covariates.
-Out of these 15 clusters, 8 were used for the _discovery sample_ and 7 for the _estimation sample_.
-We introduced two _true causal rules_, each of them with depth two (e.g.,  x1==0 & x2==0, namely _x1_ and _x2_ are the two _heterogeneity driving variables_ [HDVs]).
-The results are reported in a number of _excel tables_, and were obtained by aggregating the results, for each effect size, on 100 different datasets.
+The codes <a href="https://github.com/fbargaglistoffi/Network-Causal-Tree/tree/master/Simulations">in this folder</a> implement a number of Monte Carlo simulations to investigate the fit of the _Network Causal Tree_ algorithm.
 
-## Parameters used for the simulations
+The general data generating process (dgp) is described in detail <a href="https://github.com/fbargaglistoffi/Network-Causal-Tree/tree/master/Simulations">in the paper</a>. In a nutshell, for each simulation we build a number of clusters each of size 100, generating an Erdős–Rényi network within each cluster, and 10 covariates. </br>
+Out of these generated clusters, a half are used for the _discovery sample_ and the other half for the _estimation sample_.
+We introduce two and four _true causal rules_, each of them with depth two (e.g.,  _x1==0 & x2==0_, namely _x1_ and _x2_ are the two _heterogeneity driving variables_ [HDVs]).
 
-* <tt>`N`</tt>: number of data points (1500/3000)
-* <tt>`n_cov`</tt>: number of covariates (10)
-* <tt>`rho`</tt>: correlation within the covariates (0/0.25)
-* <tt>`prob`</tt>: treatment assignment probability (0.4)
-* <tt>`crls`</tt>: number of causal rules (2/4)
-* <tt>`seq`</tt>: effect size magnitude (varying between 0.1 and 10.1)
-* <tt>`nsim`</tt>: number of datasets created (100)
-* <tt>`gsize`</tt>: size of each cluster (100/200)
+The results are reported in the paper, and were obtained by aggregating the results over 500 different datasets for each effect size.
 
-## Results
+## R code
 
-The simualations' results were obtained for both sample sizes 1500 and 3000.
-Below a brief guide to the _excel files_:
-* <tt>`one_main_effect`</tt>: two causal rule for just one main effect (_tau(10,00)_) with two different HDVs (_x1, x2_)
-* <tt>`two_main_effects`</tt>: two causal rules for the two main effects (_tau(10,00)_, _tau(11,01)_) with two different HDVs (_x1, x2_)
-* <tt>`two_main_effects_correlated`</tt>: two causal rules for the two main effects (_tau(10,00)_, _tau(11,01)_) with two different HDVs (_x1, x2_) and correlated regressors (<tt>`rho`</tt> = 0.25)
-* <tt>`three_main_effects_overlap`</tt>: three causal rules for the two main effects (_tau(10,00)_, _tau(11,01)_), with three different HDVs (_x1, x2, x3_)
-* <tt>`three_main_effects_overlap`</tt>: three causal rules for the two main effects (_tau(10,00)_, _tau(11,01)_), with three different HDVs (_x1, x2, x3_), and different effect sizes (the effects for _tau(11,01)_ are 50% bigger than the effects for _tau(10,00)_)
-* <tt>`two_spillover_effects`</tt>: two causal rules for the two spillover effects (_eta(11,10)_, _eta(01,00)_) with two different HDVs (_x1, x2_)
+The code files used to implement the simulations are the following:
+* <tt>`simulations_main_spillover`</tt>:  two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), uncorrelated regressors, 1000/2000/3000 data points and 10/20/30 clusters;
+* <tt>`simulations_main_spillover_correlated`</tt>: two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), correlated regressors (<tt>`rho`</tt> = 0.25/0.50), 3000 data points and 30 clusters;
+* <tt>`simulations_main_spillover_homophily`</tt>:  two causal rules for the main and spillover effect with two different HDVs (_x1, x2_), homophily network, uncorrelated regressors, 3000 data points and 30 clusters;
+* <tt>`simulations_different_main_spillover`</tt>: four causal rules for the main and spillover effect with three different HDVs (_x1, x2, x3_), uncorrelated regressors, 3000 data points and 30 clusters.
 
-The following results were reported:
-* <tt>`correct_rules`</tt>: number of rules correctly detected by the algorithm;
-* <tt>`mse_tau_est_1000`</tt>: Monte Carlo mean-squared-error for _tau(10,00)_ in the estimation sample
-* <tt>`bias_tau_est_1000`</tt>: Monte Carlo bias for _tau(10,00)_ in the estimation sample
-* <tt>`mse_tau_test_1000`</tt>: Monte Carlo mean-squared-error for _tau(10,00)_ in the test sample
-* <tt>`bias_tau_test_1000`</tt>: Monte Carlo bias for _tau(10,00)_ in the test sample
-* <tt>`mse_tau_est_1101`</tt>: Monte Carlo mean-squared-error for _tau(11,01)_ in the estimation sample
-* <tt>`bias_tau_est_1101`</tt>: Monte Carlo bias for _tau(11,01)_ in the estimation sample
-* <tt>`mse_tau_test_1101`</tt>: Monte Carlo mean-squared-error for _tau(11,01)_ in the test sample
-* <tt>`bias_tau_test_1101`</tt>: Monte Carlo bias for _tau(11,01)_ in the test sample
-* <tt>`coverage_est_1000`</tt>: Monte Carlo coverage for _tau(10,00)_ in the estimation sample
-* <tt>`coverage_test_1000`</tt>: Monte Carlo coverage for _tau(10,00)_ in the test sample
-* <tt>`coverage_est_1101`</tt>: Monte Carlo coverage for _tau(11,01)_ in the estimation sample
-* <tt>`coverage_test_1101`</tt>: Monte Carlo coverage for _tau(11,01)_ in the test sample
-* <tt>`vi_x1`</tt>: variable importance for _x1_ 
-* <tt>`vi_x2`</tt>: variable importance for _x2_ 
-* <tt>`vi_X`</tt>: variable importance for all the variables with the exclusion of _x1_ and _x2_ 
+### Parameters used for the simulations
 
-N.B.: (i) the same results are reported for spillover effect but instead of _tau(10,00)_, _tau(11,01)_ we have _eta(11,10)_, _eta(01,00)_; (ii) the variable importance refers to the average increase in splitting criterion due to split on that variable (the larger this number, the higher the importance of the variable); (iii) in case of <tt>`three_main_effects_overlap`</tt> the variable importance is reported also for _x3_.
+* <tt>`N`</tt>: number of data points (1000/2000/3000);
+* <tt>`M`</tt>: number of clusters (10/20/30);
+* <tt>`n_cov`</tt>: number of covariates (10);
+* <tt>`rho`</tt>: correlation within the covariates (0/0.25/0.50);
+* <tt>`prob`</tt>: treatment assignment probability (0.50);
+* <tt>`crls`</tt>: number of causal rules (2/4);
+* <tt>`seq`</tt>: effect size magnitude (varying between 0.1 and 10.1);
+* <tt>`nsim`</tt>: number of datasets created (500);
+* <tt>`gsize`</tt>: size of each cluster (100).
 
