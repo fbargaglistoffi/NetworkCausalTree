@@ -13,7 +13,6 @@ library(randomizr)
 library(MLmetrics)
 library(dplyr)
 
-
 ###########################
 ## Initialize Parameters ##
 ###########################
@@ -27,8 +26,8 @@ library(dplyr)
 # m: group indicator for clusters
 # gsize: size of each cluster
 # param: link probability
-N = 3000
-m =  30
+N = 1000
+m =  10
 n_cov = 10
 prob = 0.5 
 gsize = N/m
@@ -48,6 +47,7 @@ comb <- function(x, ...) {
   mapply(rbind,x,...,SIMPLIFY=FALSE)
 }
 
+
 ##################################
 ##    2 RULES & MAIN + SPILL    ##
 ##################################
@@ -57,16 +57,13 @@ system.time({
   matrix <- foreach(j = 1:nsim,  .combine = 'comb', .multicombine = TRUE) %dopar% {
     
     ## Load Packages and Functions
-    source("speedfunctions.R")
+    source("AS.functions.R")
     library(MASS)
-    library(assertthat)
-    library(dplyr)
-    library(purrr)
     library(igraph)
-    library(ggplot2)
     library(ggraph)
     library(stringi)
-    library(gtools)
+    library(interference)
+    library(statnet)
     library(tidyverse)
     
     ## Initialize Matrices
@@ -96,8 +93,7 @@ system.time({
       ###########################
       
       # Adjacency Matrix
-      ## Homophily based on x1
-      adiac_matrix <- genmultnet(N=N, m=m, method="ergm", param = NULL, coefergm=c(2, -7), varhom=X[,1])
+      adiac_matrix <- genmultnet(N=N, m=m, method="er", param = param)
       
       # Group Indicator 
       M=c(rep(1:m,gsize))
@@ -170,49 +166,64 @@ system.time({
       eta0100[x1==1 & x2==1] <- -i
       
       # Generate treatment effects
-      y11 <- y00 <- rnorm(n)
+      y00 <- rnorm(n)
       y10 <- y00 + tau1000
-      y01 <- y00 + eta0100
+      y11 <- y01 <- y00 + eta0100
       
       # Generate Y
       y <- y00*(1-w)*(1-g) + y10*w*(1-g) + y01*(1-w)*g + y11*w*g
       
       # Run the NCT functions
-      SNCT <- NetworkCausalTrees(effweights = c(0.5,0,0,0.5), method = "composite",
-                                 output = "estimation", 
-                                 A = adiac_matrix,
-                                 p = rep(probT,n), Ne = NeighNum,
-                                 W = w, Y = y, X = X, M = M, G = g,
-                                 mdisc = m/2, mest = m/2,
-                                 minpopfrac = 1,
-                                 depth = 2,
-                                 fracpredictors = 1,
-                                 minsize= N/100,
-                                 n_trees = 1) 
+      SNCT <- NetworkCausalTrees(effweights=c(0.5,0,0,0.5),
+                              method="composite",output="estimation",
+                              p=unique(p), 
+                              A=adiac_matrix,
+                              W=w,
+                              M=M,
+                              Y=y,
+                              X=X,
+                              ngdisc=m/2, 
+                              gdisc=NA, 
+                              minpopfrac = 1,
+                              depth=2,
+                              minsize=N/100,
+                              n_trees = 1,
+                              fracpredictors=1,
+                              R=1000)
       
-      SNCT_main <- NetworkCausalTrees(effweights = c(1,0,0,0), method = "singular",
-                                      output = "estimation", 
-                                      A = adiac_matrix,
-                                      p = rep(probT,n), Ne = NeighNum,
-                                      W = w, Y = y, X = X, M = M, G = g,
-                                      mdisc = m/2, mest = m/2,
-                                      minpopfrac = 1,
-                                      depth = 2,
-                                      fracpredictors = 1,
-                                      minsize= N/100,
-                                      n_trees = 1) 
+      SNCT_main <- NetworkCausalTrees(effweights=c(1,0,0,0),
+                                                  method="singular",output="estimation",
+                                                  p=unique(p), 
+                                                  A=adiac_matrix,
+                                                  W=w,
+                                                  M=M,
+                                                  Y=y,
+                                                  X=X,
+                                                  ngdisc=m/2, 
+                                                  gdisc=NA, 
+                                                  minpopfrac = 1,
+                                                  depth=2,
+                                                  minsize=N/100,
+                                                  n_trees = 1,
+                                                  fracpredictors=1,
+                                                  R=1000)
       
-      SNCT_spil <- NetworkCausalTrees(effweights = c(0,0,0,1), method = "singular",
-                                      output = "estimation", 
-                                      A = adiac_matrix,
-                                      p = rep(probT,n), Ne = NeighNum,
-                                      W = w, Y = y, X = X, M = M, G = g,
-                                      mdisc = m/2, mest = m/2,
+      SNCT_spil <- NetworkCausalTrees(effweights=c(0,0,0,1),
+                                      method="singular",output="estimation",
+                                      p=unique(p), 
+                                      A=adiac_matrix,
+                                      W=w,
+                                      M=M,
+                                      Y=y,
+                                      X=X,
+                                      ngdisc=m/2, 
+                                      gdisc=NA, 
                                       minpopfrac = 1,
-                                      depth = 2,
-                                      fracpredictors = 1,
-                                      minsize= N/100,
-                                      n_trees = 1) 
+                                      depth=2,
+                                      minsize=N/100,
+                                      n_trees = 1,
+                                      fracpredictors=1,
+                                      R=1000)
       
       rule.sel <- SNCT$FILTER
       rule.main <- SNCT_main$FILTER
@@ -337,16 +348,16 @@ system.time({
       
       
       # Variables Importance
-      vi.x1.main[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.main[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.2")[2]
-      vi.X.main[j, which(seq==i)] <-  cbind(str_detect(SNCT_main$FILTER, "X.3")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.5")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.7")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.9")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.10")[2])
+      vi.x1[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.1")[2] # the second element corresponds to the first split
+      vi.x2[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.2")[2]
+      vi.X[j, which(seq==i)] <-  cbind(str_detect(SNCT_main$FILTER, "X.3")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.4")[2] |
+                                         str_detect(SNCT_main$FILTER, "X.5")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.6")[2] |
+                                         str_detect(SNCT_main$FILTER, "X.7")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.8")[2] |
+                                         str_detect(SNCT_main$FILTER, "X.9")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.10")[2])
       
       if (correct.main==2){ 
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -417,21 +428,21 @@ system.time({
                                                rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" | 
                                                rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" |
                                                rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.composite.spil[j, which(seq==i)] <- 2*correct.composite.spil
+      correct.rules.composite.spil[j, which(seq==i)] <- correct.composite.spil
       
       # Extract the Correct Rules (Treatment Tree)
       correct.singlemain.spil <- length(which(rule.main=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                                 rule.main=="data_tree$X.1<1 & data_tree$X.2<1" |
                                                 rule.main=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                                 rule.main=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.singlemain.spil[j, which(seq==i)] <- 2*correct.singlemain.spil
+      correct.rules.singlemain.spil[j, which(seq==i)] <- correct.singlemain.spil
       
       # Extract the Correct Rules (Spillover Tree)
       correct.spil <- length(which(rule.spil=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                      rule.spil=="data_tree$X.1<1 & data_tree$X.2<1" |
                                      rule.spil=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                      rule.spil=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.spil[j, which(seq==i)] <- 2*correct.spil
+      correct.rules.spil[j, which(seq==i)] <- correct.spil
       
       # Number the Extracted Rules
       SNCT_spil$RULE.NUM <- rep(0, nrow(SNCT_spil))
@@ -440,16 +451,16 @@ system.time({
       
       
       # Variables Importance
-      vi.x1.spil[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.spil[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.2")[2]
-      vi.X.spil[j, which(seq==i)] <-  cbind(str_detect(SNCT_spil$FILTER, "X.3")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.5")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.7")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.9")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.10")[2])
+      vi.x1[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.1")[2] # the second element corresponds to the first split
+      vi.x2[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.2")[2]
+      vi.X[j, which(seq==i)] <-  cbind(str_detect(SNCT_spil$FILTER, "X.3")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.4")[2] |
+                                         str_detect(SNCT_spil$FILTER, "X.5")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.6")[2] |
+                                         str_detect(SNCT_spil$FILTER, "X.7")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.8")[2] |
+                                         str_detect(SNCT_spil$FILTER, "X.9")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.10")[2])
       
       if (correct.spil==2){ 
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -532,9 +543,7 @@ system.time({
 ##   Store the Results   ##
 ###########################
 
-###############
-## Composite ##
-###############
+## Composite
 
 # Extract the Results 
 correct_rules <- na.omit(matrix[[1]])
@@ -660,16 +669,14 @@ colnames(results_nctree) <- c("correct_rules",
                               "Rule 2 se(eta(01,00))",
                               "Coverage eta(01,00)",
                               "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_effects_composite_homophily_3000.csv")
+write.csv(results_nctree, file = "two_main_spillover_effects_composite_new_1000.csv")
 
-##########################
-## Singular (Treatment) ##
-##########################
+## Singular (Main)
 
 # Extract Rules
-correct_rules_main <- na.omit(matrix[[9]]) # number of times treatment tree gets the correct rules for treatment
-correct_rules_composite <- na.omit(matrix[[25]]) # number of times composite tree gets the correct rules for treatment
-correct_rules_spil <- na.omit(matrix[[28]]) # number of times spillover tree gets the correct rules for treatment
+correct_rules_main <- na.omit(matrix[[9]])
+correct_rules_composite <- na.omit(matrix[[25]])
+correct_rules_spil <- na.omit(matrix[[28]])
 tau_est_1000 <- na.omit(matrix[[10]])
 eta_est_0100 <- na.omit(matrix[[11]])
 se_tau_est_1000 <- na.omit(matrix[[12]])
@@ -776,9 +783,9 @@ results_nctree <- cbind(avg_correct_rules_spil,
                         coverage_est_0100,
                         vi_x1_main, vi_x2_main, vi_X_main)
 
-colnames(results_nctree) <- c("correct_rules_spil",
+colnames(results_nctree) <- c("correct_rules_main",
                               "correct_rules_composite",
-                              "correct_rules_main",
+                              "correct_rules_spil",
                               "MSE tau(10,00)", 
                               "Bias tau(10,00)",
                               "Rule 1 tau(10,00)",
@@ -794,16 +801,14 @@ colnames(results_nctree) <- c("correct_rules_spil",
                               "Rule 2 se(eta(01,00))",
                               "Coverage eta(01,00)",
                               "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_effects_singular_main_homophily_3000.csv")
+write.csv(results_nctree, file = "two_main_spillover_effects_singular_main_new_1000.csv")
 
-##########################
-## Singular (Spillover) ##
-##########################
+## Singular (Spillover)
 
 # Extract Rules
-correct_rules_spil <- na.omit(matrix[[17]]) # number of times spillover tree gets the correct rules for spillover
-correct_rules_composite <- na.omit(matrix[[26]]) # number of times composite tree gets the correct rules for spillover
-correct_rules_main <- na.omit(matrix[[27]]) # number of times treatment tree gets the correct rules for spillover
+correct_rules_spil <- na.omit(matrix[[17]])
+correct_rules_composite <- na.omit(matrix[[26]])
+correct_rules_main <- na.omit(matrix[[27]])
 tau_est_1000 <- na.omit(matrix[[18]])
 eta_est_0100 <- na.omit(matrix[[19]])
 se_tau_est_1000 <- na.omit(matrix[[20]])
@@ -929,9 +934,4 @@ colnames(results_nctree) <- c("correct_rules_spil",
                               "Rule 2 se(eta(01,00))",
                               "Coverage eta(01,00)",
                               "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_effects_singular_spillover_homophily_3000.csv")
-
-# Set Cluster Off
-stopCluster(cl)
-
-## END SIMULATIONS
+write.csv(results_nctree, file = "two_main_spillover_effects_singular_spillover_1000.csv")

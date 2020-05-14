@@ -13,7 +13,6 @@ library(randomizr)
 library(MLmetrics)
 library(dplyr)
 
-
 ###########################
 ## Initialize Parameters ##
 ###########################
@@ -26,27 +25,28 @@ library(dplyr)
 # nsim: number of datasets created
 # m: group indicator for clusters
 # gsize: size of each cluster
-# param: link probability
-N = 3000
-m =  30
+# param: 
+N = 1500
+m =  15
 n_cov = 10
-prob = 0.5 
+prob = 0.4 
 gsize = N/m
 param = 0.01
 mu = rep(0, n_cov)
 rho = 0
 seq <- seq(0.1, 10.1, 1)
-nsim = 500
+nsim = 100
 
 # Set up Parallel Computation
 # Setup parallel backend to use many processors
-cl <- makeCluster(20)
+cl <- makeCluster(25)
 registerDoParallel(cl)
 
 # This function takes an arbitrary number of lists x all of which much have the same structure    
 comb <- function(x, ...) {  
   mapply(rbind,x,...,SIMPLIFY=FALSE)
 }
+
 
 ##################################
 ##    2 RULES & MAIN + SPILL    ##
@@ -58,6 +58,7 @@ system.time({
     
     ## Load Packages and Functions
     source("speedfunctions.R")
+    library(ergm)
     library(MASS)
     library(assertthat)
     library(dplyr)
@@ -93,19 +94,27 @@ system.time({
       
       ###########################
       # Data Generating Process #
-      ###########################
+      ##########################
+      
+      # Generate Variables
+      Sigma = matrix(rho, nrow = n_cov, ncol = n_cov) + diag(n_cov)*(1-rho)
+      rawvars = mvrnorm(n=N, mu=mu, Sigma=Sigma)
+      pvars = pnorm(rawvars)
+      binomvars = qbinom(pvars, 1, 0.5) 
+      X = binomvars
       
       # Adjacency Matrix
+      #if N=1500 then coefergm=c(2,-5.5), if N=3000 then coefergm=c(2,-7)
       ## Homophily based on x1
-      adiac_matrix <- genmultnet(N=N, m=m, method="ergm", param = NULL, coefergm=c(2, -7), varhom=X[,1])
+      adiac_matrix <- genmultnet(N=N, m=m, method="ergm", param = NULL, coefergm=c(2, -5.5), varhom=X[,1])
       
       # Group Indicator 
       M=c(rep(1:m,gsize))
       M=sort(M)
       levels(M)<-c(1:m)
       
-      # Generate treatment (keep prob fixed at 0.5)
-      p <- runif(m, min = prob, max = prob) # m-dimensional vector identifying the assignment probabilities in each group
+      # Generate treatment (keep prob fixed at 0.4)
+      p <- runif(m, min = prob, max = prob) #m dimensioned vector identifying the assignment prob. in each group
       
       # Assign individual assignment prob
       prt = c()
@@ -119,14 +128,7 @@ system.time({
         treat[k] <- rbinom(1, 1, prob=prt[k])
       }
       
-      # Generate Variables
-      Sigma = matrix(rho, nrow = n_cov, ncol = n_cov) + diag(n_cov)*(1-rho)
-      rawvars = mvrnorm(n=N, mu=mu, Sigma=Sigma)
-      pvars = pnorm(rawvars)
-      binomvars = qbinom(pvars, 1, 0.5) 
-      X = binomvars
-      
-      # Generate outcome variable
+      # Generate outcome  variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
       
       # Neighbors
@@ -137,7 +139,7 @@ system.time({
       neightreat <- rep(1, N) #G_i
       neightreat[num_tr_neigh==0] <- 0
       
-      # Standard notation (exclude isoletad nodes)
+      # Pass to the standard notation (exclude isoletad nodes)
       w <- treat[which(neigh != 0)]
       g <- neightreat[which(neigh != 0)]
       y <- outcome[which(neigh != 0)]
@@ -154,11 +156,14 @@ system.time({
       x9 = X[,9]
       x10 = X[,10]
       probT <- prt[which(neigh != 0)]
-      NeighNum <- neigh[which(neigh != 0)] # Degree
+      NeighNum <- neigh[which(neigh != 0)] #degree
       n <- length(which(neigh != 0))
       adiac_matrix <- adiac_matrix[which(neigh != 0), which(neigh != 0)]
       
-      # Generate Causal Rules
+      
+      ###################################################
+      ## Generate Causal Rules Tau. Direct effect=i over the population
+      
       # Tau1000
       tau1000 <- rep(0, n)
       tau1000[x1==0 & x2==0] <- i
@@ -169,72 +174,72 @@ system.time({
       eta0100[x1==0 & x2==0] <- i
       eta0100[x1==1 & x2==1] <- -i
       
-      # Generate treatment effects
-      y11 <- y00 <- rnorm(n)
+      ## Generate Treatment Effects
+      y00 <- rnorm(n)
       y10 <- y00 + tau1000
-      y01 <- y00 + eta0100
+      y11 <- y01 <- y00 + eta0100
       
-      # Generate Y
+      ## Generate Outcome
       y <- y00*(1-w)*(1-g) + y10*w*(1-g) + y01*(1-w)*g + y11*w*g
       
-      # Run the NCT functions
-      SNCT <- NetworkCausalTrees(effweights = c(0.5,0,0,0.5), method = "composite",
-                                 output = "estimation", 
+      
+      ## Run the  whole function
+      SNCT <- NetworkCausalTrees(effweights = c(0.5,0,0,0.5), method = "composite", # singular
+                                 output = "estimation", # detection, estimation
                                  A = adiac_matrix,
                                  p = rep(probT,n), Ne = NeighNum,
                                  W = w, Y = y, X = X, M = M, G = g,
-                                 mdisc = m/2, mest = m/2,
+                                 mdisc = 8, mest = 7,
                                  minpopfrac = 1,
                                  depth = 2,
                                  fracpredictors = 1,
-                                 minsize= N/100,
+                                 minsize= 15,
                                  n_trees = 1) 
       
       SNCT_main <- NetworkCausalTrees(effweights = c(1,0,0,0), method = "singular",
-                                      output = "estimation", 
+                                      output = "estimation", # detection, estimation
                                       A = adiac_matrix,
                                       p = rep(probT,n), Ne = NeighNum,
                                       W = w, Y = y, X = X, M = M, G = g,
-                                      mdisc = m/2, mest = m/2,
+                                      mdisc = 8, mest = 7,
                                       minpopfrac = 1,
                                       depth = 2,
                                       fracpredictors = 1,
-                                      minsize= N/100,
+                                      minsize= 15,
                                       n_trees = 1) 
       
       SNCT_spil <- NetworkCausalTrees(effweights = c(0,0,0,1), method = "singular",
-                                      output = "estimation", 
+                                      output = "estimation", # detection, estimation
                                       A = adiac_matrix,
                                       p = rep(probT,n), Ne = NeighNum,
                                       W = w, Y = y, X = X, M = M, G = g,
-                                      mdisc = m/2, mest = m/2,
+                                      mdisc = 8, mest = 7,
                                       minpopfrac = 1,
                                       depth = 2,
                                       fracpredictors = 1,
-                                      minsize= N/100,
+                                      minsize= 15,
                                       n_trees = 1) 
       
       rule.sel <- SNCT$FILTER
       rule.main <- SNCT_main$FILTER
       rule.spil <- SNCT_spil$FILTER
       
-      ##############################
-      ##  Composite Tree Results ## 
-      #############################
+      ## Composite Tree results
       
-      # Extract the Correct Rules
+      ## Extract the Correct Rules
       correct <- length(which(rule.sel=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                 rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" |
                                 rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                 rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules[j, which(seq==i)] <- 2*correct
+      correct.rules[j, which(seq==i)] <- correct
       
-      # Number the Extracted Rules
+      ## Number rules
       SNCT$RULE.NUM <- rep(0, nrow(SNCT))
       SNCT$RULE.NUM[which(rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" | rule.sel=="data_tree$X.2<1 & data_tree$X.1<1")] <- 1
       SNCT$RULE.NUM[which(rule.sel=="data_tree$X.1>=1 & data_tree$X.2>=1" | rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1")] <- 2
       
-      # Variables Importance
+      
+      ## Variables Importance
       vi.x1[j, which(seq==i)] <- str_detect(SNCT$FILTER, "X.1")[2] # the second element corresponds to the first split
       vi.x2[j, which(seq==i)] <- str_detect(SNCT$FILTER, "X.2")[2]
       vi.X[j, which(seq==i)] <-  cbind(str_detect(SNCT$FILTER, "X.3")[2] |  
@@ -309,44 +314,44 @@ system.time({
       ##  Treatment Tree Results ## 
       #############################
       
-      # Extract the Correct Rules (Composite Tree)
+      ## Extract the Correct Rules (Composite Tree)
       correct.composite.main <- length(which(rule.sel=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                                rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" |
                                                rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                                rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.composite.main[j, which(seq==i)] <- 2*correct.composite.main
+      correct.rules.composite.main[j, which(seq==i)] <- correct.composite.main
       
-      # Extract the Correct Rules (Spillover Tree)
+      ## Extract the Correct Rules (Spillover Tree)
       correct.singlespil.main <- length(which(rule.spil=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                                 rule.spil=="data_tree$X.1<1 & data_tree$X.2<1" |
                                                 rule.spil=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                                 rule.spil=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.singlespil.main[j, which(seq==i)] <- 2*correct.singlespil.main
+      correct.rules.singlespil.main[j, which(seq==i)] <- correct.singlespil.main
       
-      # Extract the Correct Rules (Treatment Tree)
+      ## Extract the Correct Rules (Treatment Tree)
       correct.main <- length(which(rule.main=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                      rule.main=="data_tree$X.1<1 & data_tree$X.2<1" |
                                      rule.main=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                      rule.main=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.main[j, which(seq==i)] <- 2*correct.main
+      correct.rules.main[j, which(seq==i)] <- correct.main
       
-      # Number the Extracted Rules
+      ## Number rules
       SNCT_main$RULE.NUM <- rep(0, nrow(SNCT_main))
       SNCT_main$RULE.NUM[which(rule.main=="data_tree$X.1<1 & data_tree$X.2<1" | rule.main=="data_tree$X.2<1 & data_tree$X.1<1")] <- 1
       SNCT_main$RULE.NUM[which(rule.main=="data_tree$X.1>=1 & data_tree$X.2>=1" | rule.main=="data_tree$X.2>=1 & data_tree$X.1>=1")] <- 2
       
       
-      # Variables Importance
-      vi.x1.main[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.main[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.2")[2]
-      vi.X.main[j, which(seq==i)] <-  cbind(str_detect(SNCT_main$FILTER, "X.3")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.5")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.7")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.9")[2] |  
-                                              str_detect(SNCT_main$FILTER, "X.10")[2])
+      ## Variables Importance
+      vi.x1[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.1")[2] # the second element corresponds to the first split
+      vi.x2[j, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.2")[2]
+      vi.X[j, which(seq==i)] <-  cbind(str_detect(SNCT_main$FILTER, "X.3")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.4")[2] |
+                                         str_detect(SNCT_main$FILTER, "X.5")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.6")[2] |
+                                         str_detect(SNCT_main$FILTER, "X.7")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.8")[2] |
+                                         str_detect(SNCT_main$FILTER, "X.9")[2] |  
+                                         str_detect(SNCT_main$FILTER, "X.10")[2])
       
       if (correct.main==2){ 
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -412,44 +417,44 @@ system.time({
       ##  Spillover Tree Results  # 
       #############################
       
-      # Extract the Correct Rules (Composite Tree)
+      ## Extract the Correct Rules (Composite Tree)
       correct.composite.spil <- length(which(rule.sel=="data_tree$X.1>=1 & data_tree$X.2>=1" | 
                                                rule.sel=="data_tree$X.2>=1 & data_tree$X.1>=1" | 
                                                rule.sel=="data_tree$X.1<1 & data_tree$X.2<1" |
                                                rule.sel=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.composite.spil[j, which(seq==i)] <- 2*correct.composite.spil
+      correct.rules.composite.spil[j, which(seq==i)] <- correct.composite.spil
       
-      # Extract the Correct Rules (Treatment Tree)
+      ## Extract the Correct Rules (Treatment Tree)
       correct.singlemain.spil <- length(which(rule.main=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                                 rule.main=="data_tree$X.1<1 & data_tree$X.2<1" |
                                                 rule.main=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                                 rule.main=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.singlemain.spil[j, which(seq==i)] <- 2*correct.singlemain.spil
+      correct.rules.singlemain.spil[j, which(seq==i)] <- correct.singlemain.spil
       
-      # Extract the Correct Rules (Spillover Tree)
+      ## Extract the Correct Rules (Spillover Tree)
       correct.spil <- length(which(rule.spil=="data_tree$X.1>=1 & data_tree$X.2>=1" |
                                      rule.spil=="data_tree$X.1<1 & data_tree$X.2<1" |
                                      rule.spil=="data_tree$X.2>=1 & data_tree$X.1>=1" |
                                      rule.spil=="data_tree$X.2<1 & data_tree$X.1<1"))
-      correct.rules.spil[j, which(seq==i)] <- 2*correct.spil
+      correct.rules.spil[j, which(seq==i)] <- correct.spil
       
-      # Number the Extracted Rules
+      ## Number rules
       SNCT_spil$RULE.NUM <- rep(0, nrow(SNCT_spil))
       SNCT_spil$RULE.NUM[which(rule.spil=="data_tree$X.1<1 & data_tree$X.2<1" | rule.spil=="data_tree$X.2<1 & data_tree$X.1<1")] <- 1
       SNCT_spil$RULE.NUM[which(rule.spil=="data_tree$X.1>=1 & data_tree$X.2>=1" | rule.spil=="data_tree$X.2>=1 & data_tree$X.1>=1")] <- 2
       
       
-      # Variables Importance
-      vi.x1.spil[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.spil[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.2")[2]
-      vi.X.spil[j, which(seq==i)] <-  cbind(str_detect(SNCT_spil$FILTER, "X.3")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.5")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.7")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.9")[2] |  
-                                              str_detect(SNCT_spil$FILTER, "X.10")[2])
+      ## Variables Importance
+      vi.x1[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.1")[2] # the second element corresponds to the first split
+      vi.x2[j, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.2")[2]
+      vi.X[j, which(seq==i)] <-  cbind(str_detect(SNCT_spil$FILTER, "X.3")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.4")[2] |
+                                         str_detect(SNCT_spil$FILTER, "X.5")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.6")[2] |
+                                         str_detect(SNCT_spil$FILTER, "X.7")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.8")[2] |
+                                         str_detect(SNCT_spil$FILTER, "X.9")[2] |  
+                                         str_detect(SNCT_spil$FILTER, "X.10")[2])
       
       if (correct.spil==2){ 
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -510,7 +515,7 @@ system.time({
       se.eta.est.0100.spil[j*2-1, which(seq==i)] <-  se.est0100_1
       se.eta.est.0100.spil[j*2, which(seq==i)] <-  se.est0100_2
       
-      # Clear Memory
+      ## Clear Memory
       rm(w, g, y, M, X, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10,
          probT, NeighNum, n, adiac_matrix, rule.sel, SNCT,
          effects.est1000_1, effects.est1000_2,
@@ -519,7 +524,7 @@ system.time({
          se.est0100_1, se.est0100_2)
     }
     
-    # Return the values
+    ## Return the values
     list(correct.rules, tau.est.1000, eta.est.0100, se.tau.est.1000, se.eta.est.0100, vi.x1, vi.x2, vi.X,
          correct.rules.main, tau.est.1000.main, eta.est.0100.main, se.tau.est.1000.main, se.eta.est.0100.main, vi.x1.main, vi.x2.main, vi.X.main,
          correct.rules.spil, tau.est.1000.spil, eta.est.0100.spil, se.tau.est.1000.spil, se.eta.est.0100.spil, vi.x1.spil, vi.x2.spil, vi.X.spil,
@@ -528,15 +533,9 @@ system.time({
   }
 })
 
-###########################
-##   Store the Results   ##
-###########################
+## Composite
 
-###############
-## Composite ##
-###############
-
-# Extract the Results 
+## Extract the Results 
 correct_rules <- na.omit(matrix[[1]])
 tau_est_1000 <- na.omit(matrix[[2]])
 eta_est_0100 <- na.omit(matrix[[3]])
@@ -546,50 +545,47 @@ vi_x1 <- na.omit(matrix[[6]])
 vi_x2 <- na.omit(matrix[[7]])
 vi_X <- na.omit(matrix[[8]])
 
-# Correct Rules
+## Correct Rules
 avg_correct_rules <- colMeans(correct_rules)
 
-# Variable Importance 
+## Variable Importance 
 vi_x1 <- colMeans(vi_x1)
 vi_x2 <- colMeans(vi_x2)
 vi_x3 <- colMeans(vi_x3)
 vi_X <- colMeans(vi_X)
 
-# Exclude Rules that were not discovered
+## Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
 eta_est_0100[eta_est_0100==0] <- NA
 se_tau_est_1000[se_tau_est_1000==0] <- NA 
 se_eta_est_0100[se_eta_est_0100==0] <- NA 
 
-odd_indexes<-seq(1,1000,2) # for positive valued causal rules
-even_indexes<-seq(2,1000,2) # for negative valued causal rules
-
-# Average Effects and Average SD
+## Average Effects and Average SD
 avg_tau_1000_1 <-  avg_tau_1000_2 <- c()
 for(i in seq){
-  avg_tau_1000_1[which(seq==i)] <- mean( tau_est_1000[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_tau_1000_2[which(seq==i)] <- mean( tau_est_1000[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_tau_1000_1[which(seq==i)] <- mean( tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_tau_1000_2[which(seq==i)] <- mean( tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_se_1000_1 <-  avg_se_1000_2 <- c()
 for(i in seq){
-  avg_se_1000_1[which(seq==i)] <- mean( se_tau_est_1000[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_se_1000_2[which(seq==i)] <- mean( se_tau_est_1000[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_se_1000_1[which(seq==i)] <- mean( se_tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_se_1000_2[which(seq==i)] <- mean( se_tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_eta_0100_1 <-  avg_eta_0100_2 <- c()
 for(i in seq){
-  avg_eta_0100_1[which(seq==i)] <- mean( eta_est_0100[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_eta_0100_2[which(seq==i)] <- mean( eta_est_0100[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_eta_0100_1[which(seq==i)] <- mean( eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_eta_0100_2[which(seq==i)] <- mean( eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_se_0100_1 <-  avg_se_0100_2 <- c()
 for(i in seq){
-  avg_se_0100_1[which(seq==i)] <- mean( se_eta_est_0100[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_se_0100_2[which(seq==i)] <- mean( se_eta_est_0100[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_se_0100_1[which(seq==i)] <- mean( se_eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_se_0100_2[which(seq==i)] <- mean( se_eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
-# Mean Squared Error & Bias
+## Mean Squared Error & Bias
 mse_tau_est_1000 <- c()
 mse_eta_est_0100 <- c()
 bias_tau_est_1000 <- c()
@@ -598,11 +594,11 @@ bias_eta_est_0100 <- c()
 for(i in seq){
   mse_tau_est_1000[which(seq==i)] <- mean( (abs(tau_est_1000[,which(seq==i)]) - i)^2 , na.rm = TRUE )
   mse_eta_est_0100[which(seq==i)] <- mean( (abs(eta_est_0100[,which(seq==i)]) - i)^2 , na.rm = TRUE )
-  bias_tau_est_1000[which(seq==i)] <- mean( c(mean( ( tau_est_1000[odd_indexes,which(seq==i)] - i) , na.rm = TRUE ), mean( ( tau_est_1000[even_indexes,which(seq==i)] + i) , na.rm = TRUE )))
-  bias_eta_est_0100[which(seq==i)] <- mean( c(mean( ( eta_est_0100[odd_indexes,which(seq==i)] - i) , na.rm = TRUE ), mean( ( eta_est_0100[even_indexes,which(seq==i)] + i) , na.rm = TRUE )))
+  bias_tau_est_1000[which(seq==i)] <- mean( (abs(tau_est_1000[,which(seq==i)]) - i) , na.rm = TRUE )
+  bias_eta_est_0100[which(seq==i)] <- mean( (abs(eta_est_0100[,which(seq==i)]) - i) , na.rm = TRUE )
 }
 
-# Coverage
+## Coverage
 coverage_est_1000 <- data.frame()
 coverage_est_0100 <- data.frame()
 
@@ -632,7 +628,7 @@ for(i in seq){
 }
 coverage_est_0100 <- colMeans(coverage_est_0100, na.rm = TRUE) 
 
-# Create a Matrix for the Results
+## Create a Matrix for the Results
 results_nctree <- cbind(avg_correct_rules,
                         mse_tau_est_1000, bias_tau_est_1000,
                         avg_tau_1000_1, avg_se_1000_1,
@@ -660,16 +656,14 @@ colnames(results_nctree) <- c("correct_rules",
                               "Rule 2 se(eta(01,00))",
                               "Coverage eta(01,00)",
                               "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_effects_composite_homophily_3000.csv")
+write.csv(results_nctree, file = "two_main_spillover_effects_composite_homophily_1500.csv")
 
-##########################
-## Singular (Treatment) ##
-##########################
+## Singular (Main)
 
-# Extract Rules
-correct_rules_main <- na.omit(matrix[[9]]) # number of times treatment tree gets the correct rules for treatment
-correct_rules_composite <- na.omit(matrix[[25]]) # number of times composite tree gets the correct rules for treatment
-correct_rules_spil <- na.omit(matrix[[28]]) # number of times spillover tree gets the correct rules for treatment
+## Extract Rules
+correct_rules_main <- na.omit(matrix[[9]])
+correct_rules_composite <- na.omit(matrix[[25]])
+correct_rules_spil <- na.omit(matrix[[28]])
 tau_est_1000 <- na.omit(matrix[[10]])
 eta_est_0100 <- na.omit(matrix[[11]])
 se_tau_est_1000 <- na.omit(matrix[[12]])
@@ -678,48 +672,48 @@ vi_x1_main <- na.omit(matrix[[14]])
 vi_x2_main <- na.omit(matrix[[15]])
 vi_X_main <- na.omit(matrix[[16]])
 
-# Correct Rules
+## Correct Rules
 avg_correct_rules_main <- colMeans(correct_rules_main)
 avg_correct_rules_composite <- colMeans(correct_rules_composite)
 avg_correct_rules_spil <- colMeans(correct_rules_spil)
 
-# Variable Importance 
+## Variable Importance 
 vi_x1_main <- colMeans(vi_x1_main)
 vi_x2_main <- colMeans(vi_x2_main)
 vi_X_main <- colMeans(vi_X_main)
 
-# Exclude Rules that were not discovered
+## Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
 eta_est_0100[eta_est_0100==0] <- NA
 se_tau_est_1000[se_tau_est_1000==0] <- NA 
 se_eta_est_0100[se_eta_est_0100==0] <- NA 
 
-# Average Effects and Average SD
+## Average Effects and Average SD
 avg_tau_1000_1 <-  avg_tau_1000_2 <- c()
 for(i in seq){
-  avg_tau_1000_1[which(seq==i)] <- mean( tau_est_1000[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_tau_1000_2[which(seq==i)] <- mean( tau_est_1000[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_tau_1000_1[which(seq==i)] <- mean( tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_tau_1000_2[which(seq==i)] <- mean( tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_se_1000_1 <-  avg_se_1000_2 <- c()
 for(i in seq){
-  avg_se_1000_1[which(seq==i)] <- mean( se_tau_est_1000[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_se_1000_2[which(seq==i)] <- mean( se_tau_est_1000[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_se_1000_1[which(seq==i)] <- mean( se_tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_se_1000_2[which(seq==i)] <- mean( se_tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_eta_0100_1 <-  avg_tau_0100_2 <- c()
 for(i in seq){
-  avg_eta_0100_1[which(seq==i)] <- mean( eta_est_0100[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_eta_0100_2[which(seq==i)] <- mean( eta_est_0100[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_eta_0100_1[which(seq==i)] <- mean( eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_eta_0100_2[which(seq==i)] <- mean( eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_se_0100_1 <-  avg_se_0100_2 <- c()
 for(i in seq){
-  avg_se_0100_1[which(seq==i)] <- mean( se_eta_est_0100[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_se_0100_2[which(seq==i)] <- mean( se_eta_est_0100[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_se_0100_1[which(seq==i)] <- mean( se_eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_se_0100_2[which(seq==i)] <- mean( se_eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
-# Mean Squared Error & Bias
+## Mean Squared Error & Bias
 mse_tau_est_1000 <- c()
 mse_eta_est_0100 <- c()
 bias_tau_est_1000 <- c()
@@ -728,11 +722,11 @@ bias_eta_est_0100 <- c()
 for(i in seq){
   mse_tau_est_1000[which(seq==i)] <- mean( (abs(tau_est_1000[,which(seq==i)]) - i)^2 , na.rm = TRUE )
   mse_eta_est_0100[which(seq==i)] <- mean( (abs(eta_est_0100[,which(seq==i)]) - i)^2 , na.rm = TRUE )
-  bias_tau_est_1000[which(seq==i)] <- mean( c(mean( ( tau_est_1000[odd_indexes,which(seq==i)] - i) , na.rm = TRUE ), mean( ( tau_est_1000[even_indexes,which(seq==i)] + i) , na.rm = TRUE )))
-  bias_eta_est_0100[which(seq==i)] <- mean( c(mean( ( eta_est_0100[odd_indexes,which(seq==i)] - i) , na.rm = TRUE ), mean( ( eta_est_0100[even_indexes,which(seq==i)] + i) , na.rm = TRUE )))
+  bias_tau_est_1000[which(seq==i)] <- mean( (abs(tau_est_1000[,which(seq==i)]) - i) , na.rm = TRUE )
+  bias_eta_est_0100[which(seq==i)] <- mean( (abs(eta_est_0100[,which(seq==i)]) - i) , na.rm = TRUE )
 }
 
-# Coverage
+## Coverage
 coverage_est_1000 <- data.frame()
 coverage_est_0100 <- data.frame()
 
@@ -762,7 +756,7 @@ for(i in seq){
 }
 coverage_est_0100 <- colMeans(coverage_est_0100, na.rm = TRUE) 
 
-# Create a Matrix for the Results
+## Create a Matrix for the Results
 results_nctree <- cbind(avg_correct_rules_spil,
                         avg_correct_rules_composite,
                         avg_correct_rules_main,
@@ -776,9 +770,9 @@ results_nctree <- cbind(avg_correct_rules_spil,
                         coverage_est_0100,
                         vi_x1_main, vi_x2_main, vi_X_main)
 
-colnames(results_nctree) <- c("correct_rules_spil",
+colnames(results_nctree) <- c("correct_rules_main",
                               "correct_rules_composite",
-                              "correct_rules_main",
+                              "correct_rules_spil",
                               "MSE tau(10,00)", 
                               "Bias tau(10,00)",
                               "Rule 1 tau(10,00)",
@@ -792,18 +786,15 @@ colnames(results_nctree) <- c("correct_rules_spil",
                               "Rule 1 se(eta(01,00))",
                               "Rule 2 eta(01,00)",
                               "Rule 2 se(eta(01,00))",
-                              "Coverage eta(01,00)",
-                              "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_effects_singular_main_homophily_3000.csv")
+                              "Coverage eta(01,00)") # , "VI x1", "VI x2", "VI X"
+write.csv(results_nctree, file = "two_main_spillover_effects_singular_main_homophily_1500.csv")
 
-##########################
-## Singular (Spillover) ##
-##########################
+## Singular (Spillover)
 
-# Extract Rules
-correct_rules_spil <- na.omit(matrix[[17]]) # number of times spillover tree gets the correct rules for spillover
-correct_rules_composite <- na.omit(matrix[[26]]) # number of times composite tree gets the correct rules for spillover
-correct_rules_main <- na.omit(matrix[[27]]) # number of times treatment tree gets the correct rules for spillover
+## Extract Rules
+correct_rules_spil <- na.omit(matrix[[17]])
+correct_rules_composite <- na.omit(matrix[[26]])
+correct_rules_main <- na.omit(matrix[[27]])
 tau_est_1000 <- na.omit(matrix[[18]])
 eta_est_0100 <- na.omit(matrix[[19]])
 se_tau_est_1000 <- na.omit(matrix[[20]])
@@ -812,49 +803,49 @@ vi_x1_spil <- na.omit(matrix[[22]])
 vi_x2_spil <- na.omit(matrix[[23]])
 vi_X_spil <- na.omit(matrix[[24]])
 
-# Correct Rules
+## Correct Rules
 avg_correct_rules_main <- colMeans(correct_rules_main)
 avg_correct_rules_composite <- colMeans(correct_rules_composite)
 avg_correct_rules_spil <- colMeans(correct_rules_spil)
 
-# Variable Importance 
+## Variable Importance 
 vi_x1_spil <- colMeans(vi_x1_spil)
 vi_x2_spil <- colMeans(vi_x2_spil)
 vi_x3_spil <- colMeans(vi_x3_spil)
 vi_X_spil <- colMeans(vi_X_spil)
 
-# Exclude Rules that were not discovered
+## Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
 eta_est_0100[eta_est_0100==0] <- NA
 se_tau_est_1000[se_tau_est_1000==0] <- NA 
 se_eta_est_0100[se_eta_est_0100==0] <- NA 
 
-# Average Effects and Average SD
+## Average Effects and Average SD
 avg_tau_1000_1 <-  avg_tau_1000_2 <- c()
 for(i in seq){
-  avg_tau_1000_1[which(seq==i)] <- mean( tau_est_1000[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_tau_1000_2[which(seq==i)] <- mean( tau_est_1000[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_tau_1000_1[which(seq==i)] <- mean( tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_tau_1000_2[which(seq==i)] <- mean( tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_se_1000_1 <-  avg_se_1000_2 <- c()
 for(i in seq){
-  avg_se_1000_1[which(seq==i)] <- mean( se_tau_est_1000[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_se_1000_2[which(seq==i)] <- mean( se_tau_est_1000[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_se_1000_1[which(seq==i)] <- mean( se_tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_se_1000_2[which(seq==i)] <- mean( se_tau_est_1000[,which(seq==i)][tau_est_1000[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_eta_0100_1 <-  avg_eta_0100_2 <- c()
 for(i in seq){
-  avg_eta_0100_1[which(seq==i)] <- mean( eta_est_0100[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_eta_0100_2[which(seq==i)] <- mean( eta_est_0100[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_eta_0100_1[which(seq==i)] <- mean( eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_eta_0100_2[which(seq==i)] <- mean( eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
 avg_se_0100_1 <-  avg_se_0100_2 <- c()
 for(i in seq){
-  avg_se_0100_1[which(seq==i)] <- mean( se_eta_est_0100[odd_indexes,which(seq==i)] , na.rm = TRUE )
-  avg_se_0100_2[which(seq==i)] <- mean( se_eta_est_0100[even_indexes,which(seq==i)] , na.rm = TRUE )
+  avg_se_0100_1[which(seq==i)] <- mean( se_eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]>=0] , na.rm = TRUE )
+  avg_se_0100_2[which(seq==i)] <- mean( se_eta_est_0100[,which(seq==i)][eta_est_0100[,which(seq==i)]<=0] , na.rm = TRUE )
 }
 
-# Mean Squared Error & Bias
+## Mean Squared Error & Bias
 mse_tau_est_1000 <- c()
 mse_eta_est_0100 <- c()
 bias_tau_est_1000 <- c()
@@ -863,11 +854,11 @@ bias_eta_est_0100 <- c()
 for(i in seq){
   mse_tau_est_1000[which(seq==i)] <- mean( (abs(tau_est_1000[,which(seq==i)]) - i)^2 , na.rm = TRUE )
   mse_eta_est_0100[which(seq==i)] <- mean( (abs(eta_est_0100[,which(seq==i)]) - i)^2 , na.rm = TRUE )
-  bias_tau_est_1000[which(seq==i)] <- mean( c(mean( ( tau_est_1000[odd_indexes,which(seq==i)] - i) , na.rm = TRUE ), mean( ( tau_est_1000[even_indexes,which(seq==i)] + i) , na.rm = TRUE )))
-  bias_eta_est_0100[which(seq==i)] <- mean( c(mean( ( eta_est_0100[odd_indexes,which(seq==i)] - i) , na.rm = TRUE ), mean( ( eta_est_0100[even_indexes,which(seq==i)] + i) , na.rm = TRUE )))
+  bias_tau_est_1000[which(seq==i)] <- mean( (abs(tau_est_1000[,which(seq==i)]) - i) , na.rm = TRUE )
+  bias_eta_est_0100[which(seq==i)] <- mean( (abs(eta_est_0100[,which(seq==i)]) - i) , na.rm = TRUE )
 }
 
-# Coverage
+## Coverage
 coverage_est_1000 <- data.frame()
 coverage_est_0100 <- data.frame()
 
@@ -897,7 +888,7 @@ for(i in seq){
 }
 coverage_est_0100 <- colMeans(coverage_est_0100, na.rm = TRUE) 
 
-# Create a Matrix for the Results
+## Create a Matrix for the Results
 results_nctree <- cbind(avg_correct_rules_spil,
                         avg_correct_rules_composite,
                         avg_correct_rules_main,
@@ -927,11 +918,5 @@ colnames(results_nctree) <- c("correct_rules_spil",
                               "Rule 1 se(eta(01,00))", 
                               "Rule 2 eta(01,00)",
                               "Rule 2 se(eta(01,00))",
-                              "Coverage eta(01,00)",
-                              "VI x1", "VI x2", "VI X")
-write.csv(results_nctree, file = "two_main_spillover_effects_singular_spillover_homophily_3000.csv")
-
-# Set Cluster Off
-stopCluster(cl)
-
-## END SIMULATIONS
+                              "Coverage eta(01,00)") #,"VI x1", "VI x2", "VI X"
+write.csv(results_nctree, file = "two_main_spillover_effects_singular_spillover_homophily_1500.csv")
