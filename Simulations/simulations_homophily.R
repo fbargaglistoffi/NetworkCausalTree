@@ -58,6 +58,7 @@ system.time({
     
     ## Load Packages and Functions
     source("speedfunctions.R")
+    library(ergm)
     library(MASS)
     library(assertthat)
     library(dplyr)

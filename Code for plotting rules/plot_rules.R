@@ -200,3 +200,60 @@ legend(x="center",
        col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
 rm(op)
 
+
+####################################
+##      Plots for the Appendix    ##
+####################################
+
+# CORRELATED REGRESSORS
+
+rm(list=ls())
+setwd("G:/Il mio Drive/Research/Networks/Results_simulations/v4")
+composite <- read.csv("./appendix/correlation/two_main_spillover_effects_composite_corr_0.25_3000.csv")
+singular_main <- read.csv("./appendix/correlation/two_main_spillover_effects_singular_main_corr_0.25_3000.csv")
+singular_spil <- read.csv("./appendix/correlation/two_main_spillover_effects_singular_spillover_corr_0.25_3000.csv")
+
+# Plot
+layout(matrix(c(1,2,3,3), ncol=2, nrow=2, byrow=TRUE), heights=c(5, 2))
+
+par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+plot(composite$correct_rules,
+     main = "Correlation 0.25",
+     sub = "Four Leaves",
+     xlab = "Effect Size",
+     ylab = "Number of Correctly Identified Leaves", 
+     xaxt='n',
+     type = "o",
+     col = "red",
+     lwd = 2,
+     ylim=c(0,4))
+lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 2)
+lines(singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=3, lwd = 2)
+
+
+composite <- read.csv("./appendix/correlation/two_main_spillover_effects_composite_corr_0.50_3000.csv")
+singular_main <- read.csv("./appendix/correlation/two_main_spillover_effects_singular_main_corr_0.50_3000.csv")
+singular_spil <- read.csv("./appendix/correlation/two_main_spillover_effects_singular_spillover_corr_0.50_3000.csv")
+
+par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+plot(composite$correct_rules,
+     main = "Correlation 0.50",
+     sub = "Four Leaves",
+     xlab = "Effect Size",
+     ylab = "Number of Correctly Identified Leaves", 
+     xaxt='n',
+     type = "o",
+     col = "red",
+     lwd = 2,
+     ylim=c(0,4))
+lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 2)
+lines(singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=3, lwd = 2)
+axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
+
+op <- par(cex = 1.25)
+par(mai=c(0,0,0,0))
+plot.new()
+legend(x="center", 
+       legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
+       col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
+rm(op)
