@@ -96,6 +96,13 @@ system.time({
       # Data Generating Process #
       ###########################
       
+      # Generate Variables
+      Sigma = matrix(rho, nrow = n_cov, ncol = n_cov) + diag(n_cov)*(1-rho)
+      rawvars = mvrnorm(n=N, mu=mu, Sigma=Sigma)
+      pvars = pnorm(rawvars)
+      binomvars = qbinom(pvars, 1, 0.5) 
+      X = binomvars
+      
       # Adjacency Matrix
       ## Homophily based on x1
       adiac_matrix <- genmultnet(N=N, m=m, method="ergm", param = NULL, coefergm=c(2, -7), varhom=X[,1])
@@ -119,13 +126,6 @@ system.time({
       for(k in 1:N){
         treat[k] <- rbinom(1, 1, prob=prt[k])
       }
-      
-      # Generate Variables
-      Sigma = matrix(rho, nrow = n_cov, ncol = n_cov) + diag(n_cov)*(1-rho)
-      rawvars = mvrnorm(n=N, mu=mu, Sigma=Sigma)
-      pvars = pnorm(rawvars)
-      binomvars = qbinom(pvars, 1, 0.5) 
-      X = binomvars
       
       # Generate outcome variable
       outcome <- round(rnorm(N, mean = 20, sd = sqrt(10)), 2)
