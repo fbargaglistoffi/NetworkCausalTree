@@ -25,18 +25,17 @@ singular_spil <- read.csv("./main_text/2_causal_rules/two_main_spillover_effects
 layout(matrix(c(1,2,3,4,4,4), ncol=3, nrow=2, byrow=TRUE), heights=c(5, 2))
 
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(composite$correct_rules,
+plot(composite$correct_rules/2,
      main = "10 Clusters",
-     sub = "Four Leaves",
      xlab = "Effect Size",
      ylab = "Number of Correctly Identified Leaves", 
      xaxt='n',
      type = "o",
      col = "red",
      lwd = 3,
-     ylim=c(0,4))
-lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 3)
-lines(singular_spil$correct_rules_spil*2, type = "o", col = "forestgreen", lty=2, lwd = 3)
+     ylim=c(0,2))
+lines(singular_main$correct_rules_main/2, type = "o", col = "blue", lty=2, lwd = 3)
+lines(singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=2, lwd = 3)
 axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 
 # 20 clusters
@@ -45,18 +44,17 @@ singular_main <- read.csv("./main_text/2_causal_rules/two_main_spillover_effects
 singular_spil <- read.csv("./main_text/2_causal_rules/two_main_spillover_effects_singular_spillover_2000.csv")
 
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(composite$correct_rules,
+plot(composite$correct_rules/2,
      main = "20 Clusters",
-     sub = "Four Leaves",
      xlab = "Effect Size",
      ylab = "Number of Correctly Identified Leaves", 
      xaxt='n',
      type = "o",
      col = "red",
      lwd = 3,
-     ylim=c(0,4))
-lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 3)
-lines(singular_spil$correct_rules_spil*2, type = "o", col = "forestgreen", lty=2, lwd = 3)
+     ylim=c(0,2))
+lines(singular_main$correct_rules_main/2, type = "o", col = "blue", lty=2, lwd = 3)
+lines(singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=2, lwd = 3)
 axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 
 # 30 clusters
@@ -65,18 +63,17 @@ singular_main <- read.csv("./main_text/2_causal_rules/two_main_spillover_effects
 singular_spil <- read.csv("./main_text/2_causal_rules/two_main_spillover_effects_singular_spillover_3000.csv")
 
 par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-plot(composite$correct_rules,
+plot(composite$correct_rules/2,
      main = "30 Clusters",
-     sub = "Four Leaves",
      xlab = "Effect Size",
      ylab = "Number of Correctly Identified Leaves", 
      xaxt='n',
      type = "o",
      col = "red",
      lwd = 3,
-     ylim=c(0,4))
-lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 3)
-lines(singular_spil$correct_rules_spil*2, type = "o", col = "forestgreen", lty=2, lwd = 3)
+     ylim=c(0,2))
+lines(singular_main$correct_rules_main/2, type = "o", col = "blue", lty=2, lwd = 3)
+lines(singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=2, lwd = 3)
 axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 
 op <- par(cex = 1.25)
