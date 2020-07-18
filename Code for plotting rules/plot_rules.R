@@ -254,3 +254,37 @@ legend(x="center",
        legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
 rm(op)
+
+
+# HOMOPHILY
+
+rm(list=ls())
+setwd("G:/Il mio Drive/Research/Networks/Results_simulations/v4")
+composite <- read.csv("./appendix/homophily/two_main_spillover_effects_composite_homophily_3000.csv")
+singular_main <- read.csv("./appendix/homophily/two_main_spillover_effects_singular_main_homophily_3000.csv")
+singular_spil <- read.csv("./appendix/homophily/two_main_spillover_effects_singular_spillover_homophily_3000.csv")
+
+# Plot
+layout(matrix(c(1,2), ncol=1, nrow=2, byrow=TRUE), heights=c(10, 2))
+
+par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+plot(composite$correct_rules,
+     main = "Homophily",
+     xlab = "Effect Size",
+     ylab = "Number of Correctly Identified Leaves", 
+     xaxt='n',
+     type = "o",
+     col = "red",
+     lwd = 2,
+     ylim=c(0,4))
+lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 2)
+lines(singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=3, lwd = 2)
+
+op <- par(cex = 1.25)
+par(mai=c(0,0,0,0))
+plot.new()
+legend(x="bottom", 
+       legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
+       col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
+rm(op)
+
