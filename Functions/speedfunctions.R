@@ -263,8 +263,7 @@ Gof_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Nel,Peff,vartot,
       sp <- splits[i]
       if (all(as.numeric(table(W[x>=sp],G[x>=sp]))>2) & all(as.numeric(table(W[x<sp],G[x<sp]))>2)) {   
          gofx[i]<- 1/2*(GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x<sp)),W=W[x < sp],G=G[x < sp],Y=Y[x < sp],Ne=Ne[x < sp],p=p[x < sp],Peff=Peff,Nel=Nel[x < sp],vartot=vartot,leafs=leafs) +
-                        GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x>=sp)),W=W[x >= sp],G=G[x >= sp],Y=Y[x >= sp],Ne=Ne[x >= sp],p=p[x >= sp], Peff = Peff,Nel=Nel[x >= sp],vartot=vartot,leafs=leafs))
-      } else {gofx[i]<-0}
+                        GOF(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x>=sp)),W=W[x >= sp],G=G[x >= sp],Y=Y[x >= sp],Ne=Ne[x >= sp],p=p[x >= sp], Peff = Peff,Nel=Nel[x >= sp],vartot=vartot,leafs=leafs))} else {gofx[i]<-0}
     }
     namex=rep(colnames(X)[j],length(unique(x)))
     valuesx=c(sort(unique(x)))
@@ -332,10 +331,10 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
       
       
       #PASTE FILTER RULES
-      tmp_filter <- c(paste("data_tree$",splitting[3], ">=", 
-                            as.numeric(splitting[2]),sep=""),
-                      paste("data_tree$",splitting[3], "<", 
-                            as.numeric(splitting[2]),sep=""))
+      tmp_filter <- c(paste("data_tree$",splitting[3], ">=","(" ,
+                            as.numeric(splitting[2]),")",sep=""),
+                      paste("data_tree$",splitting[3], "<", "(", 
+                            as.numeric(splitting[2]),")",sep=""))
       }
       #CHECK IF THE CURRENT SPLITTING RULE HAS ALREADY BEEN USED
       split_here  <- !sapply(tmp_filter,
@@ -613,165 +612,26 @@ NetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mes
   } 
   # coerce to data.frame
   #estimation set
-  sampgroup_est=sample(setdiff(1:m,sampgroup_train),size=mest,replace=FALSE) 
-  dataest<-data[which(M %in% sampgroup_est),]  
-  sampleidest<-unique(dataest$idunit)
-  sampleidest<-sort(sampleidest)
-  Nest=length(sampleidest)
-  West=as.numeric(dataest$W)
-  Gest=as.numeric(dataest$G)
-  Yest=as.numeric(dataest$Y)
-  Xest=as.matrix(dataest[,which(grepl("X.",names(dataest)))])
-  colnames(Xest)=sub("X.","",colnames(Xest))
-  if(output=="estimation"){
-  Nelest=Nel[sampleidest]}
-  Neighest=Ne[sampleidest]
-  pest=p[sampleidest]
+#  sampgroup_est=sample(setdiff(1:m,sampgroup_train),size=mest,replace=FALSE) 
+#  dataest<-data[which(M %in% sampgroup_est),]  
+#  sampleidest<-unique(dataest$idunit)
+#  sampleidest<-sort(sampleidest)
+#  Nest=length(sampleidest)
+#  West=as.numeric(dataest$W)
+#  Gest=as.numeric(dataest$G)
+#  Yest=as.numeric(dataest$Y)
+#  Xest=as.matrix(dataest[,which(grepl("X.",names(dataest)))])
+#  colnames(Xest)=sub("X.","",colnames(Xest))
+#  if(output=="estimation"){
+#  Nelest=Nel[sampleidest]}
+#  Neighest=Ne[sampleidest]
+#  pest=p[sampleidest]
   
-  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest,minsize=minsize)
+  Results_est<-alleffect(output=output,tree_info = Results,N=N,W=W,G=G,Y=Y,X=X,Ne=Ne,p=p,Nel=Nel,minsize=minsize)
    return(Results_est)
 }
  
 
-
-
-
-SimNetworkCausalTrees=function(effweights,A,p,fracpredictors,W,Y,X,M,G,Ne,mdisc,mest,minpopfrac,depth,minsize,n_trees,method,output){
-  
-  N<-length(W)
-  m<-length(unique(M))
-  
-  #get input weights
-  alpha=effweights[1]
-  beta=effweights[2]
-  gamma=effweights[3]
-  delta=effweights[4]
-  
-  
-  #error messages
-  if(alpha+beta+gamma+delta!=1){
-    stop('weights have to sum up to one')
-  }
-  
-  if(length(which(effweights>0))>1 & (method=="singular" | method=="penalized")){
-    stop('if method is set to singular only one effect should have positive weight')
-  }
-  
-  if(1 %in% effweights & method=="composite"){
-    stop('composite gof is computed if at least two effects are investigated')
-  }
-  
-  if(is.null(G) & is.null(A)){
-    stop('independently of the output, you have to specify either the G vector or the Adiacency Matrix')
-  }
-  
-  if(is.null(Ne) & is.null(A)){
-    stop('independently of the output, you have to specify either the Degree vector or the Adiacency Matrix')
-  }
-  
-  if(output=="estimation" & is.null(A)){
-    stop('if output is set to estimation you have to specify the adiacency matrix')
-  }
-  
-  if(is.null(Ne)){
-    Ne<-rowSums(A)
-  }
-  
-  if(output=="estimation" | method=="penalized"){
-    if(is.null(G)){
-      nt <-as.vector(A %*% W) 
-      G=rep(1,N) 
-      G[nt==0]<-0}
-      Nel<-vector(mode = "list", length = N)
-      for( i in  1:N){
-        Nel[[i]]<-which(A[i,]>0)  
-      }
-  }
-  
-
-  data <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X,M=M)  
-  
-  
-  Peff<-popeff(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne)
-  
-  sampgroup_train=sample(1:m,size=mdisc,replace=FALSE) 
-  
-  trees <- plyr::raply(
-    n_trees,
-    sproutnetctree(method=method,sampgroup=sampgroup_train,fracpredictors=fracpredictors,m=m,minpopfrac=minpopfrac,
-                   depth=depth,minsize=minsize,alpha=alpha,beta=beta,gamma=gamma,delta=delta,
-                   N=N,W=W,G=G,Y=Y,X=X,M=M,Ne=Ne,p=p,Peff=Peff,Nel=Nel),
-    .progress = "text" )
-  
-  Forest<-data.frame(IDTREE=NA,NODE = NA, GOF=NA, NOBS = NA, FILTER = NA, TERMINAL = NA,
-                     stringsAsFactors = FALSE)
-  
-  for(i in 1:n_trees){   
-    tree=NA
-    tree<-cbind(rep(i,nrow(as.data.frame(trees[i]))),as.data.frame(trees[i]))
-    colnames(tree)<-colnames(Forest)  
-    Forest<-rbind(Forest,tree)
-  }
-  
-  Forest=Forest[-1,]
-  
-  Results<-data.frame(GOF=Forest$GOF,NOBS_TR=Forest$NOBS ,  FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))), NUMTREE=NA,
-                      stringsAsFactors = FALSE)
-  
-  for(j in as.vector(na.omit(unique(Forest$FILTER)))){
-    Results$NUMTREE[Results$FILTER==j]<-length(unique(Forest$IDTREE[which(Forest$FILTER==j)]))
-    Results$NUMTREE[Results$FILTER=="NA"]=length(unique(Forest$IDTREE[is.na(Forest$FILTER)]))
-  }  
-  
-  if(nrow(Results)==1){
-    warning('No split has been made')
-  }
-  
-  # coerce to data.frame
-  #estimation set
-  sampgroup_est=sample(setdiff(1:m,sampgroup_train),size=mest,replace=FALSE) 
-  dataest<-data[which(M %in% sampgroup_est),]  
-  sampleidest<-unique(dataest$idunit)
-  sampleidest<-sort(sampleidest)
-  Nest=length(sampleidest)
-  West=as.numeric(dataest$W)
-  Gest=as.numeric(dataest$G)
-  Yest=as.numeric(dataest$Y)
-  Xest=as.matrix(dataest[,which(grepl("X.",names(dataest)))])
-  colnames(Xest)=sub("X.","",colnames(Xest))
-  
-  if(output=="estimation"){
-  Nelest=Nel[sampleidest]}
-  Neighest=Ne[sampleidest]
-  pest=p[sampleidest]
-  
-  Results_est<-alleffect(output=output,tree_info = Results,N=Nest,W=West,G=Gest,Y=Yest,X=Xest,Ne=Neighest,p=p[sampleidest],Nel=Nelest,minsize=minsize)
-
-  #testing set
-  sampgroup_test=setdiff(1:m,c(sampgroup_train,sampgroup_est))
-  datatest<-data[which(M %in% sampgroup_test),]  
-  sampleidtest<-unique(datatest$idunit)
-  sampleidtest<-sort(sampleidtest)
-  Ntest=length(sampleidtest)
-  Wtest=as.numeric(datatest$W)
-  Gtest=as.numeric(datatest$G)
-  Ytest=as.numeric(datatest$Y)
-  Xtest=as.matrix(datatest[,which(grepl("X.",names(datatest)))])
-  colnames(Xtest)=sub("X.","",colnames(Xtest))
-  if(output=="estimation"){
-  Neltest=Nel[sampleidtest]}
-  Neightest=Ne[sampleidtest]
-  ptest=p[sampleidtest]
-  
-
-  Results_test<-alleffect(output=output,tree_info = Results,N=Ntest,W=Wtest,G=Gtest,Y=Ytest,X=Xtest,Ne=Neightest,p=ptest,Nel=Neltest,minsize=minsize)
-  
-  colnames(Results_test)<-gsub(colnames(Results_test),pattern = "_EST",replacement = "_TEST")
-  
-  Results<-cbind(Results,Results_est[,-c(1:4)],Results_test[,-c(1:4)])
-  return(Results) 
-
-}
 
 plot.NetworkCausalTrees=function(NCT,vcolor,vlabelcolor,
                                  ewidth,elabelcex, efamily, ecolor,elabelfamily, elabelcolor,
@@ -847,7 +707,7 @@ plot.NetworkCausalTrees=function(NCT,vcolor,vlabelcolor,
   eff2<-paste(round(NCT$EFF1101_EST,2),"(",round(NCT$SE1101_EST,2),")",sep="")
   eff3<-paste(round(NCT$EFF1110_EST,2),"(",round(NCT$SE1110_EST,2),")",sep="")
   eff4<-paste(round(NCT$EFF0100_EST,2),"(",round(NCT$SE0100_EST,2),")",sep="") 
-  ot<-paste("(", as.numeric(round(NCT$OT,2)),";",as.numeric(round(NCT$OT_NODES_BC,2)),")",sep = "")
+  ot<-paste("(", as.numeric(round(NCT$OT,2)),")",sep = "")
   V(grafo_tree)$labels<-paste(eff1,eff3,NCT$NOBS,ot,sep="\n")
   NCTPLOT<-plot(grafo_tree,layout=layout_as_tree(grafo_tree), edge.label.color=elabelcolor,
                 edge.width=ewidth,edge.label.cex=elabelcex, edge.label.family=elabelfamily, vertex.color=vcolor,
