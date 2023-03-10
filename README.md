@@ -14,7 +14,7 @@ install_github("fbargaglistoffi/Network-Causal-Tree", ref="master")
 Import:
 
 ```r
-library("Network-Causal-Tree")
+library("NetworkCausalTree")
 ```
 
 ## Examples
