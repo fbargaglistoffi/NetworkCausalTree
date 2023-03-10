@@ -8,7 +8,7 @@ Installing the latest developing version:
 
 ```r
 library(devtools)
-install_github("fbargaglistoffi/Network-Causal-Tree", ref="master")
+install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
 Import:
