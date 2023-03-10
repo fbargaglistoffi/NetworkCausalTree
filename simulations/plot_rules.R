@@ -28,7 +28,7 @@ par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(composite$correct_rules/2,
      main = "10 Clusters",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -47,7 +47,7 @@ par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(composite$correct_rules/2,
      main = "20 Clusters",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -66,7 +66,7 @@ par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(composite$correct_rules/2,
      main = "30 Clusters",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -79,7 +79,7 @@ axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 op <- par(cex = 1.25)
 par(mai=c(0,0,0,0))
 plot.new()
-legend(x="center", 
+legend(x="center",
        legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
 rm(op)
@@ -94,7 +94,7 @@ plot(singular_main$correct_rules_composite,
      main = "Correctly Detected Rules (Treatment Effects)",
      sub = "Two True Rules",
      xlab = "Effect Size",
-     ylab = "Number of Correct Rules", 
+     ylab = "Number of Correct Rules",
      xaxt='n',
      type = "o",
      col = "red",
@@ -103,7 +103,7 @@ plot(singular_main$correct_rules_composite,
 lines(singular_main$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 2)
 lines(singular_main$correct_rules_spil, type = "o", col = "forestgreen", lty=3, lwd = 2)
 legend("topright", inset=c(-0.15,0.8),
-       legend=c("NCT (composite)", "NCT (main)", "NCT (spillover)"), 
+       legend=c("NCT (composite)", "NCT (main)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=1:3, cex=0.7, lwd = 2)
 axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 
@@ -113,7 +113,7 @@ plot(2*singular_spil$correct_rules_composite,
      main = "Correctly Detected Rules (Spillover Effects)",
      sub = "Two True Rules",
      xlab = "Effect Size",
-     ylab = "Number of Correct Rules", 
+     ylab = "Number of Correct Rules",
      xaxt='n',
      type = "o",
      col = "red",
@@ -122,7 +122,7 @@ plot(2*singular_spil$correct_rules_composite,
 lines(2*singular_spil$correct_rules_main, type = "o", col = "blue", lty=2, lwd = 2)
 lines(2*singular_spil$correct_rules_spil, type = "o", col = "forestgreen", lty=3, lwd = 2)
 legend("topright", inset=c(-0.15,0.8),
-       legend=c("NCT (composite)", "NCT (main)", "NCT (spillover)"), 
+       legend=c("NCT (composite)", "NCT (main)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=1:3, cex=0.7, lwd = 2)
 axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 
@@ -146,7 +146,7 @@ plot(composite$correct_rules,
      main = "Composite Tree",
      sub = "Four Leaves",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -162,7 +162,7 @@ plot(singular_main$correct_composite,
      main = "Treatment Effects Tree",
      sub = "Two Leaves",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -178,7 +178,7 @@ plot(singular_spil$correct_composite,
      main = "Spillover Effects Tree",
      sub = "Two Leaves",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -192,7 +192,7 @@ axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 op <- par(cex = 1.25)
 par(mai=c(0,0,0,0))
 plot.new()
-legend(x="center", 
+legend(x="center",
        legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
 rm(op)
@@ -217,7 +217,7 @@ par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(composite$correct_rules/2,
      main = "Correlation 0.25",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -235,7 +235,7 @@ par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(composite$correct_rules/2,
      main = "Correlation 0.50",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -248,7 +248,7 @@ axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 op <- par(cex = 1.25)
 par(mai=c(0,0,0,0))
 plot.new()
-legend(x="center", 
+legend(x="center",
        legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
 rm(op)
@@ -269,7 +269,7 @@ par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
 plot(composite$correct_rules/2,
      main = "Homophily",
      xlab = "Effect Size",
-     ylab = "Number of Correctly Identified Leaves", 
+     ylab = "Number of Correctly Identified Leaves",
      xaxt='n',
      type = "o",
      col = "red",
@@ -282,7 +282,7 @@ axis(1, at=1:length(composite$correct_rules), labels=c(seq(0.1,10.1,1)))
 op <- par(cex = 1.25)
 par(mai=c(0,0,0,0))
 plot.new()
-legend(x="center", 
+legend(x="center",
        legend=c("NCT (composite)", "NCT (treatment)", "NCT (spillover)"),
        col=c("red", "blue", "forestgreen"), lty=c(1,2,2), cex=0.7, lwd = 3)
 rm(op)
