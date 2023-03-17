@@ -3,9 +3,13 @@ Title: Network Causal Tree algorithm
 Version: 0.0.0.9000
 Authors@R: c(
     person("Falco Joannes", "Bargagli Stoffi", , "fbargaglistoffi@hsph.harvard.edu", role = "aut",
-           comment = c(ORCID = "0000-0002-6131-8165"))
-)
-Manteiner: Falco Joannes Bargagli Stoffi <fbargaglistoffi@hsph.harvard.edu>
+           comment = c(ORCID = "0000-0002-6131-8165")),
+    person("Costanza", "Tortu'", , "costanza.tortu@santannapisa.it", role = "aut",
+           comment = c(ORCID = "---")),
+    person("Riccardo", "Cadei", , "rcadei@hsph.harvard.edu", role = c("aut","cre"),
+           comment = c(ORCID = "0000-0003-2416-8943"))
+  )
+Manteiner: Riccardo Cadei <rcadei@hsph.harvard.edu>
 Description: ...
 License: MIT License
 Language: en-US
