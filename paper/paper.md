@@ -13,11 +13,11 @@ authors:
     affiliation: "1"
   - name: Laura Forastiere
     orcid: 0000-0003-3721-9826
-    equal-contrib: true
+    equal-contrib: false
     affiliation: "1" 
  - name: Falco J. Bargagli-Stoffi
     orcid: 0000-0002-6131-8165
-    equal-contrib: true
+    equal-contrib: false
     affiliation: "1"
 affiliations:
  - name: Department of Biostatistics, Harvard School of Public Health
@@ -26,7 +26,6 @@ affiliations:
    index: 2
 date: 24 March 2023
 bibliography: paper.bib
-
 ---
 
 # Summary
