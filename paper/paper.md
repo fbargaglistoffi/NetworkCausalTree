@@ -5,16 +5,16 @@ tags:
   - TODO
 authors:
   - name: Costanza Tortù
-    orcid: TODO
+    orcid: 0000-0003-2561-9726
     equal-contrib: true
     affiliation: "1"
- - name: Falco J. Bargagli Stoffi
+  - name: Falco J. Bargagli Stoffi
     orcid: 0000-0002-6131-8165
     equal-contrib: true
-    affiliation: "1"
+    affiliation: "2"
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
-    affiliation: "1"  
+    affiliation: "2"
 affiliations:
  - name: Department of Biostatistics, Harvard School of Public Health
    index: 1
