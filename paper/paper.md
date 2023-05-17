@@ -15,13 +15,13 @@ authors:
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
     affiliation: "2"
-  - name: Riccardo Cadei
-    orcid: 0000-0003-2416-8943
+  - name: Laura Forastiere
+    orcid: 0000-0003-3721-9826
     affiliation: "2"
 affiliations:
- - name: Department of Biostatistics, Harvard School of Public Health
+ - name: Sant'Anna School for Advanced Studies
    index: 1
- - name: TODO
+ - name: Department of Biostatistics, Harvard School of Public Health
    index: 2
 date: 24 March 2023
 bibliography: paper.bib
