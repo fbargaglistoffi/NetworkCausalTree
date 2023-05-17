@@ -7,7 +7,7 @@ authors:
   - name: Costanza Tortù
     orcid: 0000-0003-2561-9726
     equal-contrib: true
-    affiliation: "2"
+    affiliation: "1"
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
     affiliation: "1"
