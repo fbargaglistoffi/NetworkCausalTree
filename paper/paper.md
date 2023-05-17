@@ -15,6 +15,9 @@ authors:
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
     affiliation: "2"
+  - name: Riccardo Cadei
+    orcid: 0000-0003-2416-8943
+    affiliation: "2"
 affiliations:
  - name: Department of Biostatistics, Harvard School of Public Health
    index: 1
