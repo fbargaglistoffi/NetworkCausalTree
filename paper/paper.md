@@ -4,14 +4,14 @@ tags:
   - R
   - TODO
 authors:
-  - name: Falco J. Bargagli Stoffi
-    orcid: 0000-0002-6131-8165
-    equal-contrib: true
-    affiliation: "1"
   - name: Costanza Tortù
     orcid: TODO
     equal-contrib: true
-    affiliation: "2"
+    affiliation: "1"
+ - name: Falco J. Bargagli Stoffi
+    orcid: 0000-0002-6131-8165
+    equal-contrib: true
+    affiliation: "1"
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
     affiliation: "1"  
