@@ -4,21 +4,17 @@ tags:
   - R
   - TODO
 authors:
-  - name: Costanza Tortù
-    orcid: 0000-0003-2561-9726
-    equal-contrib: true
-    affiliation: "1"
- - name: Falco J. Bargagli-Stoffi
+  - name: Falco J. Bargagli Stoffi
     orcid: 0000-0002-6131-8165
-    affiliation: "1"
     equal-contrib: true
+    affiliation: "1"
+  - name: Costanza Tortù
+    orcid: TODO
+    equal-contrib: true
+    affiliation: "2"
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
-    equal-contrib: true
-    affiliation: "1"
-  - name: Laura Forastiere
-    orcid: 0000-0003-3721-9826
-    affiliation: "1" 
+    affiliation: "1"  
 affiliations:
  - name: Department of Biostatistics, Harvard School of Public Health
    index: 1
