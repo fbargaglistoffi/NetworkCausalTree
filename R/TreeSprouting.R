@@ -7,8 +7,7 @@
 # OF_Value: computes the value of the Objective Function
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Objective Function (OF)
 
 #' @description 
 #' Computes the measure of the  Objective Function
@@ -37,7 +36,7 @@
 
 
 OF_Value=function(method,alpha,beta,gamma,delta,N,W,G,Y,p,Ne,Nel,Peff,vartot,leafs){
-  
+  inof=NULL
   if(method=="composite"){
     inof<-alpha*(((EffTau1000(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[1])^2)+
       beta*(((EffTau1101(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne))^2)/(Peff[2])^2)+
@@ -81,8 +80,7 @@ OF_Value=function(method,alpha,beta,gamma,delta,N,W,G,Y,p,Ne,Nel,Peff,vartot,lea
 # OF_Split: splits the sample where the  Objective Function is maximized
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Split Objective Function 
 
 #' @description 
 #' Splits the sample where the  Objective Function is maximized 
@@ -131,7 +129,7 @@ OF_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Nel,Peff,vartot,l
       sp <- splits[i]
       if (all(as.numeric(table(W[x>=sp],G[x>=sp]))>2) & all(as.numeric(table(W[x<sp],G[x<sp]))>2)) {   
         ofx[i]<- 1/2*(OF_Value(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x<sp)),W=W[x < sp],G=G[x < sp],Y=Y[x < sp],Ne=Ne[x < sp],p=p[x < sp],Peff=Peff,Nel=Nel[x < sp],vartot=vartot,leafs=leafs) +
-                         OF_Value(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x>=sp)),W=W[x >= sp],G=G[x >= sp],Y=Y[x >= sp],Ne=Ne[x >= sp],p=p[x >= sp], Peff = Peff,Nel=Nel[x >= sp],vartot=vartot,leafs=leafs))} else {OFx[i]<-0}
+                        OF_Value(method=method,alpha=alpha,beta=beta,gamma=beta,delta=delta,N=length(which(x>=sp)),W=W[x >= sp],G=G[x >= sp],Y=Y[x >= sp],Ne=Ne[x >= sp],p=p[x >= sp], Peff = Peff,Nel=Nel[x >= sp],vartot=vartot,leafs=leafs))} else {ofx[i]<-0}
     }
     namex=rep(colnames(X)[j],length(unique(x)))
     valuesx=c(sort(unique(x)))
@@ -161,8 +159,7 @@ OF_Split=function(method,alpha,beta,gamma,delta,N,W,G,Y,X,p,Ne,Nel,Peff,vartot,l
 # netctree: identifies the partitions of a Network Causal Tree
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Identification of Partitions of the Network Causal Tree
 
 #' @description 
 #' Identifies the partitions of a Network Causal Tree
@@ -312,8 +309,7 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
 # sproutnetctree: sprouts the network causal tree 
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Generation of the Network Causal Tree
 
 #' @description 
 #' Sprouts the network causal tree, eventually including a fraction of the initial -discovery- 
@@ -393,8 +389,7 @@ sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,
 # alleffect: computes the estimates in all the partitions identified by the Network Causal Tree 
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Computation of the Effects in all NCT partitions
 
 #' @description 
 #' Computes the estimates in all the partitions identified by the Network Causal Tree

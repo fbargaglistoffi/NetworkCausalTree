@@ -7,8 +7,7 @@
 
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Plot of a Network Causal Tree
 
 #' @description 
 #' Plots the Network Causal Tree
@@ -23,6 +22,7 @@
 #' Edges
 #' @param ewidth Edge width
 #' @param elabelcex Edge's label cex
+#' @param edge.arrow.size Edge's arrow size 
 #' @param ecolor Edges color
 #' @param elabelfamily Edge label family
 #' @param elabelcolor Edges' label color
@@ -55,14 +55,19 @@
 
 
 
-plot.NetworkCausalTrees=function(NCT,output,vcolor=c("seagreen4","seagreen1","lightblue1","dodgerblue2"),vlabelcolor, coloreff,
-                                 ewidth,elabelcex, ecolor,elabelfamily, elabelcolor,
-                                 vsize, vsize2,vshape, varnames, 
-                                 vlabelfont, vlabelcex, ot=FALSE, colleg, coltitleleg,
-                                 vframecolor,title,cex.main,col.main,adj,font.main){
+plot.NetworkCausalTrees=function(NCT, output, coloreff, varnames, title,
+                                 vcolor=c("seagreen4","seagreen1","lightblue1","dodgerblue2")
+                                 ,vsize=32,vsize2=32,
+                                 vshape="circle",vframecolor = "black",
+                                 vlabelcolor = "black", vlabelcex =0.8, 
+                                 vlabelfont = 1,  elabelcex = 0.7, 
+                                 elabelfamily = "sans", ecolor="black",
+                                 ewidth=0.3, edge.arrow.size=0.5,elabelcolor="black", ot=FALSE, colleg = "black", 
+                                 coltitleleg = "black", font.main=1,
+                                 cex.main = 1,adj=1,col.main = "black"){
   
   
-  
+  options(warn=-1)
   NCT$NOBS<-NCT$NOBS_EST+NCT$NOBS_TR
 
   for (p in 1:length(varnames)) {
@@ -93,11 +98,12 @@ plot.NetworkCausalTrees=function(NCT,output,vcolor=c("seagreen4","seagreen1","li
   V(grafo_tree)$TAU0100<-NCT$EFF0100_EST
   
   if(output=="estimation"){
+    
   V(grafo_tree)$SE1000<-NCT$SE1000_EST
   V(grafo_tree)$SE1101<-NCT$SE1101_EST
   V(grafo_tree)$SE1110<-NCT$SE1110_EST
   V(grafo_tree)$SE0100<-NCT$SE0100_EST
-  }
+  
   
   if(coloreff=="1000"){
     V(grafo_tree)$stat<- V(grafo_tree)$TAU1000/ V(grafo_tree)$SE1000    
@@ -115,20 +121,23 @@ plot.NetworkCausalTrees=function(NCT,output,vcolor=c("seagreen4","seagreen1","li
     V(grafo_tree)$stat<- V(grafo_tree)$TAU1110/ V(grafo_tree)$SE1110    
   }
   
-  if(output=="estimation"){
+
   cols1 = colorRampPalette(c(vcolor[1],vcolor[2]))(4)
   cols2 = colorRampPalette(c(vcolor[3], vcolor[4]))(4)
   cols<-c(cols1,cols2)
   
-  V(grafo_tree)$color[which(V(grafo_tree)$stat< (-2.58))]<-cols[1]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>= (-2.58) & V(grafo_tree)$stat<(-1.96) )]<-cols[2]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>= (-1.96) & V(grafo_tree)$stat<(-1.66) )]<-cols[3]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>= (-1.66) & V(grafo_tree)$stat<(0 ))]<-cols[4]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>= 0 & V(grafo_tree)$stat<(1.66 ))]<-cols[5]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>=1.66 & V(grafo_tree)$stat<1.96 )]<-cols[6]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>=1.96 & V(grafo_tree)$stat<2.58 )]<-cols[7]
-  V(grafo_tree)$color[which(V(grafo_tree)$stat>=2.58) ]<-cols[8]
+  V(grafo_tree)$color<-cols[1]
+  V(grafo_tree)$color[which(V(grafo_tree)$stat< (-2.58))]<-rep(cols[1], length(which(V(grafo_tree)$stat< (-2.58))))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat>= (-2.58) & V(grafo_tree)$stat<(-1.96) )]<-rep(cols[2], length(which(V(grafo_tree)$stat>= (-2.58) & V(grafo_tree)$stat<(-1.96) )))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat >= (-1.96) & V(grafo_tree)$stat<(-1.66) )]<-rep(cols[3], length(which(V(grafo_tree)$stat>= (-1.96) & V(grafo_tree)$stat<(-1.66) )))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat>= (-1.66) & V(grafo_tree)$stat<(0 )) ]<-rep(cols[4], length(which(V(grafo_tree)$stat>= (-1.66) & V(grafo_tree)$stat<(0 ))))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat>= 0 & V(grafo_tree)$stat<(1.66 ))]<-rep(cols[5],length(which(V(grafo_tree)$stat>= 0 & V(grafo_tree)$stat<(1.66 ))))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat>=1.66 & V(grafo_tree)$stat<1.96 )]<-rep(cols[6],length(which(V(grafo_tree)$stat>=1.66 & V(grafo_tree)$stat<1.96 )))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat>=1.96 & V(grafo_tree)$stat<2.58 )]<-rep(cols[7],length(which(V(grafo_tree)$stat>=1.96 & V(grafo_tree)$stat<2.58 )))
+  V(grafo_tree)$color[which(V(grafo_tree)$stat>=2.58) ]<-rep(cols[8],length(which(V(grafo_tree)$stat>=2.58)))
+  
   }
+  
   if(output=="detection"){
     V(grafo_tree)$color<-vcolor[1]
     print("Unique color applied because NCT does not provide standard errors")
@@ -186,7 +195,7 @@ if(output=="estimation"){
                 edge.width=ewidth,edge.label.cex=elabelcex, edge.label.family=elabelfamily, vertex.color=V(grafo_tree)$color,
                 vertex.label.dist = 0, vertex.label.color=vlabelcolor,
                 vertex.label=V(grafo_tree)$labels,  vertex.label.font=vlabelfont, vertex.label.cex=vlabelcex,
-                vertex.frame.color=vframecolor, edge.color=ecolor, vertex.frame=2,
+                vertex.frame.color=vframecolor, edge.color=ecolor, vertex.frame=2, edge.arrow.size=edge.arrow.size,
                 edge.label=E(grafo_tree)$label,vertex.shape=vshape,vertex.size=vsize,vertex.size2=vsize2)
   
   if(ot==TRUE){

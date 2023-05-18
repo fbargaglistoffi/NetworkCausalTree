@@ -3,13 +3,11 @@
 #------------------------------------------------------------------
 
 #---------------------------------------------------
-# EffTau1000, EffTau1101 ,EffTau0100 ,EffTau1110 : 
-# Functions to compute the estimates of the
-# four effects of interest 
+# EffTau1000: Function to compute the estimates of the
+# the effect 1000
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Estimated Effect 1000
 
 #' @description 
 #' Computes the estimates of the effect of interest 
@@ -34,17 +32,89 @@ EffTau1000=function(N,W,G,Y,p,Ne){
   return(tau1000)
 }
 
+
+#---------------------------------------------------
+# EffTau1101: Function to compute the estimates of the
+# the effect 1101
+
+#' @title
+#' Estimated Effect 1101
+
+#' @description 
+#' Computes the estimates of the effect of interest 
+#' 
+#' @param  N Sample size 
+#' @param  W N x 1 vector, Individual Treatment 
+#' @param  G N x 1 vector, Neighborhood Treatment 
+#' @param  Y N x 1 vector, Observed Outcome
+#' @param  p  N x 1 vector,Probability to be assigned to the active individual intervention
+#' @param  Ne N x 1 vector, Degree  
+
+
+
+#' @return A numeric value corresponding to the estimate of the effect
+#' of interest.
+
+
 EffTau1101=function(N,W,G,Y,p,Ne){
   tau1101=1/N*(sum(Y[W==1 & G==1]/pi(which(W==1 & G==1),1,1,p,Ne))-
               sum(Y[W==0 & G==1]/pi(which(W==0 & G==1),0,1,p,Ne)))
   return(tau1101)
 }
 
+
+#---------------------------------------------------
+# EffTau1110: Function to compute the estimates of the
+# the effect 1110
+
+#' @title
+#' Estimated Effect 1110
+
+#' @description 
+#' Computes the estimates of the effect of interest 
+#' 
+#' @param  N Sample size 
+#' @param  W N x 1 vector, Individual Treatment 
+#' @param  G N x 1 vector, Neighborhood Treatment 
+#' @param  Y N x 1 vector, Observed Outcome
+#' @param  p  N x 1 vector,Probability to be assigned to the active individual intervention
+#' @param  Ne N x 1 vector, Degree  
+
+
+
+#' @return A numeric value corresponding to the estimate of the effect
+#' of interest.
+
+
 EffTau1110=function(N,W,G,Y,p,Ne){
   tau1110=1/N*(sum(Y[W==1 & G==1]/pi(which(W==1 & G==1),1,1,p,Ne))-
                  sum(Y[W==1 & G==0]/pi(which(W==1 & G==0),1,0,p,Ne)))
   return(tau1110)
 }
+
+
+#---------------------------------------------------
+# EffTau0100: Function to compute the estimates of the
+# the effect 0100
+
+#' @title
+#' Estimated Effect 0100
+
+#' @description 
+#' Computes the estimates of the effect of interest 
+#' 
+#' @param  N Sample size 
+#' @param  W N x 1 vector, Individual Treatment 
+#' @param  G N x 1 vector, Neighborhood Treatment 
+#' @param  Y N x 1 vector, Observed Outcome
+#' @param  p  N x 1 vector,Probability to be assigned to the active individual intervention
+#' @param  Ne N x 1 vector, Degree  
+
+
+
+#' @return A numeric value corresponding to the estimate of the effect
+#' of interest.
+
 
 EffTau0100=function(N,W,G,Y,p,Ne){
   tau0100=1/N*(sum(Y[W==0 & G==1]/pi(which(W==0 & G==1),0,1,p,Ne))-
@@ -54,14 +124,13 @@ EffTau0100=function(N,W,G,Y,p,Ne){
 
 
 #---------------------------------------------------
-# popeff: Computes the estimated effects in the whole population 
+# popeff: Computes the estimated effects in the whole sample
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Estimated Effects in the whole sample
 
 #' @description 
-#' Computes the estimated effects in the whole population 
+#' Computes the four Estimated Effects in the Whole Population 
 #' 
 #' @param  N Sample size 
 #' @param  W N x 1 vector, Individual Treatment 

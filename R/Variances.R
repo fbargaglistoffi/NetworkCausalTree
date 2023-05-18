@@ -6,8 +6,7 @@
 # Vary: computes the estimated variance of the average potential outcomes
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Estimated Variance of the Average Potential Outcomes
 
 #' @description 
 #' Computes the estimated variance of the average potential outcome 
@@ -59,8 +58,7 @@ Vary=function(N,w,g,Y,W,G,p,Ne,Nel){
 # Covy: computes the estimated covariance of the average potential outcomes
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Estimated Covariance of Average Potential Outcomes
 
 #' @description 
 #' Computes the estimated covariance of the average potential outcome 
@@ -107,13 +105,11 @@ Covy=function(w1,g1,w2,g2,N,Y,W,G,p,Ne,Nel){
 
 
 #---------------------------------------------------
-# Vartau1000, Vartau1101 ,Vartau0100 ,Vartau1110 : 
-# Functions to compute the estimated variance of the
-# four effects of interest 
+# Vartau1000: Function to compute the estimated variance of the
+#  effects of 1000
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Estimated Variance for the effect 1000
 
 #' @description 
 #' Computes the estimated variance of the effect of interest 
@@ -151,6 +147,32 @@ Vartau1000=function(N,Y,W,G,p,Ne,Nel){
   return(var1000) 
 }
 
+
+#---------------------------------------------------
+# Vartau1101: Function to compute the estimated variance of the
+#  effects of 1101
+
+#' @title
+#' Estimated Variance for the effect 1101
+
+#' @description 
+#' Computes the estimated variance of the effect of interest 
+#' 
+#' @param  N Sample size 
+#' @param  W N x 1 vector, Individual Treatment 
+#' @param  G N x 1 vector, Neighborhood Treatment 
+#' @param  Y N x 1 vector, Observed Outcome
+#' @param  p N x 1 vector, Probability to be assigned to the active individual intervention
+#' @param  Ne N x 1 vector, Degree  
+#' @param  Nel List of N elements - where N is the sample size - 
+#' where each element i contains the IDs of the direct neighbors of unit i
+
+
+
+#' @return A numeric value corresponding to the estimated variance of the effect
+#' of interest.
+
+
 Vartau1101=function(N,Y,W,G,p,Ne,Nel){
   
   vary11<-Vary(w=1,g=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
@@ -167,6 +189,32 @@ Vartau1101=function(N,Y,W,G,p,Ne,Nel){
   return(var1101) 
 }
 
+
+#---------------------------------------------------
+# Vartau1110: Function to compute the estimated variance of the
+#  effects of 1110
+
+#' @title
+#' Estimated Variance for the effect 1110
+
+#' @description 
+#' Computes the estimated variance of the effect of interest 
+#' 
+#' @param  N Sample size 
+#' @param  W N x 1 vector, Individual Treatment 
+#' @param  G N x 1 vector, Neighborhood Treatment 
+#' @param  Y N x 1 vector, Observed Outcome
+#' @param  p N x 1 vector, Probability to be assigned to the active individual intervention
+#' @param  Ne N x 1 vector, Degree  
+#' @param  Nel List of N elements - where N is the sample size - 
+#' where each element i contains the IDs of the direct neighbors of unit i
+
+
+
+#' @return A numeric value corresponding to the estimated variance of the effect
+#' of interest.
+
+
 Vartau1110=function(N,Y,W,G,p,Ne,Nel){
   
   vary11<-Vary(w=1,g=1,N=N,W=W,G=G,p=p,Ne=Ne,Nel=Nel,Y=Y)
@@ -182,6 +230,32 @@ Vartau1110=function(N,Y,W,G,p,Ne,Nel){
   }
   return(var1110) 
 }
+
+
+#---------------------------------------------------
+# Vartau9100: Function to compute the estimated variance of the
+#  effects of 0100
+
+#' @title
+#' Estimated Variance for the effect 0100
+
+#' @description 
+#' Computes the estimated variance of the effect of interest 
+#' 
+#' @param  N Sample size 
+#' @param  W N x 1 vector, Individual Treatment 
+#' @param  G N x 1 vector, Neighborhood Treatment 
+#' @param  Y N x 1 vector, Observed Outcome
+#' @param  p N x 1 vector, Probability to be assigned to the active individual intervention
+#' @param  Ne N x 1 vector, Degree  
+#' @param  Nel List of N elements - where N is the sample size - 
+#' where each element i contains the IDs of the direct neighbors of unit i
+
+
+
+#' @return A numeric value corresponding to the estimated variance of the effect
+#' of interest.
+
 
 Vartau0100=function(N,Y,W,G,p,Ne,Nel){
   

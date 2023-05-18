@@ -8,8 +8,7 @@
 # pi: Individual marginal probabilities 
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Individual Marginal Exposure Probabilities
 
 #' @description 
 #' Computes the individual marginal probability to be exposed to a given level of the joint intervention
@@ -24,7 +23,7 @@
 
 #' @return A numeric value bounded between 0 and 1 measuring 
 #' the individual marginal probability to be exposed 
-#' to the level w,g of  the joint intervention
+#' to the level w,g of the joint intervention
 
 
 
@@ -37,11 +36,10 @@ pi<-function(i,w,g,p,Ne){
 }
 
 #---------------------------------------------------
-# pij: Individual joint probabilities 
+# pij: joint probabilities 
 
 #' @title
-#' Heterogeneous Treatment and Spillover Effects 
-#' under Clustered Network Interference
+#' Joint Exposure Probabilities
 
 #' @description 
 #' Computes the individual joint probability of a given pair of units
