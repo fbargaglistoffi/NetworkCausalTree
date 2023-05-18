@@ -19,7 +19,7 @@ library("NetworkCausalTree")
 
 ## Examples
 
-Singular splitting function
+Singular splitting
 ```r
 dataset <- data_generator(N = 2000, 
                           m = 40, 
@@ -49,7 +49,7 @@ NCT <- NetworkCausalTrees(effweights <- c(1,0,0,0),
                           method = "singular",
                           output = "estimation")
 
-title<-expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
+title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 plot.NetworkCausalTrees(NCT = NCT,
                         output = "estimation",
                         vcolor = c("seagreen4","seagreen1","lightblue1","dodgerblue2"),
@@ -78,8 +78,8 @@ plot.NetworkCausalTrees(NCT = NCT,
                         title = title)
 ```
 
-Composite splitting function (NCT based on all the four effects)
-```
+Composite splitting (NCT based on all the four effects)
+```r
 dataset <- data_generator(N = 2000, 
                           m = 40, 
                           p = rep(0.2,2000), 
