@@ -19,7 +19,9 @@ Imports:
   statnet,
   ergm,
   stats,
-  base
+  base,
+  plyr,
+  data.tree
 License: MIT License
 URL: https://github.com/fbargaglistoffi/NetworkCausalTree
 BugReports: https://github.com/fbargaglistoffi/NetworkCausalTree/issues

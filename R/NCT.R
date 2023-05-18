@@ -31,7 +31,7 @@
 #' @param method method to compute the Objective function: "singular" for NCT targeted to one single effect;
 #' "composite" for NCT targeted to multiple effects; "penalized" for a OF computed while
 #' considering a single effect only and including a penalization term related to the variance
-
+#'
 #' @return A Network Causal Tree - NCT - object. An NCT object is a data frame reporting the
 #' results of the Network Causal Trees, where each tree is characterized by a set of partitions.
 #' Specifically the GOF variable includes the value of the GOF in the corresponding partition, the NOBS_TR column
@@ -43,8 +43,18 @@
 #' to the estimation set and to the given partition, the columns EFF1000_EST, EFF1101_EST,  EFF1110_EST,
 #' EFF0100_EST reporting the estimated effects in the partitions. If output = "Estimation" the data frame
 #' also include the columns SETAU1000_EST, SETAU1101_EST,  SETAU1110_EST, SETAU0100_EST reporting the estimated standard errors of the effects in the partitions
-
-
+#'
+#' @import stringi
+#' @import igraph
+#' @import statnet
+#' @import ergm
+#' @import plyr
+#' @import data.tree
+#' @import stats
+#' @import base
+#'
+#' @export
+#'
 NetworkCausalTrees=function(effweights,A,p,W,Y,X,M,G,Ne, mdisc,mest,method,
                             minpopfrac = 1,
                             depth = 3,
