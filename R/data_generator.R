@@ -119,6 +119,6 @@ data_generator = function(N = 2000,
                   M = M,
                   Ne = neigh_red,
                   p = p,
-                  X = x)
+                  X = X)
   return(dataset)
 }
