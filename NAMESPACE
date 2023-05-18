@@ -3,7 +3,6 @@
 S3method(plot,NetworkCausalTrees)
 export(NetworkCausalTrees)
 export(data_generator)
-import(base)
 import(data.tree)
 import(ergm)
 import(igraph)

@@ -21,7 +21,6 @@ Imports:
   statnet,
   ergm,
   stats,
-  base,
   plyr,
   data.tree
 License: MIT License

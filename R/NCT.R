@@ -51,7 +51,6 @@
 #' @import plyr
 #' @import data.tree
 #' @import stats
-#' @import base
 #'
 #' @export
 #'
