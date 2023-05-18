@@ -85,7 +85,7 @@ data_generator = function(N = 2000,
   neigh <- rowSums(adj_matrix)
   w <- treat[neigh>0]
   g <- neightreat[neigh>0]
-  M <- M[neigh>0]
+  M <- as.numeric(M[neigh>0])
   X <- X[neigh>0,]
   p <- p[neigh>0]
   N <- length(w)

@@ -2,8 +2,7 @@
 % Please edit documentation in R/TreeSprouting.R
 \name{sproutnetctree}
 \alias{sproutnetctree}
-\title{Heterogeneous Treatment and Spillover Effects
-under Clustered Network Interference}
+\title{Generation of the Network Causal Tree}
 \usage{
 sproutnetctree(
   method,

@@ -2,8 +2,7 @@
 % Please edit documentation in R/TreeSprouting.R
 \name{netctree}
 \alias{netctree}
-\title{Heterogeneous Treatment and Spillover Effects
-under Clustered Network Interference}
+\title{Identification of Partitions of the Network Causal Tree}
 \usage{
 netctree(
   method,

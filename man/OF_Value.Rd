@@ -2,8 +2,7 @@
 % Please edit documentation in R/TreeSprouting.R
 \name{OF_Value}
 \alias{OF_Value}
-\title{Heterogeneous Treatment and Spillover Effects
-under Clustered Network Interference}
+\title{Objective Function (OF)}
 \usage{
 OF_Value(
   method,

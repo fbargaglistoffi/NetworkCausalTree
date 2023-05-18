@@ -2,8 +2,7 @@
 % Please edit documentation in R/TreeSprouting.R
 \name{alleffect}
 \alias{alleffect}
-\title{Heterogeneous Treatment and Spillover Effects
-under Clustered Network Interference}
+\title{Computation of the Effects in all NCT partitions}
 \usage{
 alleffect(output, tree_info, N, W, G, Y, X, Ne, Nel, p, minsize)
 }

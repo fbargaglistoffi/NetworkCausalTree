@@ -2,8 +2,7 @@
 % Please edit documentation in R/TreeSprouting.R
 \name{OF_Split}
 \alias{OF_Split}
-\title{Heterogeneous Treatment and Spillover Effects
-under Clustered Network Interference}
+\title{Split Objective Function}
 \usage{
 OF_Split(
   method,
