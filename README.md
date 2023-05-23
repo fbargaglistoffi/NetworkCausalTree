@@ -30,7 +30,7 @@ dataset <- data_generator(N = 2000,
                           method_networks = "er", 
                           param_er = 0.1)
 
-NCT <- NetworkCausalTrees(effweights <- c(1,0,0,0), 
+result <- NetworkCausalTrees(effweights <- c(1,0,0,0), 
                           A = dataset[["adj_matrix"]],
                           p = dataset[["p"]], 
                           fracpredictors = 1, 
@@ -50,32 +50,8 @@ NCT <- NetworkCausalTrees(effweights <- c(1,0,0,0),
                           output = "estimation")
 
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
-plot.NetworkCausalTrees(NCT = NCT,
-                        output = "estimation",
-                        vcolor = c("seagreen4","seagreen1","lightblue1","dodgerblue2"),
-                        vsize = 32,
-                        vsize2 = 32,
-                        coloreff ="1000",
-                        vshape = "circle",
-                        vframecolor = "black",
-                        vlabelcolor = "black", 
-                        vlabelcex = 0.8, 
-                        vlabelfont = 1,  
-                        elabelcex = 0.7, 
-                        varnames = c("x1","x2","x3","x4"),
-                        elabelfamily = "sans", 
-                        ecolor = "black",
-                        ewidth = 0.3, 
-                        elabelcolor = "black", 
-                        ot = FALSE, 
-                        colleg = "black", 
-                        coltitleleg = "black", 
-                        font.main = 1, 
-                        edge.arrow.size = 0.5,
-                        cex.main = 1,
-                        adj = 1,
-                        col.main = "black",
-                        title = title)
+cov_names <- colnames(dataset[["X"]])
+plot(result, cov_names, title)
 ```
 
 Composite splitting (NCT based on all the four effects)
@@ -88,7 +64,7 @@ dataset <- data_generator(N = 2000,
                           K = 4,
                           method_networks = "sf")
 
-NCT <- NetworkCausalTrees(effweights <- c(0.25,0.25,0.25,0.25), 
+result <- NetworkCausalTrees(effweights <- c(0.25,0.25,0.25,0.25), 
                           A = dataset[["adj_matrix"]],
                           p = dataset[["p"]], 
                           fracpredictors = 1, 
@@ -108,32 +84,8 @@ NCT <- NetworkCausalTrees(effweights <- c(0.25,0.25,0.25,0.25),
                           output = "estimation")
                           
 title <- expression("CAUSAL TREE TARGETED TO ALL THE EFFECTS")
-plot.NetworkCausalTrees(NCT = NCT,
-                        output = "estimation",
-                        vcolor = c("seagreen4","seagreen1","lightblue1","dodgerblue2"),
-                        vsize = 32,
-                        vsize2 = 32,
-                        coloreff ="1000",
-                        vshape = "circle",
-                        vframecolor = "black",
-                        vlabelcolor = "black", 
-                        vlabelcex = 0.8, 
-                        vlabelfont = 1,  
-                        elabelcex = 0.7, 
-                        varnames = c("x1","x2","x3","x4"),
-                        elabelfamily = "sans", 
-                        ecolor = "black",
-                        ewidth = 0.3, 
-                        elabelcolor = "black", 
-                        ot = FALSE, 
-                        colleg = "black", 
-                        coltitleleg = "black", 
-                        font.main = 1, 
-                        edge.arrow.size = 0.5,
-                        cex.main = 1,
-                        adj = 1,
-                        col.main = "black",
-                        title = title)
+cov_names <- colnames(dataset[["X"]])
+plot(result, cov_names, title)
 ```
 
 

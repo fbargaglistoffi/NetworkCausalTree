@@ -6,10 +6,10 @@
 \usage{
 \method{plot}{NetworkCausalTrees}(
   NCT,
-  output,
-  coloreff,
   varnames,
   title,
+  output = "estimation",
+  coloreff = "1000",
   vcolor = c("seagreen4", "seagreen1", "lightblue1", "dodgerblue2"),
   vsize = 32,
   vsize2 = 32,
@@ -36,15 +36,15 @@
 \arguments{
 \item{NCT}{A Network Causal Tree object}
 
+\item{varnames}{Vector including the - ordered - names of predictors}
+
+\item{title}{Title}
+
 \item{output}{Output of the NCT. if output = "detection" only point estimates
 are reported, if output = "estimation" both estimated effects and variances are reported}
 
 \item{coloreff}{Estimated Effect according to which nodes are colored
 It can be "1000", "0100","1110","1101"}
-
-\item{varnames}{Vector including the - ordered - names of predictors}
-
-\item{title}{Title}
 
 \item{vcolor}{String Vector of four colors: the first two identify the extremes
 of the color palette employed to depict negative values, while the second two identify the extremes
@@ -63,7 +63,7 @@ with greens and positive estimates with blues}
 \item{vframecolor}{Vertex's frame color}
 
 \item{vlabelcolor}{Vertex label color
-Titlw}
+Title}
 
 \item{vlabelcex}{Vertex Label cex}
 
@@ -83,7 +83,7 @@ Titlw}
 Vertices}
 
 \item{ot}{TRUE if the NCT object includes an optimal treatment evaluation,
-FALSE otherwise (default is FALSE)
+FALSE otherwise (default: FALSE)
 Edges}
 
 \item{colleg}{Legend color}
