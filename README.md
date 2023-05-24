@@ -22,11 +22,11 @@ library("NetworkCausalTree")
 Singular splitting
 ```r
 dataset <- data_generator(N = 2000, 
+                          K = 4,
                           m = 40, 
                           p = rep(0.2,2000), 
                           het = TRUE, 
                           taui = 2, 
-                          K = 4,
                           method_networks = "er", 
                           param_er = 0.1)
 
@@ -56,11 +56,11 @@ plot(result, cov_names, title)
 Composite splitting (NCT based on all the four effects)
 ```r
 dataset <- data_generator(N = 2000, 
+                          K = 4,
                           m = 40, 
                           p = rep(0.2,2000), 
                           het = FALSE, 
                           taui = 0, 
-                          K = 4,
                           method_networks = "sf")
 
 result <- NetworkCausalTrees(effweights <- c(0.25,0.25,0.25,0.25), 

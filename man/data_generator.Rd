@@ -6,8 +6,8 @@
 \usage{
 data_generator(
   N = 2000,
-  m = 40,
   K = 5,
+  m = 40,
   p = rep(0.2, 2000),
   het = TRUE,
   taui = 2,
@@ -20,9 +20,9 @@ data_generator(
 \arguments{
 \item{N}{Sample size (default: 2000).}
 
-\item{m}{Number of clusters (default: 40).}
-
 \item{K}{Number of binary regressors (default: 5).}
+
+\item{m}{Number of clusters (default: 40).}
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual
 intervention (default: rep(0.2,2000))}
@@ -49,15 +49,14 @@ model (default: NULL).}
 \value{
 A list of synthetic data containing:
 \itemize{
-\item NxN adjacency matrix (\code{A}),
-\item Nx1 individual intervention vector (\code{W}),
-\item Nx1 neighborhood intervention vector (\code{G}),
+\item NxK covariates matrix (\code{X}).
 \item Nx1 outcome vector (\code{Y}),
+\item Nx1 individual intervention vector (\code{W}),
+\item NxN adjacency matrix (\code{A}),
+\item Nx1 neighborhood intervention vector (\code{G}),
 \item Nx1 group membership vector (\code{M}),
-\item Nx1 degree vector (\code{Ne}),
 \item Nx1 probability to be assigned to the active individual intervention vector
 (\code{p}),
-\item NxK covariates matrix (\code{X}).
 }
 }
 \description{

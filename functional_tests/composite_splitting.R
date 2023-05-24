@@ -1,9 +1,9 @@
 dataset <- data_generator(N = 2000,
+                          K = 4,
                           m = 40,
                           p = rep(0.2,2000),
                           het = FALSE,
                           taui = 0,
-                          K = 4,
                           method_networks = "sf")
 
 result <- NetworkCausalTrees(effweights <- c(0.25,0.25,0.25,0.25),

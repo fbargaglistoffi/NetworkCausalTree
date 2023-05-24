@@ -1,9 +1,9 @@
 dataset <- data_generator(N = 2000,
+                          K = 4,
                           m = 40,
                           p = rep(0.2,2000),
                           het = TRUE,
                           taui = 2,
-                          K = 4,
                           method_networks = "er",
                           param_er = 0.1)
 
