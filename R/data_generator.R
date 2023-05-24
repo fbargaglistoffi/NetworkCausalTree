@@ -24,7 +24,7 @@
 #' model (default: NULL).
 #'
 #' @return A list of synthetic data containing:
-#' - NxN adjacency matrix (`adj_matrix`),
+#' - NxN adjacency matrix (`A`),
 #' - Nx1 individual intervention vector (`W`),
 #' - Nx1 neighborhood intervention vector (`G`),
 #' - Nx1 outcome vector (`Y`),
@@ -57,18 +57,18 @@ data_generator = function(N = 2000,
 
   # Generate m networks
   gsize <- N/m
-  adj_matrix <- genmultnet(N=N,
-                           m=m,
-                           method_networks=method_networks,
-                           param_er = param_er,
-                           coef_ergm = coef_ergm,
-                           var_homophily_ergm = var_homophily_ergm)
+  A <- genmultnet(N=N,
+                  m=m,
+                  method_networks=method_networks,
+                  param_er = param_er,
+                  coef_ergm = coef_ergm,
+                  var_homophily_ergm = var_homophily_ergm)
 
   # Group Indicator
   M <- c(rep(1:m,gsize))
   M <- sort(M)
   levels(M) <- c(1:m)
-  net <- graph_from_adjacency_matrix(adj_matrix)
+  net <- graph_from_adjacency_matrix(A)
 
   # Randomly assign unit to treatment arms
   treat <- c()
@@ -77,19 +77,19 @@ data_generator = function(N = 2000,
   }
 
   #Compute number of treated neigh and consequently Gi
-  num_tr_neigh <- as.vector(adj_matrix %*% treat)
+  num_tr_neigh <- as.vector(A %*% treat)
   neightreat <- rep(1,N) #Gi
   neightreat[which(num_tr_neigh==0)] <- 0
 
   # Pass to the standard notation
-  neigh <- rowSums(adj_matrix)
+  neigh <- rowSums(A)
   w <- treat[neigh>0]
   g <- neightreat[neigh>0]
   M <- as.numeric(M[neigh>0])
   X <- X[neigh>0,]
   p <- p[neigh>0]
   N <- length(w)
-  adj_matrix <- adj_matrix[neigh>0,neigh>0]
+  A <- A[neigh>0,neigh>0]
 
   if (het){
     x1 <- X[,1]
@@ -111,7 +111,7 @@ data_generator = function(N = 2000,
     y <- y0*(1-w) +  y1*w
   }
 
-  dataset <- list(adj_matrix = adj_matrix,
+  dataset <- list(A = A,
                   W = w,
                   G = g,
                   Y = y,

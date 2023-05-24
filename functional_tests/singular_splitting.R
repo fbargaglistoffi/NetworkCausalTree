@@ -8,7 +8,7 @@ dataset <- data_generator(N = 2000,
                           param_er = 0.1)
 
 result <- NetworkCausalTrees(effweights = c(1,0,0,0),
-                             A = dataset[["adj_matrix"]],
+                             A = dataset[["A"]],
                              p = dataset[["p"]],
                              fracpredictors = 1,
                              W = dataset[["W"]],

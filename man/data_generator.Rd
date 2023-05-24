@@ -49,7 +49,7 @@ model (default: NULL).}
 \value{
 A list of synthetic data containing:
 \itemize{
-\item NxN adjacency matrix (\code{adj_matrix}),
+\item NxN adjacency matrix (\code{A}),
 \item Nx1 individual intervention vector (\code{W}),
 \item Nx1 neighborhood intervention vector (\code{G}),
 \item Nx1 outcome vector (\code{Y}),
