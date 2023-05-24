@@ -90,7 +90,6 @@ data_generator = function(N = 2000,
   p <- p[neigh>0]
   N <- length(w)
   adj_matrix <- adj_matrix[neigh>0,neigh>0]
-  neigh_red <- neigh[neigh>0]
 
   if (het){
     x1 <- X[,1]
@@ -117,7 +116,6 @@ data_generator = function(N = 2000,
                   G = g,
                   Y = y,
                   M = M,
-                  Ne = neigh_red,
                   p = p,
                   X = X)
   return(dataset)

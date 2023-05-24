@@ -5,18 +5,17 @@
 \title{Network Causal Tree}
 \usage{
 NetworkCausalTrees(
-  effweights,
-  A,
-  p,
-  W,
-  Y,
   X,
-  M,
-  G,
-  Ne,
-  mdisc,
-  mest,
-  method,
+  Y,
+  W,
+  effweights = c(0.25, 0.25, 0.25, 0.25),
+  A = NULL,
+  G = NULL,
+  M = NULL,
+  p = NULL,
+  mdisc = 25,
+  mest = 15,
+  method = "singular",
   minpopfrac = 1,
   depth = 3,
   fracpredictors = 1,
@@ -26,41 +25,41 @@ NetworkCausalTrees(
 )
 }
 \arguments{
-\item{effweights}{Vector including the 4 weights alpha, beta, gamma, delta where
+\item{X}{N x K Observed Covariates Matrix}
+
+\item{Y}{N x 1 Observed Outcome vector.}
+
+\item{W}{N x 1 Individual Treatment vector.}
+
+\item{effweights}{Vector including the 4 effect weight:
 \itemize{
-\item alpha weight associated to the effect 1000
-\item beta weight associated to the effect 1101
-\item gamma weight associated to the effect 1110
-\item delta weight associated to the effect 0100
+\item alpha weight associated to the effect 1000,
+\item beta weight associated to the effect 1101,
+\item gamma weight associated to the effect 1110,
+\item delta weight associated to the effect 0100.
 }}
 
-\item{A}{adjacency matrix}
+\item{A}{N x N Adjacency matrix.}
 
-\item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
+\item{G}{N x 1 Neighborhood Treatment vector.}
 
-\item{W}{N x 1 vector, Individual Treatment}
+\item{M}{N x 1 Cluster Membership vector.}
 
-\item{Y}{N x 1 vector, Observed Outcome}
+\item{p}{N x 1 Probability to be assigned to the active individual
+intervention vector.}
 
-\item{X}{N x K matrix, Observed Covariates Matrix}
+\item{mdisc}{Number of clusters to be assigned to the discovery set.}
 
-\item{M}{N x 1 vector, Cluster Membership}
+\item{mest}{Number of clusters to be assigned to the estimation set only.}
 
-\item{G}{N x 1 vector, Neighborhood Treatment}
+\item{method}{Method to compute the objective function: "singular" for NCT
+targeted to one single effect; "composite" for NCT targeted to multiple
+effects; "penalized" for a OF computed while considering a single effect only
+and including a penalization term related to the variance.}
 
-\item{Ne}{N x 1, Degree}
+\item{minpopfrac}{Ratio of the discovery set population to be included while sprouting the tree.}
 
-\item{mdisc}{Numeric value, number of clusters to be assigned to the discovery set}
-
-\item{mest}{Numeric value, number of clusters to be assigned to the estimation set only}
-
-\item{method}{method to compute the Objective function: "singular" for NCT targeted to one single effect;
-"composite" for NCT targeted to multiple effects; "penalized" for a OF computed while
-considering a single effect only and including a penalization term related to the variance}
-
-\item{minpopfrac}{Quote of the discovery set population to be included while sprouting the tree}
-
-\item{depth}{Depth of the tree}
+\item{depth}{Depth of the tree.}
 
 \item{fracpredictors}{Quote of the predictors to be included while sprouting the tree}
 
@@ -70,9 +69,9 @@ to be required in the leafs}
 \item{output}{Desired output of the analysis. if output = "detection" only point estimates
 are computed, if output = "estimation" both estimated effects and variances are computed}
 
-\item{N}{Sample size}
+\item{Ne}{N x 1, Degree}
 
-\item{n_tres}{Number of Trees}
+\item{n_tres}{Number of Trees.}
 }
 \value{
 A Network Causal Tree - NCT - object. An NCT object is a data frame reporting the
