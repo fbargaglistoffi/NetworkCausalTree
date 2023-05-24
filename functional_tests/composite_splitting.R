@@ -26,5 +26,4 @@ result <- NetworkCausalTrees(X =  dataset[["X"]],
 
 title <- expression("CAUSAL TREE TARGETED TO ALL THE EFFECTS")
 cov_names <- colnames(dataset[["X"]])
-
-plot(result, cov_names, title)
+plot_NCT(result, cov_names, title)

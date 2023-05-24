@@ -25,6 +25,7 @@ result <- NetworkCausalTrees(X =  dataset[["X"]],
                              method = "singular",
                              output = "estimation")
 
-title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
+
+title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)",sep=""))
 cov_names <- colnames(dataset[["X"]])
-plot(result, cov_names, title)
+plot_NCT(result, cov_names, title)

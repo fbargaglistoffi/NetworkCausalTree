@@ -50,7 +50,7 @@ result <- NetworkCausalTrees(X =  dataset[["X"]],
 
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset[["X"]])
-plot(result, cov_names, title)
+plot_NCT(result, cov_names, title)
 ```
 
 Composite splitting (NCT based on all the four effects)
@@ -83,7 +83,7 @@ result <- NetworkCausalTrees(X =  dataset[["X"]],
                           
 title <- expression("CAUSAL TREE TARGETED TO ALL THE EFFECTS")
 cov_names <- colnames(dataset[["X"]])
-plot(result, cov_names, title)
+plot_NCT(result, cov_names, title)
 ```
 
 

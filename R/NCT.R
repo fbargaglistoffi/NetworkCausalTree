@@ -60,11 +60,9 @@
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
 #' @import stringi
-#' @import igraph
 #' @import statnet
 #' @import ergm
 #' @import plyr
-#' @import data.tree
 #' @import stats
 #'
 #' @export

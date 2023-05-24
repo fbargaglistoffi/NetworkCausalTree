@@ -5,10 +5,10 @@
 #' Plots the Network Causal Tree results
 
 #' General
-#' @param NCT A Network Causal Tree object
+#' @param NCT NetworkCausalTrees results.
+#' @param varnames (Ordered) covariates names vector
 #' @param output Output of the NCT. if output = "detection" only point estimates
 #' are reported, if output = "estimation" both estimated effects and variances are reported
-#' @param varnames Vector including the - ordered - names of predictors
 #' @param ot TRUE if the NCT object includes an optimal treatment evaluation,
 #' FALSE otherwise (default: FALSE)
 #' Edges
@@ -26,13 +26,12 @@
 #' @param vlabelcex Vertex Label cex
 #' @param coloreff Estimated Effect according to which nodes are colored
 #' It can be "1000", "0100","1110","1101"
-#' @param vcolor String Vector of four colors: the first two identify the extremes
-#' of the color palette employed to depict negative values, while the second two identify the extremes
-#' of the color palette employed to depict positive values.
-#' Note that the intensity of the color is related to the Statistic of the
-#' estimated effect in each leaf.
-#' Default values represent negative estimates
-#' with greens and positive estimates with blues
+#' @param vcolor String Vector of four colors: the first two identify the
+#' extremes of the color palette employed to depict negative values, while the
+#' second two identify the extremes of the color palette employed to depict
+#' positive values. Note that the intensity of the color is related to the Statistic of the
+#' estimated effect in each leaf (Default values represent negative estimates
+#' with greens and positive estimates with blues).
 #' @param vframecolor Vertex's frame color
 #' @param vlabelcolor Vertex label color
 #' Title
@@ -44,40 +43,42 @@
 #' @param colleg Legend color
 #' @param coltitleleg Legend's title color
 #'
+#' @import data.tree
+#' @import igraph
+#'
 #' @export
 
 
-plot.NetworkCausalTrees=function(NCT,
-                                 varnames,
-                                 title,
-                                 output = "estimation",
-                                 coloreff = "1000",
-                                 vcolor = c("seagreen4","seagreen1","lightblue1","dodgerblue2"),
-                                 vsize = 32,
-                                 vsize2 = 32,
-                                 vshape = "circle",
-                                 vframecolor = "black",
-                                 vlabelcolor = "black",
-                                 vlabelcex = 0.8,
-                                 vlabelfont = 1,
-                                 elabelcex = 0.7,
-                                 elabelfamily = "sans",
-                                 ecolor = "black",
-                                 ewidth = 0.3,
-                                 edge.arrow.size = 0.5,
-                                 elabelcolor = "black",
-                                 ot = FALSE,
-                                 colleg = "black",
-                                 coltitleleg = "black",
-                                 font.main = 1,
-                                 cex.main = 1,
-                                 adj = 1,
-                                 col.main = "black"){
+plot_NCT <- function(NCT,
+                     varnames,
+                     title,
+                     output = "estimation",
+                     coloreff = "1000",
+                     vcolor = c("seagreen4","seagreen1","lightblue1","dodgerblue2"),
+                     vsize = 32,
+                     vsize2 = 32,
+                     vshape = "circle",
+                     vframecolor = "black",
+                     vlabelcolor = "black",
+                     vlabelcex = 0.8,
+                     vlabelfont = 1,
+                     elabelcex = 0.7,
+                     elabelfamily = "sans",
+                     ecolor = "black",
+                     ewidth = 0.3,
+                     edge.arrow.size = 0.5,
+                     elabelcolor = "black",
+                     ot = FALSE,
+                     colleg = "black",
+                     coltitleleg = "black",
+                     font.main = 1,
+                     cex.main = 1,
+                     adj = 1,
+                     col.main = "black"){
 
 
   options(warn=-1)
   NCT$NOBS<-NCT$NOBS_EST+NCT$NOBS_TR
-
 
   for (p in 1:length(varnames)) {
     NCT$FILTER<-gsub(pattern = paste("X.",p,sep=""),replacement = varnames[p],x=as.character(NCT$FILTER) )
@@ -224,6 +225,6 @@ if(output=="estimation"){
          text.font=4, bg='white')}
 
   title(title,cex.main=cex.main,col.main=col.main,adj=adj,font.main=font.main)
-  return(NCTPLOT)
+  invisible(NCTPLOT)
 }
 
