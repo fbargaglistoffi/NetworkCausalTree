@@ -71,10 +71,7 @@ data_generator = function(N = 2000,
   net <- graph_from_adjacency_matrix(A)
 
   # Randomly assign unit to treatment arms
-  treat <- c()
-  for(i in 1:N){
-    treat[i] <- rbinom(1,1,prob=p[i])
-  }
+  treat <- rbinom(N,1,prob=p)
 
   #Compute number of treated neigh and consequently Gi
   num_tr_neigh <- as.vector(A %*% treat)
