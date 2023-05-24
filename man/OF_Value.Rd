@@ -65,5 +65,5 @@ whole population}
 A numeric value corresponding to the computed  Objective Function
 }
 \description{
-Computes the measure of the  Objective Function
+Computes the measure of the Objective Function
 }

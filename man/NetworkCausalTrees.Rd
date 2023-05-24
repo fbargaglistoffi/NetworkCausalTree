@@ -8,7 +8,7 @@ NetworkCausalTrees(
   X,
   Y,
   W,
-  effweights = c(0.25, 0.25, 0.25, 0.25),
+  effweights = c(1, 0, 0, 0),
   A = NULL,
   G = NULL,
   M = NULL,
