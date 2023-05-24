@@ -4,33 +4,37 @@
 #' @description
 #' Returns a Network Causal Tree, with the corresponding estimates
 #'
-#' @param effweights Vector including the 4 weights alpha, beta, gamma, delta where
-#' - alpha weight associated to the effect 1000
-#' - beta weight associated to the effect 1101
-#' - gamma weight associated to the effect 1110
-#' - delta weight associated to the effect 0100
-#' @param A adjacency matrix
-#' @param N Sample size
-#' @param W N x 1 vector, Individual Treatment
-#' @param G N x 1 vector, Neighborhood Treatment
-#' @param Y N x 1 vector, Observed Outcome
-#' @param M N x 1 vector, Cluster Membership
-#' @param mdisc Numeric value, number of clusters to be assigned to the discovery set
-#' @param mest Numeric value, number of clusters to be assigned to the estimation set only
-#' @param X N x K matrix, Observed Covariates Matrix
-#' @param p  N x 1 vector, Probability to be assigned to the active individual intervention
-#' @param Ne N x 1, Degree
-#' @param minpopfrac Quote of the discovery set population to be included while sprouting the tree
-#' @param fracpredictors Quote of the predictors to be included while sprouting the tree
-#' @param minsize Minimum number of observaztions for each level of the joint intervention
+#' @param X N x K Observed Covariates Matrix.
+#' @param Y N x 1 Observed Outcome vector.
+#' @param W N x 1 Individual Treatment vector.
+#' @param effweights Vector including the 4 effect weight:
+#' - alpha weight associated to the effect 1000,
+#' - beta weight associated to the effect 1101,
+#' - gamma weight associated to the effect 1110,
+#' - delta weight associated to the effect 0100.
+#' @param A N x N Adjacency matrix.
+#' @param G N x 1 Neighborhood Treatment vector.
+#' @param M N x 1 Cluster Membership vector.
+#' @param p  N x 1 Probability to be assigned to the active individual
+#' intervention vector.
+#' @param mdisc Number of clusters to be assigned to the discovery set.
+#' @param mest Number of clusters to be assigned to the estimation set only.
+#' @param minpopfrac Ratio of the discovery set population to be included while
+#' sprouting the tree.
+#' @param fracpredictors Quote of the predictors to be included while sprouting
+#' the tree
+#' @param n_trees Number of Trees.
+#' @param minsize Minimum number of observaztions for each level of the joint
+#' intervention
 #' to be required in the leafs
-#' @param depth Depth of the tree
-#' @param output Desired output of the analysis. if output = "detection" only point estimates
-#' are computed, if output = "estimation" both estimated effects and variances are computed
-#' @param n_tres Number of Trees
-#' @param method method to compute the Objective function: "singular" for NCT targeted to one single effect;
-#' "composite" for NCT targeted to multiple effects; "penalized" for a OF computed while
-#' considering a single effect only and including a penalization term related to the variance
+#' @param depth Depth of the tree.
+#' @param method Method to compute the objective function: "singular" for NCT
+#' targeted to one single effect; "composite" for NCT targeted to multiple
+#' effects; "penalized" for a OF computed while considering a single effect only
+#' and including a penalization term related to the variance.
+#' @param output Desired output of the analysis. if output = "detection" only
+#' point estimates are computed, if output = "estimation" both estimated effects
+#' and variances are computed
 #'
 #' @return A Network Causal Tree - NCT - object. An NCT object is a data frame reporting the
 #' results of the Network Causal Trees, where each tree is characterized by a set of partitions.
@@ -54,16 +58,26 @@
 #'
 #' @export
 #'
-NetworkCausalTrees=function(effweights,A,p,W,Y,X,M,G,Ne, mdisc,mest,method,
+NetworkCausalTrees=function(X, Y, W,
+                            effweights = c(0.25,0.25,0.25,0.25),
+                            A = NULL,
+                            G = NULL,
+                            M = NULL,
+                            p = NULL,
+                            mdisc = 25,
+                            mest = 15,
                             minpopfrac = 1,
-                            depth = 3,
                             fracpredictors = 1,
-                            minsize = 10,
                             n_trees = 1,
+                            depth = 3,
+                            minsize = 10,
+                            method = "singular",
                             output = "estimation"){
 
   N <- length(W)
   m <- length(unique(M))
+
+  Ne <- rowSums(A)
 
   # get input weights
   alpha <- effweights[1]

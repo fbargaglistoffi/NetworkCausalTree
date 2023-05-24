@@ -15,17 +15,17 @@ NetworkCausalTrees(
   p = NULL,
   mdisc = 25,
   mest = 15,
-  method = "singular",
   minpopfrac = 1,
-  depth = 3,
   fracpredictors = 1,
-  minsize = 10,
   n_trees = 1,
+  depth = 3,
+  minsize = 10,
+  method = "singular",
   output = "estimation"
 )
 }
 \arguments{
-\item{X}{N x K Observed Covariates Matrix}
+\item{X}{N x K Observed Covariates Matrix.}
 
 \item{Y}{N x 1 Observed Outcome vector.}
 
@@ -52,26 +52,28 @@ intervention vector.}
 
 \item{mest}{Number of clusters to be assigned to the estimation set only.}
 
+\item{minpopfrac}{Ratio of the discovery set population to be included while
+sprouting the tree.}
+
+\item{fracpredictors}{Quote of the predictors to be included while sprouting
+the tree}
+
+\item{n_trees}{Number of Trees.}
+
+\item{depth}{Depth of the tree.}
+
+\item{minsize}{Minimum number of observaztions for each level of the joint
+intervention
+to be required in the leafs}
+
 \item{method}{Method to compute the objective function: "singular" for NCT
 targeted to one single effect; "composite" for NCT targeted to multiple
 effects; "penalized" for a OF computed while considering a single effect only
 and including a penalization term related to the variance.}
 
-\item{minpopfrac}{Ratio of the discovery set population to be included while sprouting the tree.}
-
-\item{depth}{Depth of the tree.}
-
-\item{fracpredictors}{Quote of the predictors to be included while sprouting the tree}
-
-\item{minsize}{Minimum number of observaztions for each level of the joint intervention
-to be required in the leafs}
-
-\item{output}{Desired output of the analysis. if output = "detection" only point estimates
-are computed, if output = "estimation" both estimated effects and variances are computed}
-
-\item{Ne}{N x 1, Degree}
-
-\item{n_tres}{Number of Trees.}
+\item{output}{Desired output of the analysis. if output = "detection" only
+point estimates are computed, if output = "estimation" both estimated effects
+and variances are computed}
 }
 \value{
 A Network Causal Tree - NCT - object. An NCT object is a data frame reporting the
