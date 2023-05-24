@@ -36,65 +36,68 @@ plot_NCT(
 \arguments{
 \item{NCT}{NetworkCausalTrees results.}
 
-\item{varnames}{(Ordered) covariates names vector}
+\item{varnames}{(Ordered) covariates names vector.}
 
-\item{title}{Title}
+\item{title}{Title.}
 
-\item{output}{Output of the NCT. if output = "detection" only point estimates
-are reported, if output = "estimation" both estimated effects and variances are reported}
+\item{output}{If "detection" only point estimates are reported, if
+"estimation" both estimated effects and variances are reported.}
 
 \item{coloreff}{Estimated Effect according to which nodes are colored
-It can be "1000", "0100","1110","1101"}
+It can be "1000", "0100","1110","1101".}
 
 \item{vcolor}{String Vector of four colors: the first two identify the
 extremes of the color palette employed to depict negative values, while the
 second two identify the extremes of the color palette employed to depict
-positive values. Note that the intensity of the color is related to the Statistic of the
-estimated effect in each leaf (Default values represent negative estimates
-with greens and positive estimates with blues).}
+positive values. Note that the intensity of the color is related to the
+Statistic of the estimated effect in each leaf (Default values represent
+negative estimates with greens and positive estimates with blues).}
 
-\item{vsize}{Vertex size}
+\item{vsize}{Vertex size.}
 
-\item{vsize2}{Vertex size - to be set if you want rectangular vertices -}
+\item{vsize2}{Vertex size (for rectangular vertices).}
 
-\item{vshape}{Vertex shape}
+\item{vshape}{Vertex shape.}
 
-\item{vframecolor}{Vertex's frame color}
+\item{vframecolor}{Vertex's frame color.}
 
-\item{vlabelcolor}{Vertex label color
+\item{vlabelcolor}{Vertex label color.
 Title}
 
-\item{vlabelcex}{Vertex Label cex}
+\item{vlabelcex}{Vertex Label cex.}
 
-\item{vlabelfont}{Vertex label font}
+\item{vlabelfont}{Vertex label font.}
 
-\item{elabelcex}{Edge's label cex}
+\item{elabelcex}{Edge's label cex.}
 
-\item{elabelfamily}{Edge label family}
+\item{elabelfamily}{Edge label family.}
 
-\item{ecolor}{Edges color}
+\item{ecolor}{Edges color.}
 
-\item{ewidth}{Edge width}
+\item{ewidth}{Edge width.}
 
-\item{edge.arrow.size}{Edge's arrow size}
+\item{edge.arrow.size}{Edge's arrow size.}
 
-\item{elabelcolor}{Edges' label color
+\item{elabelcolor}{Edges' label color.
 Vertices}
 
-\item{ot}{TRUE if the NCT object includes an optimal treatment evaluation,
-FALSE otherwise (default: FALSE)
+\item{ot}{TRUE if the results. includes an optimal treatment evaluation,
+FALSE otherwise (default: FALSE).
 Edges}
 
-\item{colleg}{Legend color}
+\item{colleg}{Legend color.}
 
-\item{coltitleleg}{Legend's title color}
+\item{coltitleleg}{Legend's title color.}
 
-\item{cex.main}{Title cex}
+\item{cex.main}{Title cex.}
 
-\item{adj}{adj}
+\item{adj}{adj.}
 
-\item{col.main}{Title color
+\item{col.main}{Title color.
 Legend}
+}
+\value{
+ADD HERE A PLOT DESCRIPTION
 }
 \description{
 Plots the Network Causal Tree results
