@@ -7,11 +7,15 @@
 #' @param X N x K Observed Covariates Matrix.
 #' @param Y N x 1 Observed Outcome vector.
 #' @param W N x 1 Individual Treatment vector.
-#' @param effweights Vector including the 4 effect weight:
-#' - alpha weight associated to the effect 1000,
-#' - beta weight associated to the effect 1101,
-#' - gamma weight associated to the effect 1110,
-#' - delta weight associated to the effect 0100.
+#' @param effweights Treatment Effect weights vector (4 elements):
+#' - alpha: weight associated to the treatment effect 1000 (effect of the
+#' individual treatment, with the neighborhood treatment set at 0),
+#' - beta: weight associated to the treatment effect 1101 (effect of the
+#' individual treatment, with the neighborhood treatment set at 1),
+#' - gamma: weight associated to the spillover effect 1110 (effect of the
+#' neighborhood treatment, with the individual treatment set at 1),
+#' - delta: weight associated to the spillover effect 0100 (effect of the
+#' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
 #' @param G N x 1 Neighborhood Treatment vector.
 #' @param M N x 1 Cluster Membership vector.
@@ -36,17 +40,24 @@
 #' point estimates are computed, if output = "estimation" both estimated effects
 #' and variances are computed
 #'
-#' @return A Network Causal Tree - NCT - object. An NCT object is a data frame reporting the
-#' results of the Network Causal Trees, where each tree is characterized by a set of partitions.
-#' Specifically the GOF variable includes the value of the GOF in the corresponding partition, the NOBS_TR column
-#' includes the number of obs belonging to the training set and to the given partition,
-#' the column FILTER includes the values of the Xs that identify the given partition, the
-#' IDTREE variable identifies the id of the tree ,  the
-#' NUMTREE variable represents the number of trees that identify the given partition,
-#' the NOBS_EST column includes the number of obs belonging
-#' to the estimation set and to the given partition, the columns EFF1000_EST, EFF1101_EST,  EFF1110_EST,
-#' EFF0100_EST reporting the estimated effects in the partitions. If output = "Estimation" the data frame
-#' also include the columns SETAU1000_EST, SETAU1101_EST,  SETAU1110_EST, SETAU0100_EST reporting the estimated standard errors of the effects in the partitions
+#' @return A data.frame describing the obtained Network Causal Trees.
+#' Each row represents a partition (of a specific tree) with 10/14 entries.
+#' Columns summary:
+#' - `OF`: value of the OF in the corresponding partition,
+#' - `NOBS_TR`: number of training observations in the partition,
+#' - `FILTER`: values of the covariates `X` that identify the partition,
+#' - `IDTREE`: tree ID,
+#' - `NUMTREE`: number of trees identifying the partition,
+#' - `NOBS_EST`: number of estimation observations in the partition,
+#' - `EFF1000_EST`: estimated 1000 effects in the partitions,
+#' - `EFF1101_EST`: estimated 1101 effects in the partitions,
+#' - `EFF1110_EST`: estimated 1110 effects in the partitions,
+#' - `EFF0100_EST`: estimated 0100 effects in the partitions.
+#' Additional columns summary (only if output = "Estimation"):
+#' - `SETAU1000_EST`: estimated std. error of the 1000 effect in the partition,
+#' - `SETAU1101_EST`: estimated std. error of the 1101 effect in the partition,
+#' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
+#' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
 #' @import stringi
 #' @import igraph

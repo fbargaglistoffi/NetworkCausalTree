@@ -36,15 +36,26 @@ to be required in the leafs}
 whole population}
 }
 \value{
-A data frame reporting the results of the Network Causal Trees. #' Specifically the OF variable includes the value of the OF in the corresponding partition, the NOBS_TR column
-includes the number of obs belonging to the training set and to the given partition,
-the column FILTER includes the values of the Xs that identify the given partition, the
-IDTREE variable identifies the id of the tree ,  the
-NUMTREE variable represents the number of trees that identify the given partition,
-the NOBS_EST column includes the number of obs belonging
-to the estimation set and to the given partition, the columns EFF1000_EST, EFF1101_EST,  EFF1110_EST,
-EFF0100_EST reporting the estimated effects in the partitions. If output = "Estimation" the data frame
-also include the columns SETAU1000_EST, SETAU1101_EST,  SETAU1110_EST, SETAU0100_EST reporting the estimated standard errors of the effects in the partitions
+A data.frame describing the obtained Network Causal Trees.
+Each row represents a partition (of a specific tree) with 10/14 entries.
+Columns summary:
+\itemize{
+\item \code{OF}: value of the OF in the corresponding partition,
+\item \code{NOBS_TR}: number of training observations in the partition,
+\item \code{FILTER}: values of the covariates \code{X} that identify the partition,
+\item \code{IDTREE}: tree ID,
+\item \code{NUMTREE}: number of trees identifying the partition,
+\item \code{NOBS_EST}: number of estimation observations in the partition,
+\item \code{EFF1000_EST}: estimated 1000 effects in the partitions,
+\item \code{EFF1101_EST}: estimated 1101 effects in the partitions,
+\item \code{EFF1110_EST}: estimated 1110 effects in the partitions,
+\item \code{EFF0100_EST}: estimated 0100 effects in the partitions.
+Additional columns summary (only if output = "Estimation"):
+\item \code{SETAU1000_EST}: estimated std. error of the 1000 effect in the partition,
+\item \code{SETAU1101_EST}: estimated std. error of the 1101 effect in the partition,
+\item \code{SETAU1110_EST}: estimated std. error of the 1110 effect in the partition,
+\item \code{SETAU0100_EST}: estimated std. error of the 0100 effect in the partition.
+}
 }
 \description{
 Computes the estimates in all the partitions identified by the Network Causal Tree
