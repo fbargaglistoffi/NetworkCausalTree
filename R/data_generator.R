@@ -12,7 +12,7 @@
 #' @param het TRUE if the treatment effects 1000 and 1101 are heterogeneous with
 #' respect to the first regressor (+taui with X1=0, -taui with X0=0), FALSE if
 #' constant (+taui) (default: TRUE).
-#' @param taui Absolute value of the treatment effects 1000 and 1101
+#' @param h Absolute value of the treatment effects 1000 and 1101
 #' (default: 2).
 #' @param  method_networks Method to generate the m networks:
 #' "ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
@@ -40,7 +40,7 @@ data_generator = function(N = 2000,
                           m = 40,
                           p = rep(0.2,2000),
                           het = TRUE,
-                          taui = 2,
+                          h = 2,
                           method_networks = "er",
                           param_er = 0.1,
                           coef_ergm = NULL,
@@ -90,8 +90,8 @@ data_generator = function(N = 2000,
   if (het){
     x1 <- X[,1]
     tau <- rep(0, N)
-    tau[x1==0] <- taui
-    tau[x1==1] <- - taui
+    tau[x1==0] <- h
+    tau[x1==1] <- - h
 
     ## Generate Treatment Effects
     y0 <- rnorm(N, sd = 0.01)
@@ -99,7 +99,7 @@ data_generator = function(N = 2000,
     ## Generate Outcome
     y <- y0*(1-w) + y1*w
   } else {
-    tau <- rep(taui, N)
+    tau <- rep(h, N)
     ## Generate Treatment Effects
     y0 <- rnorm(N, sd = 0.01)
     y1 <- y0 + tau

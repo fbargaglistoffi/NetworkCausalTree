@@ -243,17 +243,19 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
                          },
                          x = this_data)
 
+      
+      #STOP IF INSUFFICIENT MINSIZE
+      if (any(as.numeric(table(this_data$W,this_data$G))< minsize)) {
+        split_here <- rep(FALSE, 2)
+        print('split has stopped for insufficient minsize')
+      }
+      
+      
       #STOP IF THE THREE IS OVER THE DEPTH
       depth_tree<-as.numeric(stri_count_regex(tree_info[j, "FILTER"], "X."))
       if (depth_tree>=depth & !is.na(depth_tree)){
         split_here <- rep(FALSE, 2)
         print('split has stopped for reached depth')
-      }
-
-      #STOP IF INSUFFICIENT MINSIZE
-      if (any(as.numeric(table(this_data$W,this_data$G))< minsize)) {
-        split_here <- rep(FALSE, 2)
-        print('split has stopped for insufficient minsize')
       }
 
 
@@ -304,8 +306,6 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
 #' @param gamma weight associated to the effect 1110
 #' @param delta weight associated to the effect 0100
 #' @param  N Sample size
-#' @param minpopfrac Quote of the discovery set population to be included while sprouting the tree
-#' @param fracpredictors Quote of the predictors to be included while sprouting the tree
 #' @param sampgroup Clusters assigned to the discovery set
 #' @param m Total number of clusters
 #' @param  W N x 1 vector, Individual Treatment
@@ -338,15 +338,12 @@ sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,
 
   #SAMPLE PREDICTORS
   samppredictors <- sort(sample(which(grepl("X.",names(data))),
-                                size = ceiling(length(which(grepl("X.",names(data)))) * fracpredictors),
+                                size = ceiling(length(which(grepl("X.",names(data)))) * 1),
                                 replace = FALSE))
 
   #CREATE SUBSET OF DATA ABOVE WHICH IS USED TO BUILD UP THE TREE AND BUILD THE TREE
   datasample<-data[which(M %in% sampgroup),c(1:4,samppredictors,ncol(data))]
-  if(round(minpopfrac*nrow(datasample))==nrow(datasample)){
-    sampunit<- nrow(datasample)
-  } else {
-    sampunit=sample(round(minpopfrac*nrow(datasample)):nrow(datasample),size=1)}
+  sampunit<- nrow(datasample)
 
   datasample<-datasample[sample(1:nrow(datasample), size = sampunit, replace = FALSE),]
   datasample<-datasample[order(datasample$idunit) ,]
@@ -395,8 +392,6 @@ sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,
 #' - `OF`: value of the OF in the corresponding partition,
 #' - `NOBS_TR`: number of training observations in the partition,
 #' - `FILTER`: values of the covariates `X` that identify the partition,
-#' - `IDTREE`: tree ID,
-#' - `NUMTREE`: number of trees identifying the partition,
 #' - `NOBS_EST`: number of estimation observations in the partition,
 #' - `EFF1000_EST`: estimated 1000 effects in the partitions,
 #' - `EFF1101_EST`: estimated 1101 effects in the partitions,
@@ -410,13 +405,6 @@ sproutnetctree=function(method,minpopfrac,fracpredictors,sampgroup,m,alpha,beta,
 #'
 alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
 
-  tree_info_whole<-tree_info
-  n_trees<-max(tree_info$IDTREE)
-  Results_tree_info<- NULL
-
-  for (t in c(1:n_trees)){
-
-    tree_info<-tree_info_whole[which(tree_info_whole$IDTREE==t),]
 
     if(output=="estimation"){
       data_est <- data.frame(idunit=1:N,W=W,G=G,Y=Y,X=X)
@@ -460,7 +448,7 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
           tree_info$EFFTAU0100[j]<-EffTau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
           tree_info$SETAU0100[j]<- sqrt(Vartau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit],Nel=Nelsub))
         }}
-      colnames(tree_info)<-c("GOF","NOBS_TR","FILTER","NUMTREE","IDTREE","NOBS_EST","EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST","EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST")
+      colnames(tree_info)<-c("OF","FILTER","TERMINAL","NOBS_TR","NOBS_EST","EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST","EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST")
 
     }
 
@@ -496,13 +484,12 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
           tree_info$EFFTAU0100[j]<-EffTau0100(N=nrow(this_data),W=this_data$W,G=this_data$G,Y=this_data$Y,p=p[this_data$idunit],Ne=Ne[this_data$idunit])
 
         }}
-      colnames(tree_info)<-c("GOF","NOBS_TR","FILTER","NUMTREE","IDTREE","NOBS_EST","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
+      colnames(tree_info)<-c("OF","FILTER","TERMINAL","NOBS_TR","NOBS_EST","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
 
     }
 
-    Results_tree_info<-rbind(Results_tree_info,tree_info)
-  }
+  
 
-  return(Results_tree_info)
+  return(tree_info)
 }
 

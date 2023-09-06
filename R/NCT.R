@@ -17,17 +17,10 @@
 #' - delta: weight associated to the spillover effect 0100 (effect of the
 #' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
-#' @param G N x 1 Neighborhood Treatment vector.
 #' @param M N x 1 Cluster Membership vector.
 #' @param p  N x 1 Probability to be assigned to the active individual
 #' intervention vector.
-#' @param mdisc Number of clusters to be assigned to the discovery set.
-#' @param mest Number of clusters to be assigned to the estimation set only.
-#' @param minpopfrac Ratio of the discovery set population to be included while
-#' sprouting the tree.
-#' @param fracpredictors Quote of the predictors to be included while sprouting
-#' the tree
-#' @param n_trees Number of Trees.
+#' @param ratio_dis ratio  of clusters to be assigned to the discovery set only.
 #' @param minsize Minimum number of observaztions for each level of the joint
 #' intervention
 #' to be required in the leafs
@@ -46,8 +39,6 @@
 #' - `OF`: value of the OF in the corresponding partition,
 #' - `NOBS_TR`: number of training observations in the partition,
 #' - `FILTER`: values of the covariates `X` that identify the partition,
-#' - `IDTREE`: tree ID,
-#' - `NUMTREE`: number of trees identifying the partition,
 #' - `NOBS_EST`: number of estimation observations in the partition,
 #' - `EFF1000_EST`: estimated 1000 effects in the partitions,
 #' - `EFF1101_EST`: estimated 1101 effects in the partitions,
@@ -70,14 +61,9 @@
 NetworkCausalTrees <- function(X, Y, W,
                                effweights = c(1,0,0,0),
                                A = NULL,
-                               G = NULL,
                                M = NULL,
                                p = NULL,
-                               mdisc = 25,
-                               mest = 15,
-                               minpopfrac = 1,
-                               fracpredictors = 1,
-                               n_trees = 1,
+                               ratio_dis,
                                depth = 3,
                                minsize = 10,
                                method = "singular",
@@ -85,8 +71,6 @@ NetworkCausalTrees <- function(X, Y, W,
 
   N <- length(W)
   m <- length(unique(M))
-
-  Ne <- rowSums(A)
 
   # get input weights
   alpha <- effweights[1]
@@ -107,30 +91,19 @@ NetworkCausalTrees <- function(X, Y, W,
     stop('Composite gof is computed if at least two effects are investigated.')
   }
 
-  if (is.null(G) & is.null(A)) {
-    stop('Independently of the output, you have to specify either the
-         Neighborhood Treatment vector G or the Adiacency Matrix A.')
+  if (is.null(A)) {
+    stop('You have to specify the Adiacency Matrix A.')
   }
-
-  if (is.null(Ne) & is.null(A)) {
-    stop('Independently of the output, you have to specify either the degree vector Ne
-         or the Adiacency Matrix A.')
+  
+  if (ratio_dis<=0 | ratio_dis>1) {
+    stop('The ratio of clusters to be assigned to the discovery set must be above 0 and below or equal 1')
   }
-
-  if (output=="estimation" & is.null(A)) {
-    stop('If output is set estimation you have to specify the Adiacency Matrix A.')
-  }
-
-  if (is.null(Ne)) {
-    #stop('If you dont input the Adiacency Matrix you must specify the degree vector')
+  
     Ne <-rowSums(A)
-  }
-
-  if (is.null(G)) {
     nt <- as.vector(A %*% W)
     G = rep(1,N)
     G[nt==0] <- 0
-  }
+  
 
   Nel <- vector(mode = "list", length = N)
   for (i in  1:N) {
@@ -139,66 +112,38 @@ NetworkCausalTrees <- function(X, Y, W,
 
 
   Peff <- popeff(N=N,W=W,G=G,Y=Y,p=p,Ne=Ne)
+  mdisc=round(m*ratio_dis)
   sampgroup_train <- sample(1:m,size=mdisc,replace=FALSE)
-  trees <- plyr::raply(n_trees,
-                       sproutnetctree(method = method,
-                                      sampgroup = sampgroup_train,
-                                      fracpredictors = fracpredictors,
-                                      m = m,
-                                      minpopfrac = minpopfrac,
-                                      depth = depth,
-                                      minsize = minsize,
-                                      alpha = alpha,
-                                      beta = beta,
-                                      gamma = gamma,
-                                      delta = delta,
-                                      N = N,
-                                      W = W,
-                                      G = G,
-                                      Y = Y,
-                                      X = X,
-                                      M = M,
-                                      Ne = Ne,
-                                      p = p,
-                                      Peff = Peff,
-                                      Nel = Nel),
-                       .progress = "text" )
+  tree <- sproutnetctree(method = method,
+                          sampgroup = sampgroup_train,
+                          m = m,
+                          depth = depth,
+                          minsize = minsize,
+                          alpha = alpha,
+                          beta = beta,
+                          gamma = gamma,
+                          delta = delta,
+                          N = N,
+                          W = W,
+                          G = G,
+                          Y = Y,
+                          X = X,
+                          M = M,
+                          Ne = Ne,
+                          p = p,
+                          Peff = Peff,
+                          Nel = Nel)[["tree"]]
 
-  Forest <- data.frame(IDTREE = NA,
-                       NODE = NA,
-                       GOF = NA,
-                       NOBS = NA,
-                       FILTER = NA,
-                       TERMINAL = NA,
-                       stringsAsFactors = FALSE)
 
-  for(i in 1:n_trees){
-    tree <- NA
-    tree <- cbind(rep(i,nrow(as.data.frame(trees[i]))),
-                  as.data.frame(trees[i]))
-    colnames(tree) <- colnames(Forest)
-    Forest <- rbind(Forest,tree)
-  }
 
-  Forest=Forest[-1,]
-
-  Results<-data.frame(GOF = Forest$GOF,
-                      NOBS = Forest$NOBS,
-                      FILTER =  c("NA",as.vector(na.omit(unique(Forest$FILTER)))),
-                      NUMTREE = NA,
-                      IDTREE = Forest$IDTREE,
+  Results<-data.frame(OF = tree$OF,
+                      FILTER =  c("NA",as.vector(na.omit(unique(tree$FILTER)))),
+                      TERMINAL=tree$TERMINAL,
+                      NOBS = tree$NOBS,
                       stringsAsFactors = FALSE)
 
-  for(j in as.vector(na.omit(unique(Forest$FILTER)))){
-    Results$NUMTREE[Results$FILTER==j] <- length(unique(Forest$IDTREE[which(Forest$FILTER==j)]))
-    Results$NUMTREE[Results$FILTER=="NA"] <- length(unique(Forest$IDTREE[is.na(Forest$FILTER)]))
-  }
 
-  if(nrow(Results)==1){
-    warning('No split has been made')
-  }
-
-  results_est <- alleffect(output = output,
+  Results_estimates <- alleffect(output = output,
                            tree_info = Results,
                            N = N,
                            W = W,
@@ -209,5 +154,5 @@ NetworkCausalTrees <- function(X, Y, W,
                            p = p,
                            Nel = Nel,
                            minsize = minsize)
-  return(results_est)
+  return(Results_estimates)
 }
