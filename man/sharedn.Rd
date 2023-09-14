@@ -7,12 +7,12 @@
 sharedn(i, j, Nel)
 }
 \arguments{
-\item{i}{Unit ID}
+\item{i}{Unit ID.}
 
-\item{j}{Unit ID}
+\item{j}{Unit ID.}
 
 \item{Nel}{List of N elements - where N is the sample size -
-where each element i contains the IDs of the direct neighbors of unit i}
+where each element i contains the IDs of the direct neighbors of unit i.}
 }
 \value{
 A numeric value representing the number of shared neighbors between

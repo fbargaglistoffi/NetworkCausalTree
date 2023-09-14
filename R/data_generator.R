@@ -10,8 +10,8 @@
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual
 #' intervention (default: rep(0.2,2000))
 #' @param het TRUE if the treatment effects 1000 and 1101 are heterogeneous with
-#' respect to the first regressor (+taui with X1=0, -taui with X0=0), FALSE if
-#' constant (+taui) (default: TRUE).
+#' respect to the first regressor (+h with X1=0, -h with X0=0), FALSE if
+#' constant (+h) (default: TRUE).
 #' @param h Absolute value of the treatment effects 1000 and 1101
 #' (default: 2).
 #' @param  method_networks Method to generate the m networks:

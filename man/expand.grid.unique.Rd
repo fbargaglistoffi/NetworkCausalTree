@@ -8,15 +8,15 @@ by equal elements}
 expand.grid.unique(x, y, include.equals = FALSE)
 }
 \arguments{
-\item{x}{A vector}
+\item{x}{A vector.}
 
-\item{y}{A vector}
+\item{y}{A vector.}
 
-\item{include.equals=FALSE}{}
+\item{include.equals}{Boolean.}
 }
 \value{
 A data frame with all combinations of the elements of the vectors,
-with no rows characterized by equal elements
+with no rows characterized by equal elements.
 }
 \description{
 Create a data frame including all combinations of the supplied vectors or factors,

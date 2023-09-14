@@ -7,23 +7,24 @@
 genmultnet(m, N, method_networks, param_er, var_homophily_ergm, coef_ergm)
 }
 \arguments{
-\item{m}{Number of clusters}
+\item{m}{Number of clusters.}
 
-\item{N}{Number of units}
+\item{N}{Number of units.}
 
-\item{method_networks}{method to generate the m networks: "ergm" (Exponential Random Graph Models) , "er" (Erdos Renyi) ,
-"sf" (Barabasi-Albert model)
-Note: in this function, clusters have the same size, so N should be a multiple of m}
+\item{method_networks}{method to generate the m networks: "ergm" (Exponential
+Random Graph Models) , "er" (Erdos Renyi), "sf" (Barabasi-Albert model)
+Note: in this function, clusters have the same size, so N should be a
+multiple of m.}
 
-\item{param_er}{If method "er", probability of the ER model}
+\item{param_er}{If method "er", probability of the ER model.}
 
-\item{var_homophily_ergm}{Variable to account for homophily}
+\item{var_homophily_ergm}{Variable to account for homophily.}
 
-\item{coef_ergm}{If method "ergm", coefficients of the ERGM model}
+\item{coef_ergm}{If method "ergm", coefficients of the ERGM model.}
 }
 \value{
-: An adjacency matrix which describes a clustered network environment
+An adjacency matrix which describes a clustered network environment.
 }
 \description{
-Generates a simulated clustered network environment
+Generates a simulated clustered network environment.
 }

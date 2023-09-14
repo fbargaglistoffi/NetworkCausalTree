@@ -33,10 +33,6 @@ sproutnetctree(
 "composite" for NCT targeted to multiple effects; "penalized" for a OF computed while
 considering a single effect only and including a penalization term related to the variance}
 
-\item{minpopfrac}{Quote of the discovery set population to be included while sprouting the tree}
-
-\item{fracpredictors}{Quote of the predictors to be included while sprouting the tree}
-
 \item{sampgroup}{Clusters assigned to the discovery set}
 
 \item{m}{Total number of clusters}

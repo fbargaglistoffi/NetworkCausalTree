@@ -243,14 +243,14 @@ netctree <- function(method,alpha,beta,gamma,delta,depth,minsize,N,W,G,Y,X,p,Ne,
                          },
                          x = this_data)
 
-      
+
       #STOP IF INSUFFICIENT MINSIZE
       if (any(as.numeric(table(this_data$W,this_data$G))< minsize)) {
         split_here <- rep(FALSE, 2)
         print('split has stopped for insufficient minsize')
       }
-      
-      
+
+
       #STOP IF THE THREE IS OVER THE DEPTH
       depth_tree<-as.numeric(stri_count_regex(tree_info[j, "FILTER"], "X."))
       if (depth_tree>=depth & !is.na(depth_tree)){
@@ -487,9 +487,6 @@ alleffect=function(output,tree_info,N,W,G,Y,X,Ne,Nel,p,minsize){
       colnames(tree_info)<-c("OF","FILTER","TERMINAL","NOBS_TR","NOBS_EST","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST")
 
     }
-
-  
-
   return(tree_info)
 }
 

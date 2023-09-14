@@ -10,21 +10,20 @@ plot_NCT(
   title,
   output = "estimation",
   coloreff = "1000",
-  vcolor = c("seagreen4", "seagreen1", "lightblue1", "dodgerblue2"),
-  vsize = 32,
-  vsize2 = 32,
-  vshape = "circle",
+  vcolor = c("lightskyblue", "dodgerblue2"),
+  vsize = 44,
+  vsize2 = 40,
+  vshape = "rectangle",
   vframecolor = "black",
   vlabelcolor = "black",
-  vlabelcex = 0.8,
+  vlabelcex = 2,
   vlabelfont = 1,
-  elabelcex = 0.7,
+  elabelcex = 1.5,
   elabelfamily = "sans",
   ecolor = "black",
   ewidth = 0.3,
   edge.arrow.size = 0.5,
   elabelcolor = "black",
-  ot = FALSE,
   colleg = "black",
   coltitleleg = "black",
   font.main = 1,
@@ -46,12 +45,9 @@ plot_NCT(
 \item{coloreff}{Estimated Effect according to which nodes are colored
 It can be "1000", "0100","1110","1101".}
 
-\item{vcolor}{String Vector of four colors: the first two identify the
-extremes of the color palette employed to depict negative values, while the
-second two identify the extremes of the color palette employed to depict
-positive values. Note that the intensity of the color is related to the
-Statistic of the estimated effect in each leaf (Default values represent
-negative estimates with greens and positive estimates with blues).}
+\item{vcolor}{String Vector of two colors identifying the
+extremes of the color palette employed to depict positive estimates of the effect specified in "coloreff"
+(Negative values are represented in white).}
 
 \item{vsize}{Vertex size.}
 
@@ -81,10 +77,6 @@ Title}
 \item{elabelcolor}{Edges' label color.
 Vertices}
 
-\item{ot}{TRUE if the results. includes an optimal treatment evaluation,
-FALSE otherwise (default: FALSE).
-Edges}
-
 \item{colleg}{Legend color.}
 
 \item{coltitleleg}{Legend's title color.}
@@ -95,11 +87,21 @@ Edges}
 
 \item{col.main}{Title color.
 Legend}
+
+\item{ot}{TRUE if the results. includes an optimal treatment evaluation,
+FALSE otherwise (default: FALSE).
+Edges}
 }
 \value{
-ADD HERE A PLOT DESCRIPTION
+A plot representing the estimated Network causal tree. Each node reports - from the top to the bottom
+\itemize{
+\item i) the estimated effect 10000
+ii) the estimated effect 0100
+iii) the size of the sub population
+Colors provide an intuition on the strength of the effect specified in "coloreff".
+}
 }
 \description{
-Plots the Network Causal Tree results
+Plots the Network Causal Tree results.
 General
 }

@@ -43,8 +43,6 @@ Columns summary:
 \item \code{OF}: value of the OF in the corresponding partition,
 \item \code{NOBS_TR}: number of training observations in the partition,
 \item \code{FILTER}: values of the covariates \code{X} that identify the partition,
-\item \code{IDTREE}: tree ID,
-\item \code{NUMTREE}: number of trees identifying the partition,
 \item \code{NOBS_EST}: number of estimation observations in the partition,
 \item \code{EFF1000_EST}: estimated 1000 effects in the partitions,
 \item \code{EFF1101_EST}: estimated 1101 effects in the partitions,

@@ -8,16 +8,11 @@ NetworkCausalTrees(
   X,
   Y,
   W,
-  effweights = c(1, 0, 0, 0),
-  A = NULL,
-  G = NULL,
-  M = NULL,
+  A,
+  M,
   p = NULL,
-  mdisc = 25,
-  mest = 15,
-  minpopfrac = 1,
-  fracpredictors = 1,
-  n_trees = 1,
+  effweights = c(1, 0, 0, 0),
+  ratio_dis = 0.5,
   depth = 3,
   minsize = 10,
   method = "singular",
@@ -31,6 +26,13 @@ NetworkCausalTrees(
 
 \item{W}{N x 1 Individual Treatment vector.}
 
+\item{A}{N x N Adjacency matrix.}
+
+\item{M}{N x 1 Cluster Membership vector.}
+
+\item{p}{N x 1 Probability to be assigned to the active individual
+intervention vector (default: NULL).}
+
 \item{effweights}{Treatment Effect weights vector (4 elements):
 \itemize{
 \item alpha: weight associated to the treatment effect 1000 (effect of the
@@ -43,52 +45,32 @@ neighborhood treatment, with the individual treatment set at 1),
 neighborhood treatment, with the individual treatment set at 0).
 }}
 
-\item{A}{N x N Adjacency matrix.}
+\item{ratio_dis}{ratio  of clusters to be assigned to the discovery set only
+(default: 0.5).}
 
-\item{G}{N x 1 Neighborhood Treatment vector.}
+\item{depth}{Depth of the tree (default: 3).}
 
-\item{M}{N x 1 Cluster Membership vector.}
-
-\item{p}{N x 1 Probability to be assigned to the active individual
-intervention vector.}
-
-\item{mdisc}{Number of clusters to be assigned to the discovery set.}
-
-\item{mest}{Number of clusters to be assigned to the estimation set only.}
-
-\item{minpopfrac}{Ratio of the discovery set population to be included while
-sprouting the tree.}
-
-\item{fracpredictors}{Quote of the predictors to be included while sprouting
-the tree}
-
-\item{n_trees}{Number of Trees.}
-
-\item{depth}{Depth of the tree.}
-
-\item{minsize}{Minimum number of observaztions for each level of the joint
-intervention
-to be required in the leafs}
+\item{minsize}{Minimum number of observations for each level of the joint
+intervention to be required in the leaves (default: 10).}
 
 \item{method}{Method to compute the objective function: "singular" for NCT
 targeted to one single effect; "composite" for NCT targeted to multiple
 effects; "penalized" for a OF computed while considering a single effect only
-and including a penalization term related to the variance.}
+and including a penalization term related to the variance
+(default: "singular").}
 
-\item{output}{Desired output of the analysis. if output = "detection" only
+\item{output}{Desired output of the analysis. If output = "detection" only
 point estimates are computed, if output = "estimation" both estimated effects
-and variances are computed}
+and variances are computed (default: "estimation").}
 }
 \value{
 A data.frame describing the obtained Network Causal Trees.
-Each row represents a partition (of a specific tree) with 10/14 entries.
+Each row represents a partition (of a specific tree) with 8/12 entries.
 Columns summary:
 \itemize{
 \item \code{OF}: value of the OF in the corresponding partition,
 \item \code{NOBS_TR}: number of training observations in the partition,
 \item \code{FILTER}: values of the covariates \code{X} that identify the partition,
-\item \code{IDTREE}: tree ID,
-\item \code{NUMTREE}: number of trees identifying the partition,
 \item \code{NOBS_EST}: number of estimation observations in the partition,
 \item \code{EFF1000_EST}: estimated 1000 effects in the partitions,
 \item \code{EFF1101_EST}: estimated 1101 effects in the partitions,
@@ -102,5 +84,5 @@ Additional columns summary (only if output = "Estimation"):
 }
 }
 \description{
-Returns a Network Causal Tree, with the corresponding estimates
+Run Network Causal Tree algorithm.
 }
