@@ -21,28 +21,24 @@ library("NetworkCausalTree")
 
 Singular splitting
 ```r
+set.seed(1)
+
 dataset <- data_generator(N = 2000, 
                           K = 4,
                           m = 40, 
                           p = rep(0.2,2000), 
                           het = TRUE, 
-                          taui = 2, 
+                          h = 2, 
                           method_networks = "er", 
                           param_er = 0.1)
-
-result <- NetworkCausalTrees(X =  dataset[["X"]],
+result <- NetworkCausalTrees(X = dataset[["X"]],
                              Y = dataset[["Y"]],
-                             W = dataset[["W"]],
-                             effweights <- c(1,0,0,0), 
+                             W = dataset[["W"]], 
                              A = dataset[["A"]],
-                             G =  dataset[["G"]], 
                              M = dataset[["M"]],
                              p = dataset[["p"]], 
-                             mdisc = 25, 
-                             mest = 15,  
-                             minpopfrac = 1, 
-                             fracpredictors = 1, 
-                             n_trees = 1,
+                             effweights = c(1,0,0,0),
+                             ratio_dis = 0.5,
                              depth = 3,
                              minsize = 5, 
                              method = "singular",
@@ -55,6 +51,8 @@ plot_NCT(result, cov_names, title)
 
 Composite splitting (NCT based on all the four effects)
 ```r
+set.seed(1)
+
 dataset <- data_generator(N = 2000, 
                           K = 4,
                           m = 40, 
@@ -62,7 +60,6 @@ dataset <- data_generator(N = 2000,
                           het = FALSE, 
                           taui = 0, 
                           method_networks = "sf")
-
 result <- NetworkCausalTrees(X =  dataset[["X"]],
                              Y = dataset[["Y"]],
                              W = dataset[["W"]],
@@ -85,7 +82,6 @@ title <- expression("CAUSAL TREE TARGETED TO ALL THE EFFECTS")
 cov_names <- colnames(dataset[["X"]])
 plot_NCT(result, cov_names, title)
 ```
-
 
 ## Cite
 
