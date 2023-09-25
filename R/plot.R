@@ -105,7 +105,7 @@ plot_NCT <- function(NCT,
     nomelati_i<-gsub(pattern = "X.",replacement="",x=nomelati_i)
     nomelati=c(nomelati,nomelati_i)
   }
-  grafo_tree<-graph_from_edgelist(lati_tree, directed = TRUE)
+  grafo_tree<-igraph::graph_from_edgelist(lati_tree, directed = TRUE)
   V(grafo_tree)$TAU1000<-NCT$EFF1000_EST
   V(grafo_tree)$SE1000<-NCT$SE1000_EST
   V(grafo_tree)$TAU1101<-NCT$EFF1101_EST
@@ -138,7 +138,7 @@ plot_NCT <- function(NCT,
   qeff<-as.numeric(quantile(V(grafo_tree)$stat[which(V(grafo_tree)$stat>=0)]))[2:4]
 
 
-  V(grafo_tree)$color[which(V(grafo_tree)$stat<  (0)) ]<- "white"
+  V(grafo_tree)$color[which(V(grafo_tree)$stat< 0)]<- "white"
   V(grafo_tree)$color[which(V(grafo_tree)$stat>= 0 & V(grafo_tree)$stat< qeff[1])]<-cols[1]
   V(grafo_tree)$color[which(V(grafo_tree)$stat>= qeff[1] & V(grafo_tree)$stat< qeff[2])]<-cols[2]
   V(grafo_tree)$color[which(V(grafo_tree)$stat>= qeff[2] & V(grafo_tree)$stat< qeff[3])]<-cols[3]

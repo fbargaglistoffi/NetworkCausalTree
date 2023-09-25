@@ -32,7 +32,7 @@ EffTau1000=function(N,W,G,Y,p,Ne){
 #' @param  W N x 1 vector, Individual Treatment
 #' @param  G N x 1 vector, Neighborhood Treatment
 #' @param  Y N x 1 vector, Observed Outcome
-#' @param  p  N x 1 vector,Probability to be assigned to the active individual intervention
+#' @param  p N x 1 vector,Probability to be assigned to the active individual intervention
 #' @param  Ne N x 1 vector, Degree
 #'
 #' @return A numeric value corresponding to the estimate of the effect
