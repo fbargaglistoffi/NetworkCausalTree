@@ -10,8 +10,8 @@
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual
 #' intervention (default: rep(0.2,2000))
 #' @param het TRUE if the treatment effects 1000 and 1101 are heterogeneous with
-#' respect to the first regressor (+h with X1=0, -h with X0=0), FALSE if
-#' constant (+h) (default: TRUE).
+#' respect to the first regressor (+taui with X1=0, -taui with X0=0), FALSE if
+#' constant (+taui) (default: TRUE).
 #' @param h Absolute value of the treatment effects 1000 and 1101
 #' (default: 2).
 #' @param  method_networks Method to generate the m networks:
@@ -33,6 +33,8 @@
 #' - Nx1 probability to be assigned to the active individual intervention vector
 #' (`p`),
 #'
+#' @import igraph
+#'
 #' @export
 
 data_generator = function(N = 2000,
@@ -48,70 +50,75 @@ data_generator = function(N = 2000,
 
   # Generate Covariates
   X <- NULL
-  for(k in 1:K){
-    x <- rbinom(N,1,0.5)
-    X <- cbind(X,x)
-    colnames(X)[k] <- paste0(colnames(X)[k],k)
+  for (k in 1 : K) {
+    x <- rbinom(N, 1, 0.5)
+    X <- cbind(X, x)
+    colnames(X)[k] <- paste0(colnames(X)[k], k)
   }
 
   # Generate m networks
-  gsize <- N/m
-  A <- genmultnet(N = N,
-                  m = m,
-                  method_networks = method_networks,
-                  param_er = param_er,
-                  coef_ergm = coef_ergm,
-                  var_homophily_ergm = var_homophily_ergm)
-
-  # Group Indicator
-  M <- c(rep(1:m, gsize))
-  M <- sort(M)
-  levels(M) <- c(1:m)
+  A <- generate_clustered_networks(N = N,
+                                   m = m,
+                                   method_networks = method_networks,
+                                   param_er = param_er,
+                                   coef_ergm = coef_ergm,
+                                   var_homophily_ergm = var_homophily_ergm)
+  
   net <- graph_from_adjacency_matrix(A)
 
+  # Group Indicator
+  cluster_size <- N / m
+  M <- c(rep(1 : m, cluster_size))
+  M <- sort(M)
+  levels(M) <- c(1 : m)
+  
+
   # Randomly assign unit to treatment arms
-  treat <- rbinom(N, 1, prob = p)
+  W <- rbinom(N, 1, prob = p)
+  
+  # Network information
+  Ne <- rowSums(A)
+  Ne_treated <- as.vector(A %*% W)
+  G = rep(1, N)
+  G[Ne_treated == 0] <- 0
 
-  # Compute number of treated neigh and consequently Gi
-  num_tr_neigh <- as.vector(A %*% treat)
-  neightreat <- rep(1, N) #Gi
-  neightreat[which(num_tr_neigh==0)] <- 0
+  
 
-  # Pass to the standard notation
-  neigh <- rowSums(A)
-  w <- treat[neigh>0]
-  g <- neightreat[neigh>0]
-  M <- as.numeric(M[neigh>0])
-  X <- X[neigh>0,]
-  p <- p[neigh>0]
-  N <- length(w)
-  A <- A[neigh>0, neigh>0]
+  # Remove isolates
+  W <- W[Ne > 0]
+  G <- G[Ne > 0]
+  M <- as.numeric(M[Ne > 0])
+  X <- X[Ne > 0, ]
+  p <- p[Ne > 0]
+  N <- length(W)
+  A <- A[Ne > 0, Ne > 0]
 
-  if (het){
+  # Generate Potential Outcomes
+  if (het) {
     x1 <- X[,1]
     tau <- rep(0, N)
     tau[x1==0] <- h
     tau[x1==1] <- - h
 
-    ## Generate Treatment Effects
+    # Generate Treatment Effects
     y0 <- rnorm(N, sd = 0.01)
     y1 <- y0 + tau
-    ## Generate Outcome
-    y <- y0*(1-w) + y1*w
+    # Generate Outcome
+    Y <- y0 * (1-W) + y1 * W
   } else {
     tau <- rep(h, N)
-    ## Generate Treatment Effects
+    # Generate Treatment Effects
     y0 <- rnorm(N, sd = 0.01)
     y1 <- y0 + tau
-    ## Generate Outcome
-    y <- y0*(1-w) +  y1*w
+    # Generate Outcome
+    Y <- y0 * (1-W) +  y1 * W
   }
 
   dataset <- list(X = X,
-                  Y = y,
-                  W = w,
+                  Y = Y,
+                  W = W,
                   A = A,
-                  G = g,
+                  G = G,
                   M = M,
                   p = p)
   return(dataset)
