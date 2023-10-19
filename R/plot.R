@@ -6,7 +6,7 @@
 
 #' General parameters
 #' @param NCT A NCT object (output of the NetworkCausalTree function).
-#' @param varnames (Ordered) covariates names vector.
+#' @param cov_names (Ordered) covariates names vector.
 #' @param output If "detection" only point estimates are reported, if
 #' "estimation" both estimated effects and variances are reported.
 
@@ -19,36 +19,37 @@
 #' @param elabelcolor Edges' label color.
 
 #' Vertices - specific parameters
-#' @param vsize Vertex size.
-#' @param vsize2 Vertex size (for rectangular vertices).
-#' @param vshape Vertex shape.
-#' @param vlabelfont Vertex label font.
-#' @param vlabelcex Vertex Label cex.
-#' @param coloreff The estimated effect according to which nodes are colored
+#' @param vertex_size Vertex size.
+#' @param vertex_size2 Vertex size (for rectangular vertices).
+#' @param vertex_shape Vertex shape.
+#' @param vertex_label_font Vertex label font.
+#' @param vertex_label_cex Vertex Label cex.
+#' @param effect_color_nodes The estimated effect according to which nodes are colored
 #' It can be "1000", "0100","1110","1101".
-#' @param vcolor String Vector of two colors identifying the
+#' @param vertex_color String Vector of two colors identifying the
 #' extremes of the color palette employed to depict positive 
-#' estimates of the effect specified in "coloreff" 
+#' estimates of the effect specified in "effect_color_nodes" 
 #' (Negative values are represented in white )
-#' @param vframecolor Vertex's frame color.
-#' @param vlabelcolor Vertex label color.
+#' @param vertex_frame_color Vertex's frame color.
+#' @param vertex_label_color Vertex label color.
 
 #' Title - specific parameters
 #' @param title Title.
-#' @param cex.main Title cex.
+#' @param main_cex Title cex.
 #' @param adj adj.
-#' @param col.main Title color.
-
+#' @param main_color Title color.
+#' @param main_font Title font.
+#' 
 #' Legend - specific parameters
-#' @param colleg Legend color.
-#' @param coltitleleg Legend's title color.
+#' @param legend_color Legend color.
+#' @param legend_title_color Legend's title color.
 #'
 #' @return A plot representing the estimated Network causal tree. 
 #' Each node reports - from the top to the bottom
 #'- i) the estimated effect 10000
 #'  ii) the estimated effect 0100
-#'  iii) the size of the sub population
-#'  Colors provide an intuition on the strength of the effect specified in "coloreff". 
+#'  iii) the size of the sub popuedgeson
+#'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes". 
 
 #'
 #' @import data.tree
@@ -57,46 +58,46 @@
 #' @export
 
 plot_NCT <- function(NCT,
-                     varnames,
+                     cov_names,
                      title,
                      output = "estimation",
-                     coloreff = "1000",
-                     vcolor = c("lightskyblue","dodgerblue2"),
-                     vsize = 44,
-                     vsize2 = 40,
-                     vshape = "rectangle",
-                     vframecolor = "black",
-                     vlabelcolor = "black",
-                     vlabelcex = 2,
-                     vlabelfont = 1,
-                     elabelcex = 1.5,
-                     elabelfamily = "sans",
-                     ecolor = "black",
-                     ewidth = 0.3,
-                     edge.arrow.size = 0.5,
-                     elabelcolor = "black",  
-                     colleg = "black",
-                     coltitleleg = "black",
-                     font.main = 1,
-                     cex.main = 1,
+                     effect_color_nodes = "1000",
+                     vertex_color = c("lightskyblue","dodgerblue2"),
+                     vertex_size = 44,
+                     vertex_size2 = 40,
+                     vertex_shape = "rectangle",
+                     vertex_frame_color = "black",
+                     vertex_label_color = "black",
+                     vertex_label_cex = 2,
+                     vertex_label_font = 1,
+                     edge_label_cex = 1.5,
+                     edge_label_family = "sans",
+                     edge_color = "black",
+                     edge_width = 0.3,
+                     edge_arrow_size = 0.5,
+                     edge_label_color = "black",  
+                     legend_color = "black",
+                     legend_title_color = "black",
+                     main_font = 1,
+                     main_cex = 1,
                      adj = 1,
-                     col.main = "black"){
+                     main_color = "black"){
 
   options(warn = -1)
   
   # Clean causal rules
   NCT$NOBS <- NCT$NOBS_EST + NCT$NOBS_TR
 
-  if (length(varnames) > 10){
-  for (p in 10 : length(varnames)) {
+  if (length(cov_names) > 10){
+  for (p in 10 : length(cov_names)) {
     NCT$FILTER <- gsub(pattern = paste("X.", p, sep=""),
-                     replacement = varnames[p], 
+                     replacement = cov_names[p], 
                      x = as.character(NCT$FILTER) )
   }
   }  
   for (p in 1 : 9) {
     NCT$FILTER <- gsub(pattern = paste("X.", p, sep=""),
-                     replacement = varnames[p], 
+                     replacement = cov_names[p], 
                      x = as.character(NCT$FILTER) )
   }
   
@@ -116,17 +117,17 @@ plot_NCT <- function(NCT,
                        na.rm = TRUE) 
   
   # Clean tree branches
-  lati_tree <- ToDataFrameNetwork(tree_data)
-  lati_tree <- as.matrix(lati_tree)
-  nomelati <- NULL
-  for (i in 1 : nrow(lati_tree)) {
-    nomelati_i <- tail(strsplit(lati_tree[,2], "/")[[i]], n = 1)
-    nomelati_i <- gsub(pattern = "X.", replacement = "", x = nomelati_i)
-    nomelati = c(nomelati, nomelati_i)
+edges_tree <- ToDataFrameNetwork(tree_data)
+edges_tree <- as.matrix(edges_tree)
+  edges_names <- NULL
+  for (i in 1 : nrow(edges_tree)) {
+    edges_names_i <- tail(strsplit(edges_tree[,2], "/")[[i]], n = 1)
+    edges_names_i <- gsub(pattern = "X.", replacement = "", x = edges_names_i)
+    edges_names = c(edges_names, edges_names_i)
   } 
   
   # Generate a tree graph corresponding to the NCT object
-  grafo_tree <- graph_from_edgelist(lati_tree, directed = TRUE)
+  grafo_tree <- graph_from_edgelist(edges_tree, directed = TRUE)
   
   # Add the effects as nodes' attributes
   V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
@@ -139,24 +140,24 @@ plot_NCT <- function(NCT,
   V(grafo_tree)$SE0100 <- NCT$SE0100_EST
   
   # Set the nodes' colors and attach them as an attribute 
-  if (coloreff == "1000") {
+  if (effect_color_nodes == "1000") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1000 
   }
   
-  if (coloreff == "1101") {
+  if (effect_color_nodes == "1101") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1101
   } 
   
-  if (coloreff == "0100") {
+  if (effect_color_nodes == "0100") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU0100
   }
   
-  if (coloreff == "1110") {
+  if (effect_color_nodes == "1110") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1110
   }
   
-  cols <- colorRampPalette(c(vcolor[1],
-                             vcolor[2]))(4)
+  cols <- colorRampPalette(c(vertex_color[1],
+                             vertex_color[2]))(4)
   
   qeff <- as.numeric(quantile(V(grafo_tree)$stat
                               [which(V(grafo_tree)$stat >= 0)]))[2 : 4]
@@ -173,53 +174,53 @@ plot_NCT <- function(NCT,
   
   
   # Clean edges names
-  latinomefine <- rep(NULL, length(nomelati))
+edges_names_final <- rep(NULL, length(edges_names))
   edgelabel <- vector(mode = "list", 
-                      length = length(nomelati))
+                      length = length(edges_names))
   
-  for (l in 1 : length(nomelati)) {
+  for (l in 1 : length(edges_names)) {
     
-    if (length(grep(x = nomelati[l], pattern = ">=")) > 0) {
-      edgelabel[[l]][1] <- strsplit(nomelati[l], "(?=[>=])", perl = TRUE)[[1]][1]
-      edgelabel[[l]][2] <- paste(value = strsplit(nomelati[l], "(?=[>=])", perl = TRUE)[[1]][2:
-                          (lengths(gregexpr(",", strsplit(nomelati[l],"(?=[>=])", perl = TRUE))) 
+    if (length(grep(x = edges_names[l], pattern = ">=")) > 0) {
+      edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[>=])", perl = TRUE)[[1]][1]
+      edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[>=])", perl = TRUE)[[1]][2:
+                          (lengths(gregexpr(",", strsplit(edges_names[l],"(?=[>=])", perl = TRUE))) 
                           + 1)],collapse = " ")
     }
     
-    if (length(grep(x = nomelati[l], pattern = "<=")) > 0) {
-      edgelabel[[l]][1] <- strsplit(nomelati[l], "(?=[<=])", perl = TRUE)[[1]][1]
-      edgelabel[[l]][2] <- paste(value = strsplit(nomelati[l], "(?=[<=])",perl = TRUE)[[1]]
-                                 [2 : (lengths(gregexpr(",", strsplit(nomelati[l],
+    if (length(grep(x = edges_names[l], pattern = "<=")) > 0) {
+      edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[<=])", perl = TRUE)[[1]][1]
+      edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[<=])",perl = TRUE)[[1]]
+                                 [2 : (lengths(gregexpr(",", strsplit(edges_names[l],
                                   "(?=[<=])", perl = TRUE))) + 1)], collapse = " ")
     }
     
-    if (length(grep(x = nomelati[l], pattern = "<=")) == 0 
-        & length(grep(x = nomelati[l], pattern = "<")) > 0) {
-      edgelabel[[l]][1] <- strsplit(nomelati[l], "(?=[<])", perl = TRUE)[[1]][1]
-      edgelabel[[l]][2] <- paste(value = strsplit(nomelati[l], "(?=[<])", perl = TRUE)[[1]]
-                                 [2 : (lengths(gregexpr(",", strsplit(nomelati[l],
+    if (length(grep(x = edges_names[l], pattern = "<=")) == 0 
+        & length(grep(x = edges_names[l], pattern = "<")) > 0) {
+      edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[<])", perl = TRUE)[[1]][1]
+      edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[<])", perl = TRUE)[[1]]
+                                 [2 : (lengths(gregexpr(",", strsplit(edges_names[l],
                                  "(?=[<])", perl = TRUE))) + 1)], collapse = " ")
     }
     
-    if (length(grep(x = nomelati[l], pattern=">=")) == 0 &
-        length(grep(x = nomelati[l], pattern=">")) > 0) {
+    if (length(grep(x = edges_names[l], pattern=">=")) == 0 &
+        length(grep(x = edges_names[l], pattern=">")) > 0) {
       
-      edgelabel[[l]][1] <- strsplit(nomelati[l], "(?=[>])",
+      edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[>])",
                                     perl = TRUE)[[1]][1]
-      edgelabel[[l]][2] <- paste(value = strsplit(nomelati[l], "(?=[>])", 
+      edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[>])", 
                                 perl = TRUE)[[1]][2: (lengths(gregexpr(",", 
-                                strsplit(nomelati[l], "(?=[>])", perl = TRUE))) + 1)],
+                                strsplit(edges_names[l], "(?=[>])", perl = TRUE))) + 1)],
                                 collapse = " ")
     }
     
-    latinomefine[l] <- paste(edgelabel[[l]][1], 
+  edges_names_final[l] <- paste(edgelabel[[l]][1], 
                              gsub("\\s", "", x = edgelabel[[l]][2]), sep = "\n")
     
   }
   
-  latinomefine <- gsub(pattern = "<\\(1\\)", replacement = "=0", x = as.character(latinomefine))
-  latinomefine <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.character(latinomefine))
-  E(grafo_tree)$label <- latinomefine
+edges_names_final <- gsub(pattern = "<\\(1\\)", replacement = "=0", x = as.character(edges_names_final))
+edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.character(edges_names_final))
+  E(grafo_tree)$label <- edges_names_final
   
   # Attach nodes' labels
   eff1 <- paste(round(NCT$EFF1000_EST, 2), "(", round(NCT$SE1000_EST, 2), ")", sep="")
@@ -231,31 +232,31 @@ plot_NCT <- function(NCT,
   # Plot the tree
   NCTPLOT <- plot(grafo_tree,
                   layout = layout_as_tree(grafo_tree), 
-                  edge.label.color = elabelcolor,
-                  edge.width = ewidth, 
-                  edge.label.cex = elabelcex, 
-                  edge.label.family = elabelfamily,
+                  edge.label.color = edge_label_color,
+                  edge.width = edge_width, 
+                  edge.label.cex = edge_label_cex, 
+                  edge.label.family = edge_label_family,
                   vertex.color = V(grafo_tree)$color,
                   vertex.label.dist = 0,
-                  vertex.label.color = vlabelcolor,
-                  edge.arrow.size = edge.arrow.size,
+                  vertex.label.color = vertex_label_color,
+                  edge.arrow.size = edge_arrow_size,
                   vertex.label = V(grafo_tree)$labels,  
-                  vertex.label.font = vlabelfont, 
-                  vertex.label.cex = vlabelcex,
-                  vertex.frame.color = vframecolor,
-                  edge.color = ecolor, 
-                  vertex.frame=2,
+                  vertex.label.font = vertex_label_font, 
+                  vertex.label.cex = vertex_label_cex,
+                  vertex.frame.color = vertex_frame_color,
+                  edge.color = edge_color, 
+                  vertex.frame = 2,
                   edge.label = E(grafo_tree)$label,
-                  vertex.shape = vshape,
-                  vertex.size = vsize,
-                  vertex.size2 = vsize2)
+                  vertex.shape = vertex_shape,
+                  vertex.size = vertex_size,
+                  vertex.size2 = vertex_size2)
   
-  legend('topleft', text.font = 4, text.col = colleg, 
+  legend('topleft', text.font = 4, text.col = legend_color, 
          xjust = 0, adj = 0.2, legend = c(expression(paste(tau, "(1,0;0,0)",sep = "")),
          expression(paste(tau,"(0,1;0,0)", sep = "")), "N"),
-         title = "Legend", title.col  = coltitleleg)  
+         title = "Legend", title.col  = legend_title_color)  
 
-  title(title, cex.main = cex.main, col.main = col.main,
-        adj = adj, font.main = font.main)
+  title(title, cex.main = main_cex, col.main = main_color,
+        adj = adj, font.main = main_font)
 }
 
