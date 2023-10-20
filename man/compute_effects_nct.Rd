@@ -43,9 +43,6 @@ where each element i contains the IDs of the direct neighbors of unit i}
 
 \item{minsize}{minimum number of observations for each level of the joint intervention
 to be required in the leafs}
-
-\item{population_effects}{4 dimensional vector containing the estimated effects in the
-whole population}
 }
 \value{
 A data.frame describing the obtained Network Causal Trees.

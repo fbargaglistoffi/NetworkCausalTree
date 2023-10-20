@@ -454,8 +454,6 @@ sprout_nct = function(method, sampled_clusters,
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
 #' where each element i contains the IDs of the direct neighbors of unit i
-#' @param  population_effects 4 dimensional vector containing the estimated effects in the
-#' whole population
 #' @param minsize minimum number of observations for each level of the joint intervention
 #' to be required in the leafs
 #'
