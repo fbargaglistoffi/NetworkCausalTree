@@ -50,10 +50,12 @@
 #'  ii) the estimated effect 0100
 #'  iii) the size of the sub popuedgeson
 #'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
-
 #'
 #' @import data.tree
 #' @import igraph
+#' @import grDevices
+#' @import graphics
+#' @import utils
 #'
 #' @export
 
