@@ -163,7 +163,7 @@ edges_tree <- as.matrix(edges_tree)
                               [which(V(grafo_tree)$stat >= 0)]))[2 : 4]
   
   
-  V(grafo_tree)$color[which(V(grafo_tree)$stat <  (0)) ]<- "white"
+  V(grafo_tree)$color <- "white"
   V(grafo_tree)$color[which(V(grafo_tree)$stat >= 0 
                             & V(grafo_tree)$stat < qeff[1])] <- cols[1]
   V(grafo_tree)$color[which(V(grafo_tree)$stat >= qeff[1] 
@@ -174,7 +174,7 @@ edges_tree <- as.matrix(edges_tree)
   
   
   # Clean edges names
-edges_names_final <- rep(NULL, length(edges_names))
+ edges_names_final <- rep(NULL, length(edges_names))
   edgelabel <- vector(mode = "list", 
                       length = length(edges_names))
   
@@ -220,7 +220,7 @@ edges_names_final <- rep(NULL, length(edges_names))
   
 edges_names_final <- gsub(pattern = "<\\(1\\)", replacement = "=0", x = as.character(edges_names_final))
 edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.character(edges_names_final))
-  E(grafo_tree)$label <- edges_names_final
+E(grafo_tree)$label <- edges_names_final
   
   # Attach nodes' labels
   eff1 <- paste(round(NCT$EFF1000_EST, 2), "(", round(NCT$SE1000_EST, 2), ")", sep="")
