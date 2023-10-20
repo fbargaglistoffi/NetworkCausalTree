@@ -43,7 +43,7 @@ generate_clustered_networks = function(m, N, method_networks, param_er,
 
       # Erdos Renyi networks
       if (method_networks=="er") {
-        g=erdos.renyi.game(cluster_size, p=param_er, type = "gnp")}
+        g=erdos.renyi.game(cluster_size, p.or.m=param_er, type = "gnp")}
 
       # Barabasi-Albert networks
       if (method_networks=="sf") {
