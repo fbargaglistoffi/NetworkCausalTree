@@ -28,8 +28,8 @@ data_generator(
 intervention (default: rep(0.2,2000))}
 
 \item{het}{TRUE if the treatment effects 1000 and 1101 are heterogeneous with
-respect to the first regressor (+h with X1=0, -h with X0=0), FALSE if
-constant (+h) (default: TRUE).}
+respect to the first regressor (+taui with X1=0, -taui with X0=0), FALSE if
+constant (+taui) (default: TRUE).}
 
 \item{h}{Absolute value of the treatment effects 1000 and 1101
 (default: 2).}

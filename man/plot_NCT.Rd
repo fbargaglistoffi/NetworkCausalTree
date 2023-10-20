@@ -6,102 +6,104 @@
 \usage{
 plot_NCT(
   NCT,
-  varnames,
+  cov_names,
   title,
   output = "estimation",
-  coloreff = "1000",
-  vcolor = c("lightskyblue", "dodgerblue2"),
-  vsize = 44,
-  vsize2 = 40,
-  vshape = "rectangle",
-  vframecolor = "black",
-  vlabelcolor = "black",
-  vlabelcex = 2,
-  vlabelfont = 1,
-  elabelcex = 1.5,
-  elabelfamily = "sans",
-  ecolor = "black",
-  ewidth = 0.3,
-  edge.arrow.size = 0.5,
-  elabelcolor = "black",
-  colleg = "black",
-  coltitleleg = "black",
-  font.main = 1,
-  cex.main = 1,
+  effect_color_nodes = "1000",
+  vertex_color = c("lightskyblue", "dodgerblue2"),
+  vertex_size = 44,
+  vertex_size2 = 40,
+  vertex_shape = "rectangle",
+  vertex_frame_color = "black",
+  vertex_label_color = "black",
+  vertex_label_cex = 2,
+  vertex_label_font = 1,
+  edge_label_cex = 1.5,
+  edge_label_family = "sans",
+  edge_color = "black",
+  edge_width = 0.3,
+  edge_arrow_size = 0.5,
+  edge_label_color = "black",
+  legend_color = "black",
+  legend_title_color = "black",
+  main_font = 1,
+  main_cex = 1,
   adj = 1,
-  col.main = "black"
+  main_color = "black"
 )
 }
 \arguments{
-\item{NCT}{NetworkCausalTrees results.}
+\item{NCT}{A NCT object (output of the NetworkCausalTree function).}
 
-\item{varnames}{(Ordered) covariates names vector.}
+\item{cov_names}{(Ordered) covariates names vector.}
 
 \item{title}{Title.}
 
 \item{output}{If "detection" only point estimates are reported, if
-"estimation" both estimated effects and variances are reported.}
+"estimation" both estimated effects and variances are reported.
+Edge - specific parameters}
 
-\item{coloreff}{Estimated Effect according to which nodes are colored
+\item{effect_color_nodes}{The estimated effect according to which nodes are colored
 It can be "1000", "0100","1110","1101".}
 
-\item{vcolor}{String Vector of two colors identifying the
-extremes of the color palette employed to depict positive estimates of the effect specified in "coloreff"
-(Negative values are represented in white).}
+\item{vertex_color}{String Vector of two colors identifying the
+extremes of the color palette employed to depict positive
+estimates of the effect specified in "effect_color_nodes"
+(Negative values are represented in white )}
 
-\item{vsize}{Vertex size.}
+\item{vertex_size}{Vertex size.}
 
-\item{vsize2}{Vertex size (for rectangular vertices).}
+\item{vertex_size2}{Vertex size (for rectangular vertices).}
 
-\item{vshape}{Vertex shape.}
+\item{vertex_shape}{Vertex shape.}
 
-\item{vframecolor}{Vertex's frame color.}
+\item{vertex_frame_color}{Vertex's frame color.}
 
-\item{vlabelcolor}{Vertex label color.
-Title}
+\item{vertex_label_color}{Vertex label color.
+Title - specific parameters}
 
-\item{vlabelcex}{Vertex Label cex.}
+\item{vertex_label_cex}{Vertex Label cex.}
 
-\item{vlabelfont}{Vertex label font.}
+\item{vertex_label_font}{Vertex label font.}
 
-\item{elabelcex}{Edge's label cex.}
+\item{legend_color}{Legend color.}
 
-\item{elabelfamily}{Edge label family.}
+\item{legend_title_color}{Legend's title color.}
 
-\item{ecolor}{Edges color.}
+\item{main_font}{Title font.
 
-\item{ewidth}{Edge width.}
+Legend - specific parameters}
 
-\item{edge.arrow.size}{Edge's arrow size.}
-
-\item{elabelcolor}{Edges' label color.
-Vertices}
-
-\item{colleg}{Legend color.}
-
-\item{coltitleleg}{Legend's title color.}
-
-\item{cex.main}{Title cex.}
+\item{main_cex}{Title cex.}
 
 \item{adj}{adj.}
 
-\item{col.main}{Title color.
-Legend}
+\item{main_color}{Title color.}
 
-\item{ot}{TRUE if the results. includes an optimal treatment evaluation,
-FALSE otherwise (default: FALSE).
-Edges}
+\item{ewidth}{Edge width.}
+
+\item{elabelcex}{Edge's label cex.}
+
+\item{edge.arrow.size}{Edge's arrow size.}
+
+\item{ecolor}{Edges color.}
+
+\item{elabelfamily}{Edge label family.}
+
+\item{elabelcolor}{Edges' label color.
+Vertices - specific parameters}
 }
 \value{
-A plot representing the estimated Network causal tree. Each node reports - from the top to the bottom
+A plot representing the estimated Network causal tree.
+Each node reports - from the top to the bottom
 \itemize{
 \item i) the estimated effect 10000
 ii) the estimated effect 0100
-iii) the size of the sub population
-Colors provide an intuition on the strength of the effect specified in "coloreff".
+iii) the size of the sub popuedgeson
+Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
 }
 }
 \description{
-Plots the Network Causal Tree results.
-General
+Plots the Network Causal Tree results
+General parameters
 }
