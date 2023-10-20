@@ -66,6 +66,19 @@ Title - specific parameters}
 
 \item{vertex_label_font}{Vertex label font.}
 
+\item{edge_label_cex}{Edge's label cex.}
+
+\item{edge_label_family}{Edge label family.}
+
+\item{edge_color}{Edges color.}
+
+\item{edge_width}{Edge width.}
+
+\item{edge_arrow_size}{Edge's arrow size.}
+
+\item{edge_label_color}{Edges' label color.
+Vertices - specific parameters}
+
 \item{legend_color}{Legend color.}
 
 \item{legend_title_color}{Legend's title color.}
@@ -79,19 +92,6 @@ Legend - specific parameters}
 \item{adj}{adj.}
 
 \item{main_color}{Title color.}
-
-\item{ewidth}{Edge width.}
-
-\item{elabelcex}{Edge's label cex.}
-
-\item{edge.arrow.size}{Edge's arrow size.}
-
-\item{ecolor}{Edges color.}
-
-\item{elabelfamily}{Edge label family.}
-
-\item{elabelcolor}{Edges' label color.
-Vertices - specific parameters}
 }
 \value{
 A plot representing the estimated Network causal tree.
