@@ -18,10 +18,10 @@
 #'
 generate_clustered_networks = function(m, N, method_networks, param_er,
                               var_homophily_ergm, coef_ergm){
-  
+
   # Initialize
   comba <- matrix(0, N, N)
-  
+
   # Compute cluster size
   cluster_size <- N / m
 
@@ -34,27 +34,27 @@ generate_clustered_networks = function(m, N, method_networks, param_er,
       test.net%v%"x1" = var_homophily_ergm[(cluster_size*i-(cluster_size-1))]
       g <- simulate(test.net ~ nodematch("x1") + edges,
                         coef = coef_ergm)
-      comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i), 
+      comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
             (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- as.matrix(g)
     }
 
-    
+
     if(method_networks=="er" | method_networks=="sf"){
-      
+
       # Erdos Renyi networks
       if (method_networks=="er") {
         g=erdos.renyi.game(cluster_size, p=param_er, type = "gnp")}
-      
+
       # Barabasi-Albert networks
       if (method_networks=="sf") {
         g=barabasi.game(cluster_size)
       }
-      
-      
+
+
       adj<-as.matrix(get.adjacency(g))
       comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
             (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- adj
-      
+
     }
 
   }
@@ -70,20 +70,20 @@ generate_clustered_networks = function(m, N, method_networks, param_er,
 #' while omitting rows characterized by equal elements.
 #' @param  x A vector
 #' @param  y A vector
-#' @param  include.equals=FALSE
+#' @param  include.equals Boolean (dafault: FALSE)
 #'
 #' @return A data frame with all combinations of the elements of the vectors,
 #' with no rows characterized by equal elements
 #'
 expand.grid.unique <- function(x, y, include.equals = FALSE){
-  
+
   x <- unique(x)
   y <- unique(y)
   g <- function(i){
     z <- setdiff(y, x[seq_len(i - include.equals)])
     if (length(z)) cbind(x[i], z, deparse.level=0)
   }
-  
+
   do.call(rbind, lapply(seq_along(x), g))
 }
 
@@ -104,8 +104,8 @@ expand.grid.unique <- function(x, y, include.equals = FALSE){
 #' unit i and j.
 #'
 shared_neigh = function(i, j, Ne_list){
-  
+
   shared_neighbors <- length(intersect(Ne_list[[i]], Ne_list[[j]]))
-  
+
   return(shared_neighbors)
 }

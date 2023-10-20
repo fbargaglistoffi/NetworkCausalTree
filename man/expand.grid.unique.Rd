@@ -12,7 +12,7 @@ expand.grid.unique(x, y, include.equals = FALSE)
 
 \item{y}{A vector}
 
-\item{include.equals=FALSE}{}
+\item{include.equals}{Boolean (dafault: FALSE)}
 }
 \value{
 A data frame with all combinations of the elements of the vectors,
