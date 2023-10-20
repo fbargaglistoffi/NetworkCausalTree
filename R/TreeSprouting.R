@@ -615,7 +615,7 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
         for (j in 2 : nrow(nct_partition)){
 
 
-          texts = gsub(pattern = "data_tree", replace = "data_est",nct_partition[j, "FILTER"])
+          texts = gsub(pattern = "data_tree", replacement = "data_est",nct_partition[j, "FILTER"])
           this_data <- subset(data_est, eval(parse(text = texts)))
 
           if (any(as.numeric(table(this_data$W, this_data$G)) < 3)){
