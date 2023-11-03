@@ -23,60 +23,69 @@ Singular splitting
 ```r
 set.seed(1)
 
-dataset <- data_generator(N = 2000, 
+dataset <- data_generator(N = 4000, 
                           K = 4,
-                          m = 40, 
+                          m = 80, 
                           p = rep(0.2,2000), 
                           het = TRUE, 
                           h = 2, 
                           method_networks = "er", 
                           param_er = 0.1)
+
 result <- NetworkCausalTree(X = dataset[["X"]],
-                             Y = dataset[["Y"]],
-                             W = dataset[["W"]], 
-                             A = dataset[["A"]],
-                             M = dataset[["M"]],
-                             p = dataset[["p"]], 
-                             effect_weights = c(1,0,0,0),
-                             ratio_disc = 0.5,
-                             depth = 3,
-                             minsize = 5, 
-                             method = "singular",
-                             output = "estimation")
+                            Y = dataset[["Y"]],
+                            W = dataset[["W"]], 
+                            A = dataset[["A"]],
+                            M = dataset[["M"]],
+                            p = dataset[["p"]], 
+                            effect_weights = c(1,0,0,0),
+                            ratio_dis = 0.5,
+                            depth = 3,
+                            minsize = 5, 
+                            method = "singular",
+                            output = "estimation")
+
 
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset[["X"]])
-plot_NCT(result, cov_names, title)
+
+plot_NCT(NCT = result, 
+         cov_names = cov_names,
+         title = title)
 ```
 
 Composite splitting (NCT based on all the four effects)
 ```r
-set.seed(1)
 
-dataset <- data_generator(N = 2000, 
+
+dataset <- data_generator(N = 4000,
                           K = 4,
-                          m = 40, 
-                          p = rep(0.2,2000), 
-                          het = FALSE, 
-                          taui = 0, 
+                          m = 80,
+                          p = rep(0.2,4000),
+                          het = TRUE,
+                          h = 3,
                           method_networks = "sf")
-result <- NetworkCausalTree(X =  dataset[["X"]],
+
+result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
-                             W = dataset[["W"]],
-                             effweights <- c(0.25,0.25,0.25,0.25), 
-                             A = dataset[["A"]],
-                             G =  dataset[["G"]], 
-                             M = dataset[["M"]],
-                             p = dataset[["p"]], 
-                             ratio_disc = 0.5,
-                             depth = 3,
-                             minsize = 5, 
-                             method = "composite",
-                             output = "estimation")
-                          
+                            W = dataset[["W"]],
+                            A = dataset[["A"]],
+                            M = dataset[["M"]],
+                            p = dataset[["p"]],
+                            effect_weights =   c(0.25, 0.25, 0.25, 0.25),
+                            ratio_disc = 0.5,
+                            depth = 2,
+                            minsize = 5,
+                            method = "composite",
+                            output = "detection")
+
 title <- expression("CAUSAL TREE TARGETED TO ALL THE EFFECTS")
 cov_names <- colnames(dataset[["X"]])
-plot_NCT(result, cov_names, title)
+
+plot_NCT(result, 
+         cov_names, 
+         title,
+         output = "detection")
 ```
 
 ## Cite
