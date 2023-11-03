@@ -9,6 +9,10 @@
 #' @param cov_names (Ordered) covariates names vector.
 #' @param output If "detection" only point estimates are reported, if
 #' "estimation" both estimated effects and variances are reported.
+#' @param margins 4 - dimensional vector setting the figure margins. The first element denotes
+#' the bottom margin, the second the left side margin, the third the top margin
+#'  and the fourth the right side marhin
+#'
 
 #' Edge - specific parameters
 #' @param edge_width Edge width.
@@ -65,14 +69,14 @@ plot_NCT <- function(NCT,
                      output = "estimation",
                      effect_color_nodes = "1000",
                      vertex_color = c("lightskyblue","dodgerblue2"),
-                     vertex_size = 44,
-                     vertex_size2 = 40,
+                     vertex_size = 32,
+                     vertex_size2 = 30,
                      vertex_shape = "rectangle",
                      vertex_frame_color = "black",
                      vertex_label_color = "black",
-                     vertex_label_cex = 2,
+                     vertex_label_cex = 1,
                      vertex_label_font = 1,
-                     edge_label_cex = 1.5,
+                     edge_label_cex = 1,
                      edge_label_family = "sans",
                      edge_color = "black",
                      edge_width = 0.3,
@@ -83,7 +87,9 @@ plot_NCT <- function(NCT,
                      main_font = 1,
                      main_cex = 1,
                      adj = 1,
-                     main_color = "black"){
+                     main_color = "black",
+                     margins = c(0.1, 0.5, 1.5, 0.7)
+                     ){
 
   options(warn = -1)
 
@@ -92,54 +98,63 @@ plot_NCT <- function(NCT,
 
   if (length(cov_names) > 10){
   for (p in 10 : length(cov_names)) {
-    NCT$FILTER <- gsub(pattern = paste("X.", p, sep=""),
-                     replacement = cov_names[p],
-                     x = as.character(NCT$FILTER) )
+    NCT$FILTER <- gsub(pattern = paste("X.", p, sep = ""),
+                       replacement = cov_names[p],
+                       x = as.character(NCT$FILTER) )
   }
   }
   for (p in 1 : 9) {
-    NCT$FILTER <- gsub(pattern = paste("X.", p, sep=""),
-                     replacement = cov_names[p],
-                     x = as.character(NCT$FILTER) )
+    NCT$FILTER <- gsub(pattern = paste("X.", p, sep = ""),
+                       replacement = cov_names[p],
+                       x = as.character(NCT$FILTER) )
   }
 
-  NCT$FILTER<-gsub(pattern = "data_tree", replacement = "",
-                   x=as.character(NCT$FILTER))
-  NCT$FILTER<-gsub(pattern = "[$]", replacement = "",
-                   x=as.character(NCT$FILTER))
-  NCT$FILTER<-gsub(pattern = "_bin", replacement ="",
-                   x=as.character(NCT$FILTER))
+  NCT$FILTER <- gsub(pattern = "data_tree", replacement = "",
+                   x = as.character(NCT$FILTER))
+  NCT$FILTER <- gsub(pattern = "[$]", replacement = "",
+                   x = as.character(NCT$FILTER))
+  NCT$FILTER <- gsub(pattern = "_bin", replacement ="",
+                   x = as.character(NCT$FILTER))
   NCT$FILTER[which(NCT$FILTER!="NA")] <- paste0("NA & ", NCT$FILTER[which(NCT$FILTER!="NA")])
 
   # Reshape the NCT object as a tree dataset
-  tree_data <- as.Node(NCT, mode = "table",
-                       pathName = "FILTER",
-                       pathDelimiter = " & ",
-                       colLevels = NULL,
-                       na.rm = TRUE)
+  tree_data <- data.tree::as.Node(NCT, mode = "table",
+                          pathName = "FILTER",
+                          pathDelimiter = " & ",
+                          colLevels = NULL,
+                          na.rm = TRUE)
 
   # Clean tree branches
-edges_tree <- ToDataFrameNetwork(tree_data)
-edges_tree <- as.matrix(edges_tree)
+edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
+
   edges_names <- NULL
   for (i in 1 : nrow(edges_tree)) {
-    edges_names_i <- tail(strsplit(edges_tree[,2], "/")[[i]], n = 1)
+    edges_names_i <- utils::tail(strsplit(edges_tree[,2], "/")[[i]], n = 1)
     edges_names_i <- gsub(pattern = "X.", replacement = "", x = edges_names_i)
     edges_names = c(edges_names, edges_names_i)
   }
 
   # Generate a tree graph corresponding to the NCT object
-  grafo_tree <- graph_from_edgelist(edges_tree, directed = TRUE)
+  grafo_tree <- igraph::graph_from_edgelist(edges_tree, directed = TRUE)
 
   # Add the effects as nodes' attributes
-  V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
-  V(grafo_tree)$SE1000 <- NCT$SE1000_EST
-  V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
-  V(grafo_tree)$SE1101 <- NCT$SE1101_EST
-  V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
-  V(grafo_tree)$SE1110 <- NCT$SE1110_EST
-  V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
-  V(grafo_tree)$SE0100 <- NCT$SE0100_EST
+  if (output == "estimation") {
+    V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
+    V(grafo_tree)$SE1000 <- NCT$SE1000_EST
+    V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
+    V(grafo_tree)$SE1101 <- NCT$SE1101_EST
+    V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
+    V(grafo_tree)$SE1110 <- NCT$SE1110_EST
+    V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
+    V(grafo_tree)$SE0100 <- NCT$SE0100_EST    
+  } else {
+    V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
+    V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
+    V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
+    V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
+  }
+
+  
 
   # Set the nodes' colors and attach them as an attribute
   if (effect_color_nodes == "1000") {
@@ -158,26 +173,26 @@ edges_tree <- as.matrix(edges_tree)
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1110
   }
 
-  cols <- colorRampPalette(c(vertex_color[1],
+  cols <- grDevices::colorRampPalette(c(vertex_color[1],
                              vertex_color[2]))(4)
 
-  qeff <- as.numeric(quantile(V(grafo_tree)$stat
-                              [which(V(grafo_tree)$stat >= 0)]))[2 : 4]
+  qeff <- as.numeric(stats::quantile(V(grafo_tree)$stat
+                    [which(V(grafo_tree)$stat >= 0)]))[2 : 4]
 
 
   V(grafo_tree)$color <- "white"
   V(grafo_tree)$color[which(V(grafo_tree)$stat >= 0
-                            & V(grafo_tree)$stat < qeff[1])] <- cols[1]
+                      & V(grafo_tree)$stat < qeff[1])] <- cols[1]
   V(grafo_tree)$color[which(V(grafo_tree)$stat >= qeff[1]
-                            & V(grafo_tree)$stat < qeff[2])] <- cols[2]
+                      & V(grafo_tree)$stat < qeff[2])] <- cols[2]
   V(grafo_tree)$color[which(V(grafo_tree)$stat >= qeff[2]
-                            & V(grafo_tree)$stat < qeff[3])] <- cols[3]
+                      & V(grafo_tree)$stat < qeff[3])] <- cols[3]
   V(grafo_tree)$color[which(V(grafo_tree)$stat >= qeff[3])] <- cols[4]
 
 
   # Clean edges names
  edges_names_final <- rep(NULL, length(edges_names))
-  edgelabel <- vector(mode = "list",
+ edgelabel <- vector(mode = "list",
                       length = length(edges_names))
 
   for (l in 1 : length(edges_names)) {
@@ -216,7 +231,9 @@ edges_tree <- as.matrix(edges_tree)
     }
 
   edges_names_final[l] <- paste(edgelabel[[l]][1],
-                             gsub("\\s", "", x = edgelabel[[l]][2]), sep = "\n")
+                                gsub("\\s", "", 
+                                x = edgelabel[[l]][2]),
+                                sep = "\n")
 
   }
 
@@ -225,13 +242,25 @@ edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.char
 E(grafo_tree)$label <- edges_names_final
 
   # Attach nodes' labels
+  if (output == "estimation") {
   eff1 <- paste(round(NCT$EFF1000_EST, 2), "(", round(NCT$SE1000_EST, 2), ")", sep="")
   eff2 <- paste(round(NCT$EFF1101_EST, 2), "(", round(NCT$SE1101_EST, 2), ")", sep="")
   eff3 <- paste(round(NCT$EFF1110_EST, 2), "(", round(NCT$SE1110_EST, 2), ")", sep="")
   eff4 <- paste(round(NCT$EFF0100_EST, 2), "(", round(NCT$SE0100_EST, 2), ")", sep="")
+  } else {
+    eff1 <- paste(round(NCT$EFF1000_EST, 2), sep="")
+    eff2 <- paste(round(NCT$EFF1101_EST, 2), sep="")
+    eff3 <- paste(round(NCT$EFF1110_EST, 2), sep="")
+    eff4 <- paste(round(NCT$EFF0100_EST, 2), sep="")  
+  }
+  
   V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep="\n")
 
+  
+  
   # Plot the tree
+  par(mar = margins)
+  
   NCTPLOT <- plot(grafo_tree,
                   layout = layout_as_tree(grafo_tree),
                   edge.label.color = edge_label_color,

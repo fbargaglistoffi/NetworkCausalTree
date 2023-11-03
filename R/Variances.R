@@ -32,7 +32,7 @@ Vary = function(N, w, g, Y, W, G,
                                 which(W == w & G == g),
                                 include.equals = FALSE)
     
-    for (k in 1:nrow(pairs)) { 
+    for (k in 1 : nrow(pairs)) { 
       
       i = pairs[k, 1]
       j = pairs[k, 2]
@@ -107,8 +107,8 @@ Covy = function(w1, g1, w2, g2,
                    sum(1 / pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p)*
                       (Y[i] / pi(i, w1, g1, p, Ne)) * 
                       (Y[j] / pi(j, w2, g2, p, Ne))) *
-                      (pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p)
-                    - pi(i, w1, g1, p, Ne) * pi(j, w2, g2, p,Ne)))
+                      (pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p) -
+                      pi(i, w1, g1, p, Ne) * pi(j, w2, g2, p,Ne)))
 
       }
       
@@ -149,7 +149,7 @@ Covy = function(w1, g1, w2, g2,
 #' of interest.
 #'
 Vartau1000 = function(N, Y, W, G, 
-                    p, Ne, Ne_list) {
+                      p, Ne, Ne_list) {
 
 # Variance of the Average Potential Outcome Y(w,g)=Y(1,0)
   vary10 <- Vary(w = 1, g = 0, N = N, W = W, G = G, p = p,
@@ -198,7 +198,7 @@ Vartau1000 = function(N, Y, W, G,
 #' of interest.
 #'
 Vartau1101 = function(N, Y, W, G, 
-                    p, Ne, Ne_list) {
+                      p, Ne, Ne_list) {
 
   # Variance of the Average Potential Outcome Y(w,g)=Y(1,1)  
   vary11 <- Vary(w = 1, g = 1, N = N, W = W, G = G,
@@ -210,8 +210,8 @@ Vartau1101 = function(N, Y, W, G,
 
   # Covariance of the Average Potential Outcomes Y(w,g)=Y(1,1) and Y(w,g)=Y(0,1) 
     covy11y01 <- Covy(w1 = 1, g1 = 1,w2 = 0,g2 = 1,
-                    N = N,W = W,G = G,
-                    p = p, Ne = Ne, Ne_list = Ne_list, Y = Y)
+                      N = N,W = W,G = G,
+                      p = p, Ne = Ne, Ne_list = Ne_list, Y = Y)
 
   if (any(is.na(c(vary11, vary01)))) {
     var1101 = NA
@@ -247,7 +247,7 @@ Vartau1101 = function(N, Y, W, G,
 #' of interest.
 #'
 Vartau1110 = function(N, Y, W, G, 
-                    p, Ne, Ne_list) {
+                      p, Ne, Ne_list) {
  
   # Variance of the Average Potential Outcome Y(w,g)=Y(1,1)   
   vary11 <- Vary(w = 1, g = 1, N = N, W = W, G = G,
@@ -296,7 +296,7 @@ Vartau1110 = function(N, Y, W, G,
 #' of interest.
 #'
 Vartau0100 = function(N, Y, W, G, 
-                    p, Ne, Ne_list) {
+                      p, Ne, Ne_list) {
   
   # Variance of the Average Potential Outcome Y(w,g)=Y(0,1)
   vary01 <- Vary(w = 0, g = 1, N = N, W = W, G = G,

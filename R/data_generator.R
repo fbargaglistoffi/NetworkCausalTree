@@ -62,9 +62,10 @@ data_generator = function(N = 2000,
                                    method_networks = method_networks,
                                    param_er = param_er,
                                    coef_ergm = coef_ergm,
-                                   var_homophily_ergm = var_homophily_ergm)
+                                   var_homophily_ergm = var_homophily_ergm,
+                                   X = X)
   
-  net <- graph_from_adjacency_matrix(A)
+  net <- igraph::graph_from_adjacency_matrix(A)
 
   # Group Indicator
   cluster_size <- N / m

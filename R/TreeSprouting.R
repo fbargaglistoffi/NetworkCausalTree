@@ -52,15 +52,15 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
   inof <-  alpha * (((EffTau1000(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
                     2 / nleafs * sum(c(total_variance, Vartau1000(N = N, W = W, Y = Y,G  = G,
                     p = p, Ne = Ne, Ne_list = Ne_list)))) +
-           beta * (((EffTau1101(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
+           beta *  (((EffTau1101(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
                     2 / nleafs *sum(c(total_variance, Vartau1101(N = N, W = W, Y = Y, G = G,
                     p = p, Ne = Ne, Ne_list = Ne_list)))) +
            gamma * (((EffTau1110( N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
                    2 / nleafs * sum(c(total_variance,Vartau1110(N = N, W = W, Y = Y, G = G,
                    p = p, Ne = Ne, Ne_list = Ne_list))))+
-           delta * (  ((EffTau0100(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2)-
+           delta * (((EffTau0100(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
                    2 / nleafs * sum(c(total_variance,Vartau0100(N = N, W = W, Y = Y, G = G,
-                  p = p, Ne = Ne, Ne_list = Ne_list)))
+                   p = p, Ne = Ne, Ne_list = Ne_list)))
     )
   }
 
@@ -236,7 +236,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   # Initialize
   data_tree <- data.frame(idunit = c(1 : N) , W = W, G = G, Y = Y, X = X)
   do_splits <- TRUE
-  total_variance=NULL
+  total_variance = NULL
 
   # Create output dataset
   tree_info <- data.frame(NODE = 1, OF = 0, NOBS = nrow(data_tree),
@@ -252,7 +252,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
       if (!is.na(tree_info[j, "FILTER"])) {
         texts = tree_info[j, "FILTER"]
         this_data <- subset(data_tree, eval(parse(text = texts)))
-      } else { this_data <- data_tree}
+      } else {this_data <- data_tree}
 
       nleafs = nrow(tree_info)
 
@@ -310,7 +310,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 
 
       # STOP if exceeded depth
-      depth_tree <- as.numeric(stri_count_regex(tree_info[j, "FILTER"], "X."))
+      depth_tree <- as.numeric(stringi::stri_count_regex(tree_info[j, "FILTER"], "X."))
       if (depth_tree >= depth & !is.na(depth_tree)) {
         split_here <- rep(FALSE, 2)
         print('split has stopped for reached depth')

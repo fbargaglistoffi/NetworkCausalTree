@@ -90,7 +90,7 @@ NetworkCausalTree <- function(X, Y, W,
     stop('If method is set to singular or penalized only one effect should have positive weight.')
   }
 
-  if (1 %in% effect_weights & method=="composite") {
+  if (1 %in% effect_weights & method == "composite") {
     stop('Composite objective function is computed if at least two effects are investigated.')
   }
 
@@ -116,12 +116,18 @@ NetworkCausalTree <- function(X, Y, W,
   }
 
   # compute the estimated effects in the whole population
-  population_effects <- compute_population_effects(N = N, W = W, G = G,
-                                                   Y = Y, p = p, Ne = Ne)
+  population_effects <- compute_population_effects(N = N, 
+                                                   W = W,
+                                                   G = G,
+                                                   Y = Y, 
+                                                   p = p, 
+                                                   Ne = Ne)
 
   # sample the clusters to be assigned to the discovery set
   nclusters_disc = round(m * ratio_disc)
-  clusters_disc <- sample(1 : m, size = nclusters_disc, replace = FALSE)
+  clusters_disc <- sample(1 : m,
+                          size = nclusters_disc, 
+                          replace = FALSE)
 
   # generate the tree on the discovery set
   tree <- sprout_nct(method = method,

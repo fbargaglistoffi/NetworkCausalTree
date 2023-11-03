@@ -6,6 +6,7 @@
 #'
 #' @param  m Number of clusters
 #' @param  N Number of units
+#' @param X N x K Observed Covariates Matrix.
 #' @param  method_networks method to generate the m networks: "ergm" (Exponential Random Graph Models) ,
 #'  "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
 #' Note: in this function, clusters have the same size, so N should be a multiple of m
@@ -16,8 +17,13 @@
 #' @return: An adjacency matrix which describes a clustered network environment
 #'
 #'
-generate_clustered_networks = function(m, N, method_networks, param_er,
-                              var_homophily_ergm, coef_ergm){
+generate_clustered_networks = function(m,
+                                       N,
+                                       method_networks, 
+                                       param_er,
+                                       var_homophily_ergm, 
+                                       coef_ergm,
+                                       X){
 
   # Initialize
   comba <- matrix(0, N, N)
@@ -29,29 +35,36 @@ generate_clustered_networks = function(m, N, method_networks, param_er,
   for (i in 1:m) {
 
     # ERGM networks
-    if (method_networks=="ergm") {
-      test.net <- network(cluster_size, directed = FALSE, density = 0)
-      test.net%v%"x1" = var_homophily_ergm[(cluster_size*i-(cluster_size-1))]
-      g <- simulate(test.net ~ nodematch("x1") + edges,
-                        coef = coef_ergm)
+    if (method_networks == "ergm") {
+      test.net <- network::network(cluster_size, 
+                                   directed = FALSE, 
+                                   density = 0)
+      homophily_vector <- X[,var_homophily_ergm]
+      test.net%v%"homophily" =  homophily_vector[(cluster_size * i -
+                                                 (cluster_size - 1)) : 
+                                                 (cluster_size * i) ]
+      g <- ergm::simulate_formula(test.net ~ nodematch("homophily") + edges,
+                                  coef = coef_ergm)
       comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
             (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- as.matrix(g)
     }
 
 
-    if(method_networks=="er" | method_networks=="sf"){
+    if (method_networks =="er" | method_networks == "sf") {
 
       # Erdos Renyi networks
-      if (method_networks=="er") {
-        g=erdos.renyi.game(cluster_size, p.or.m=param_er, type = "gnp")}
+      if (method_networks == "er") {
+        g = igraph::erdos.renyi.game(cluster_size,
+                                   p.or.m=param_er, 
+                                   type = "gnp")}
 
       # Barabasi-Albert networks
-      if (method_networks=="sf") {
-        g=barabasi.game(cluster_size)
+      if (method_networks == "sf") {
+        g = igraph::barabasi.game(cluster_size)
       }
 
 
-      adj<-as.matrix(get.adjacency(g))
+      adj <- as.matrix(igraph::as_adjacency_matrix(g))
       comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
             (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- adj
 
@@ -79,12 +92,14 @@ expand.grid.unique <- function(x, y, include.equals = FALSE){
 
   x <- unique(x)
   y <- unique(y)
+  
   g <- function(i){
-    z <- setdiff(y, x[seq_len(i - include.equals)])
-    if (length(z)) cbind(x[i], z, deparse.level=0)
+    z <- dplyr::setdiff(y, x[seq_len(i - include.equals)])
+    if (length(z)) cbind(x[i], z, deparse.level = 0)
   }
 
   do.call(rbind, lapply(seq_along(x), g))
+  
 }
 
 
@@ -105,7 +120,7 @@ expand.grid.unique <- function(x, y, include.equals = FALSE){
 #'
 shared_neigh = function(i, j, Ne_list){
 
-  shared_neighbors <- length(intersect(Ne_list[[i]], Ne_list[[j]]))
+  shared_neighbors <- length(dplyr::intersect(Ne_list[[i]], Ne_list[[j]]))
 
   return(shared_neighbors)
 }
