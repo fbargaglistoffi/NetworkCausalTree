@@ -23,7 +23,7 @@ generate_clustered_networks = function(m,
                                        param_er,
                                        var_homophily_ergm, 
                                        coef_ergm,
-                                       X){
+                                       X = NULL){
 
   # Initialize
   comba <- matrix(0, N, N)
