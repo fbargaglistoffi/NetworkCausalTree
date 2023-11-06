@@ -24,13 +24,13 @@ library(dplyr)
 # seq: Effect Size Magnitudes
 # nsim: number of datasets created
 # m: group indicator for clusters
-# gsize: size of each cluster
+# cluster_size: size of each cluster
 # param: link probability
 N = 3000
 m = 30
 n_cov = 10
 prob = 0.5 
-gsize = N/m
+cluster_size = N/m
 param = 0.01
 mu = rep(0, n_cov)
 rho = 0
@@ -88,10 +88,13 @@ system.time({
       ##########################
       
       # Adjacency Matrix
-      adiac_matrix <- genmultnet(N=N, m=m, method="er", param = param)
+      adiac_matrix <- generate_clustered_networks(N=N,
+                                                  m=m, 
+                                                  method_networks="er", 
+                                                  param_er = param)
       
       # Group Indicator 
-      M=c(rep(1:m,gsize))
+      M=c(rep(1:m,cluster_size))
       M=sort(M)
       levels(M)<-c(1:m)
       
@@ -176,43 +179,34 @@ system.time({
       ## Run the  whole function
       
       ## Composite Tree
-      SNCT <- NetworkCausalTrees(effweights = c(0.5,0,0,0.5), method = "composite", # singular
+      SNCT <- NetworkCausalTree(effect_weights = c(0.5,0,0,0.5), method = "composite", # singular
                                  output = "estimation", # detection, estimation
                                  A = adiac_matrix,
-                                 p = rep(probT,n), Ne = NeighNum,
-                                 W = w, Y = y, X = X, M = M, G = g,
-                                 mdisc = m/2, mest = m/2,
-                                 minpopfrac = 1,
+                                 p = rep(probT,n), 
+                                 W = w, Y = y, X = X, M = M, 
+                                 ratio_disc = 0.5,
                                  depth = 2,
-                                 fracpredictors = 1,
-                                 minsize= N/100,
-                                 n_trees = 1) 
+                                 minsize= N/100) 
       
       ## Tree for Main Treatment Effect
-      SNCT_main <- NetworkCausalTrees(effweights = c(1,0,0,0), method = "singular",
+      SNCT_main <- NetworkCausalTree(effect_weights = c(1,0,0,0), method = "singular",
                                       output = "estimation", # detection, estimation
                                       A = adiac_matrix,
-                                      p = rep(probT,n), Ne = NeighNum,
-                                      W = w, Y = y, X = X, M = M, G = g,
-                                      mdisc = m/2, mest = m/2,
-                                      minpopfrac = 1,
+                                      p = rep(probT,n), 
+                                      W = w, Y = y, X = X, M = M, 
+                                      ratio_disc = 0.5,
                                       depth = 2,
-                                      fracpredictors = 1,
-                                      minsize= N/100,
-                                      n_trees = 1) 
+                                      minsize= N/100) 
       
       ## Tree for Spillover Effect
-      SNCT_spil <- NetworkCausalTrees(effweights = c(0,0,0,1), method = "singular",
+      SNCT_spil <- NetworkCausalTree(effect_weights = c(0,0,0,1), method = "singular",
                                       output = "estimation", # detection, estimation
                                       A = adiac_matrix,
-                                      p = rep(probT,n), Ne = NeighNum,
-                                      W = w, Y = y, X = X, M = M, G = g,
-                                      mdisc = m/2, mest = m/2,
-                                      minpopfrac = 1,
+                                      p = rep(probT,n), 
+                                      W = w, Y = y, X = X, M = M, 
+                                      ratio_disc = 0.5,
                                       depth = 2,
-                                      fracpredictors = 1,
-                                      minsize= N/100,
-                                      n_trees = 1) 
+                                      minsize= N/100) 
       
       rule.sel <- SNCT$FILTER
       rule.main <- SNCT_main$FILTER
