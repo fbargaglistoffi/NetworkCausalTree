@@ -24,5 +24,5 @@ The code files used to implement the simulations are the following:
 * <tt>`crls`</tt>: number of causal rules (2/4);
 * <tt>`seq`</tt>: effect size magnitude (varying between 0.1 and 10.1);
 * <tt>`nsim`</tt>: number of datasets created (500);
-* <tt>`gsize`</tt>: size of each cluster (100).
+* <tt>`cluster_size`</tt>: size of each cluster (100).
 
