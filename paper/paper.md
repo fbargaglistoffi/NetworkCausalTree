@@ -79,7 +79,10 @@ plot_NCT(NCT = result,
          cov_names = cov_names,
          title = title)
 ```
-
+---
+bibliography: paper.bib
+nocite: "@*"
+---
 
 # Acknowledgements
 
