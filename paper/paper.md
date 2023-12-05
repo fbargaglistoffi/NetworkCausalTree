@@ -109,7 +109,8 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             output = "estimation")
 ```
 
-Results can be graphically represented by using the appropriate ‘plot_NCT’ function included in the ‘NetworkCausalTree’ package. For instance, the plot related to the ‘NetworkCausalTree’ resulted in the **Example 1** is obtained using: 
+
+The results are included in a  `data.frame` object which provides information about i) the partitions identified by the tree ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors . The function `print()` displays these results and  ‘plot_NCT()’ function visualizes results. For instance, the plot related to the ‘NetworkCausalTree’ resulted in the **Example 1** is obtained using: 
 
 
 ```r
@@ -121,6 +122,7 @@ plot_NCT(NCT = result,
          title = title)
 ```
 
+Online documentation for the package can be found at [https://github.com/fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
 
 # Acknowledgements
 
