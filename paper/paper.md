@@ -35,12 +35,14 @@ Concurrently, alongside the interference research domain, scholars have crafted 
 To integrate the aforementioned two topics in the field of causal inference through [@bargagli2020heterogeneous] introduces a novel machine learning algorithm, named Network Causal Tree (NCT), that explores the heterogeneity of treatment and spillover effects concerning individual, neighborhood, and network characteristics within randomized settings. NCT is designed to operate amidst clustered network interference, where agents are categorized into distinct clusters, and spillover mechanisms exclusively take place within clusters based on the links of a cluster-specific network. The estimation of conditional effects is carried out using an extended version of the Horvitz-Thompson estimator [@aronow2017estimating], tailored to accommodate clustered network interference. `NetworkCausalTree` is an R Package providing a flexible implementation of the Network Causal Tree algorithm.
 
 
-# Statement of need
+# Algorithm
 
 Why `NetworkCausalTree` package is necessary.
 
 # Usage
 
+`NetworkCausalTree` is available on [GitHub](https://github.com/fbargaglistoffi/NetworkCausalTree) and can be installed and loaded into the R session
+using:
 
 
 
@@ -48,6 +50,8 @@ Why `NetworkCausalTree` package is necessary.
 library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
+
+`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world  data sets. 
 
 ```r
 dataset <- data_generator(N = 4000, 
@@ -59,6 +63,9 @@ dataset <- data_generator(N = 4000,
                           method_networks = "er", 
                           param_er = 0.1)
 ```
+
+We propose here some examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package.
+
 
 ```r
 result <- NetworkCausalTree(X = dataset[["X"]],
@@ -76,6 +83,8 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 ```
 
 ```r
+
+
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset[["X"]])
 
