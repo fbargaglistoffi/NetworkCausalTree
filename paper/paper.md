@@ -42,7 +42,7 @@ To integrate the aforementioned two topics in the field of causal inference thro
 
 The NCT algorithm is designed to detect and estimate heterogeneous treatment and spillover effects in randomized settings, under CNI. Under CNI, spillover is confined to units within the same cluster, and an individual's outcome is influenced by the treatment status of directly connected units in the cluster-specific network. Potential outcomes are indexed with respect to the individual intervention $W_{ik}$ (where $k\in \mathcal{K}=[1, \ldots, K]$ is the cluster indicator, and $i=1,\ldots, n_k$ is the unit indicator in each cluster $k$.) and to the neighborhood treatment $G_{ik}$, which is defined as a binary variable that equals 1 if the unit $ik$ has at least one treated neighbor, 0 otherwise. Estimands of interest ($\tau_{(w,g;w',g')}$) encompass two treatment and two spillover effects, comparing average potential outcomes under varying individual or neighborhood treatment statuses, while keeping the other constant
 
-`NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate for more than one estimated simultaneously. `NetworkCausalTree` procedure is divided into two steps, discovery and estimation, and each cluster is randomly assigned to one of the two clusters(honest splitting). In the discovery step, ‘NetworkCausalTree’ builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves, which are not sufficiently representative of the four exposure conditions. In the estimation step, ‘NetworkCausalTree’ estimates the CACEs and their standard errors in each leaf.
+`NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate for more than one estimand simultaneously. `NetworkCausalTree` procedure is divided into two steps, discovery and estimation, and each cluster is randomly assigned to one of the two clusters(honest splitting). In the discovery step, ‘NetworkCausalTree’ builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves, which are not sufficiently representative of the four exposure conditions. In the estimation step, ‘NetworkCausalTree’ estimates the CACEs and their standard errors in each leaf.
 
 
 
@@ -110,7 +110,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 ```
 
 
-The results are included in a  `data.frame` object which provides information about i) the partitions identified by the tree ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors . The function `print()` displays these results and  ‘plot_NCT()’ function visualizes results. For instance, the plot related to the ‘NetworkCausalTree’ resulted in the **Example 1** is obtained using: 
+The results are included in a  `data.frame` object which provides information about i) the partitions identified by the tree ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors, in all leafs. The function `print()` displays these results and the ‘plot_NCT()’ function visualizes results. For instance, the plot related to the ‘NetworkCausalTree’ resulted in the **Example 1** is obtained using: 
 
 
 ```r
