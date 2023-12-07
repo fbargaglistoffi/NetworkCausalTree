@@ -19,10 +19,12 @@ library("NetworkCausalTree")
 
 ## Examples
 
-Singular splitting
-```r
-set.seed(1)
+### Example 1
 
+Data generated using Erdos Renyi networks. 
+
+```r
+## Examples
 dataset <- data_generator(N = 4000, 
                           K = 4,
                           m = 80, 
@@ -31,6 +33,12 @@ dataset <- data_generator(N = 4000,
                           h = 2, 
                           method_networks = "er", 
                           param_er = 0.1)
+```
+
+Singular splitting based on the main treatment effect only 
+
+```r
+
 
 result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
@@ -54,7 +62,10 @@ plot_NCT(NCT = result,
          title = title)
 ```
 
-Composite splitting (NCT based on all the four effects)
+### Example 2
+
+Data generated using Barabasi - Albert networks. 
+
 ```r
 
 
@@ -65,6 +76,12 @@ dataset <- data_generator(N = 4000,
                           het = TRUE,
                           h = 3,
                           method_networks = "sf")
+
+```
+
+Composite splitting (NCT based on all the four effects)
+
+```r
 
 result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
@@ -82,9 +99,9 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 title <- expression("CAUSAL TREE TARGETED TO ALL THE EFFECTS")
 cov_names <- colnames(dataset[["X"]])
 
-plot_NCT(result, 
-         cov_names, 
-         title,
+plot_NCT(NCT = result, 
+         cov_names = cov_names,
+         title = title,
          output = "detection")
 ```
 
