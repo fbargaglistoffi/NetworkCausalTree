@@ -28,7 +28,7 @@ Data generated using Erdos Renyi networks.
 dataset <- data_generator(N = 4000, 
                           K = 4,
                           m = 80, 
-                          p = rep(0.2,2000), 
+                          p = rep(0.2,4000), 
                           het = TRUE, 
                           h = 2, 
                           method_networks = "er", 
