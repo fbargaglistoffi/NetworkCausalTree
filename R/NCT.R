@@ -51,7 +51,7 @@
 #'
 #' @import stringi
 #' @import statnet
-#' @import network
+#' @import intergraph
 #' @import ergm
 #' @import plyr
 #' @import stats
