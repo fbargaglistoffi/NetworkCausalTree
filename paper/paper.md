@@ -121,7 +121,7 @@ plot_NCT(NCT = result,
 
 Figure 1 reports the visualization of the results for Example 1, which perfectly discover the correct CATE decomposition.
 
-![pippo](images/JOSS_logo.png)
+![Network Causal Tree targeted to the main treatment effect](images/result.jpeg)
 
 Online documentation for the package can be found at [https://github.com/fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
 
