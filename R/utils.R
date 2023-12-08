@@ -36,9 +36,9 @@ generate_clustered_networks = function(m,
 
     # ERGM networks
     if (method_networks == "ergm") {
-      test.net <- network::network(cluster_size, 
-                                   directed = FALSE, 
-                                   density = 0)
+      test.net <- make_empty_graph(n = cluster_size, 
+                                   directed = FALSE)
+      test.net <- intergraph::asNetwork(test.net)
       homophily_vector <- X[,var_homophily_ergm]
       test.net%v%"homophily" =  homophily_vector[(cluster_size * i -
                                                  (cluster_size - 1)) : 
