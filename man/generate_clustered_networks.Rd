@@ -10,7 +10,8 @@ generate_clustered_networks(
   method_networks,
   param_er,
   var_homophily_ergm,
-  coef_ergm
+  coef_ergm,
+  X = NULL
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 \item{var_homophily_ergm}{Variable to account for homophily}
 
 \item{coef_ergm}{If method "ergm", coefficients of the ERGM model}
+
+\item{X}{N x K Observed Covariates Matrix.}
 }
 \value{
 : An adjacency matrix which describes a clustered network environment

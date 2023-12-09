@@ -11,14 +11,14 @@ plot_NCT(
   output = "estimation",
   effect_color_nodes = "1000",
   vertex_color = c("lightskyblue", "dodgerblue2"),
-  vertex_size = 44,
-  vertex_size2 = 40,
+  vertex_size = 32,
+  vertex_size2 = 30,
   vertex_shape = "rectangle",
   vertex_frame_color = "black",
   vertex_label_color = "black",
-  vertex_label_cex = 2,
+  vertex_label_cex = 1,
   vertex_label_font = 1,
-  edge_label_cex = 1.5,
+  edge_label_cex = 1,
   edge_label_family = "sans",
   edge_color = "black",
   edge_width = 0.3,
@@ -29,7 +29,8 @@ plot_NCT(
   main_font = 1,
   main_cex = 1,
   adj = 1,
-  main_color = "black"
+  main_color = "black",
+  margins = c(0.1, 0.5, 1.5, 0.7)
 )
 }
 \arguments{
@@ -40,8 +41,7 @@ plot_NCT(
 \item{title}{Title.}
 
 \item{output}{If "detection" only point estimates are reported, if
-"estimation" both estimated effects and variances are reported.
-Edge - specific parameters}
+"estimation" both estimated effects and variances are reported.}
 
 \item{effect_color_nodes}{The estimated effect according to which nodes are colored
 It can be "1000", "0100","1110","1101".}
@@ -92,6 +92,12 @@ Legend - specific parameters}
 \item{adj}{adj.}
 
 \item{main_color}{Title color.}
+
+\item{margins}{4 - dimensional vector setting the figure margins. The first element denotes
+the bottom margin, the second the left side margin, the third the top margin
+and the fourth the right side marhin
+
+Edge - specific parameters}
 }
 \value{
 A plot representing the estimated Network causal tree.

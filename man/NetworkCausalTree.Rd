@@ -12,7 +12,7 @@ NetworkCausalTree(
   A = NULL,
   M = NULL,
   p = NULL,
-  ratio_disc,
+  ratio_disc = 0.5,
   depth = 3,
   minsize = 10,
   method = "singular",
