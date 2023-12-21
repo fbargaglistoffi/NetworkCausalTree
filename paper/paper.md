@@ -1,5 +1,5 @@
 ---
-title: 'NetworkCausalTree: an R package for estimating heterogeneous effects under interference'
+title: 'NetworkCausalTree: An R package for interpretable discovery and inference of heterogeneous treatment effects under network interference'
 tags:
   - R
   - TODO
@@ -17,26 +17,34 @@ authors:
     affiliation: "2"
   - name: Laura Forastiere
     orcid: 0000-0003-3721-9826
-    affiliation: "2"
+    affiliation: "3"
 affiliations:
  - name: Sant'Anna School for Advanced Studies
    index: 1
  - name: Department of Biostatistics, Harvard School of Public Health
    index: 2
-date: 24 March 2023
+ - name: Causal Learning and Artificial Intelligence lab, Institute of Science and Technology Austria
+   index: 3
+ - name: Department of Biostatistics, Yale School of Public Health
+   index: 4
+date: 01 January 2024
 bibliography: paper.bib
 ---
 
 # Summary
 
 @cox1958planning asserts that interference occurs when the assignment of treatment to one unit influences the outcomes of other units. In the realm of policy interventions, interference can manifest through various interactions, encompassing social, physical, or virtual connections. The conventional Rubin Causal Model, employed in causal inference studies [@rubin1986comment], excludes interference. However, when interference plays a role, it introduces bias into estimates [@forastiere2016identification]. Additionally, spillover effects enable researchers to gauge the overall impact of an intervention and to enhance the efficiency of treatment assignment mechanisms. Consequently, recent research has devised inventive methodologies to tackle interference [@sobel2006randomized; @rosenbaum2007interference].
-Concurrently, alongside the interference research domain, scholars have crafted machine learning algorithms to appraise treatment effects' heterogeneity with respect of individual characteristics [@athey2016recursive]. The rationale behind these algorithms lies in partitioning sub-populations by iteratively segregating groups whose estimated average treatment effect exhibits the most deviation.
+Concurrently, alongside the interference research domain, scholars have crafted machine learning algorithms to appraise treatment effects' heterogeneity with respect to individual characteristics [@athey2016recursive]. The rationale behind these algorithms lies in partitioning sub-populations by iteratively segregating groups whose estimated average treatment effect exhibits the most deviation.
 
 To integrate the aforementioned two topics in the field of causal inference, [@bargagli2020heterogeneous] introduces a novel machine learning algorithm, named Network Causal Tree (NCT), that explores the heterogeneity of treatment and spillover effects concerning individual, neighborhood, and network characteristics within randomized settings. NCT is designed to operate within clustered network interference (CNI), where agents are categorized into distinct clusters, and spillover mechanisms exclusively take place within clusters based on the links of a cluster-specific network. The estimation of conditional effects is carried out using an extended version of the Horvitz-Thompson estimator [@aronow2017estimating], tailored to accommodate clustered network interference. `NetworkCausalTree` is an R Package providing a flexible implementation of the Network Causal Tree algorithm.
 
 # Statement of need
 
-The existing R algorithms are designed either to detect and estimate Heterogeneous Treatment Effects (HTEs) or to estimate the Average Treatment Effects (ATEs) or Average Spullover Effects (ASEs) in the presence of interference: to the best of our knowledge, there aren't existing packages to explore the heterogeneity of treatment and spillover effects, in the presence of interference. There are mainly two R packages to discover and estimate HTEs: i) the `causalTree` package, founded on the Causal Honest Tree by Athey and Imbens [@athey2016recursive], presents a method for the interpretable discovery and estimation of HTE through decision rules; ii) the `CRE` package [@Cadei2023] finds its roots in the Causal Rule Ensemble algorithm and employs an ensemble-of-trees to achieve a comprehensive exploration of heterogeneity patterns. Alongside, there are two main packages to estimate the ATE and ASE in the presence of interference: i) the `inferference` package implements the Inverse Probability Weighting (IPW) estimators proposed by [@tchetgen2012causal] to evaluate the effect of an intervention in the presence of network interference; ii) the `interference` package still estimates causal effects under interference, but through the Aronow and Samii estimator [@aronow2017estimating]. To account for these current lack of existing methods to explore the heterogeneity of causal effects in the presence of interference, we propose `NetworkCausalTree`, an R package providing a flexible implementation of the Network Causal Tree algorithm. `NetworkCausalTree` provides i) an interpretable representation of the heterogeneity of treatment and spillover effects in the presence of CNI, within randomized settings; ii) the possibility for the researcher to simultaneously model the heterogeneity of both treatment and spillover effects. 
+The existing R algorithms are designed either to detect and estimate Heterogeneous Treatment Effects (HTEs) or to estimate the Average Treatment Effects (ATEs) or Average Spillover Effects (ASEs) in the presence of interference: to the best of our knowledge, there aren't existing packages to explore the heterogeneity of treatment and spillover effects, in the presence of interference. There are a plethora of methods to discover and estimate HTEs employing decision trees. Some of them have also been implemented in R packages. For instance, i) the `aVirtualTwins` package which implements the Virtual Twins algorithm introduced by [@foster2011subgroup]; ii) the `causalTree` package which implements the Causal Honest Tree algorithm introduced by Athey and Imbens [@athey2016recursive]; iii) the `policytree` which implements the Policy Tree methodology as proposed by [@athey2021policy]; iv) the `CRE` package [@Cadei2023] which implements the Causal Rule Ensemble algorithm introduced by [@bargagli2020causal]. 
+
+Alongside these packages for the data-driven discovery of heterogeneous treatment effects, there are two main packages to estimate the ATE and ASE in the presence of interference: i) the `inferference` package implements the Inverse Probability Weighting (IPW) estimators proposed by [@tchetgen2012causal] to evaluate the effect of an intervention in the presence of network interference; ii) the `interference` package also estimates causal effects under interference, but making use of the Aronow and Samii estimator [@aronow2017estimating]. 
+
+To account for the current lack of existing methods to data-drivenly discover the heterogeneity of causal effects in the presence of interference, we propose `NetworkCausalTree`, an R package providing a flexible implementation of the Network Causal Tree algorithm. `NetworkCausalTree` provides i) an interpretable representation of the heterogeneity of treatment and spillover effects in the presence of CNI, within randomized settings; ii) the possibility for the researcher to simultaneously model the heterogeneity of both treatment and spillover effects. 
 
 
 # Algotithm 
