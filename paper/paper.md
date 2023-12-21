@@ -139,6 +139,6 @@ Online documentation for the package can be found at [https://github.com/fbargag
 
 # Acknowledgements
 
-This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of _Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity_, the VPR - Harvard University grant on _Climate Change Solutions Fund_ and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
+This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of _Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity_ and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
 
 # References
