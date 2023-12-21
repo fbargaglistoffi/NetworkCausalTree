@@ -67,7 +67,7 @@ library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world  data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence] or the Exponential Random Graph Model[@lusher2013exponential], that can potentially account for homophily.
+`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world  data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the Exponential Random Graph Model[@lusher2013exponential], that can potentially account for homophily.
 
 ```r
 dataset <- data_generator(N = 4000, 
@@ -120,8 +120,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 ```
 
 
-The results are included in a  `data.frame` object which provides information about i) the partitions identified by the tree ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors, in all leafs. The function `print()` displays these results and the `plot_NCT()` function visualizes results. For instance, the plot related to the `NetworkCausalTree` resulted in the **Example 1** is obtained using: 
-
+The results are included in a `data.frame` object which provides information about i) the partitions identified by the tree, ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors, in all leaves. The function `print()` displays these results and the `plot_NCT()` function visualizes results. For instance, the plot related to the `NetworkCausalTree` resulted in the **Example 1** is obtained using: 
 
 ```r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
@@ -132,7 +131,7 @@ plot_NCT(NCT = result,
          title = title)
 ```
 
-Figure 1 reports the visualization of the results for Example 1, which perfectly discover the correct CATE decomposition.
+Figure 1 reports the visualization of the results for Example 1, which discovers correctly the underlying CATE decomposition.
 
 ![Network Causal Tree targeted to the main treatment effect](images/result.jpeg)
 
@@ -140,6 +139,6 @@ Online documentation for the package can be found at [https://github.com/fbargag
 
 # Acknowledgements
 
-We acknowledge ...
+This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of _Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity_, the VPR - Harvard University grant on _Climate Change Solutions Fund_ and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
 
 # References
