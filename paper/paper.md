@@ -52,7 +52,9 @@ To account for the current lack of existing methods for a data-driven discovery 
 
 The NCT algorithm is designed to detect and estimate heterogeneous treatment and spillover effects in randomized settings under CNI. Under CNI, spillover is confined to units within the same cluster, and an individual's outcome is influenced by the treatment status of directly connected units in the cluster-specific network. Potential outcomes $ Y_{ik}(w,g)$ - where $k\in \mathcal{K}=[1, \ldots, K]$ is the cluster indicator, and $i=1,\ldots, n_k$ is the unit indicator in each cluster $k$ - are indexed with respect to the individual intervention $W_{ik}=w$ and to the neighborhood treatment $G_{ik}=g$, which is defined as a binary variable that equals 1 if the unit $ik$ has at least one treated neighbor, 0 otherwise. For each observation $ik$ in the sample $\mathcal{V}$ we observe a vector of individual or network characteristics $\mathbf{X_{ik}}$.  The adjacency matrix describing interactions within a given cluster $k$ is denoted with $\mathbf{A_{k}}$. Estimands of interest ($\tau_{(w,g;w',g')}$) encompass two treatment and two spillover effects, comparing average potential outcomes under varying individual or neighborhood treatment statuses, while keeping the other constant. 
 
-
+$$
+\tau_{(w,g;w',g')}(\ell(\mathbf{x})) =  \frac{1}{N(\ell(\vx))}\sum_{k=1}^K\sum_{i=1}^{n_k}Y_{ik}(w,g)\mathds{1}(\mathbf{X}_{ik}\in \ell(\vx)) -  \frac{1}{N(\ell(\mathbf{x}))}\sum_{k=1}^K\sum_{i=1}^{n_k}Y_{ik}(w',g')\mathds{1}(\mathbf{X}_{ik} \in \ell(\mathbf{x})). 
+$$
 
 These effects will be estimated within each leaf through an appropriate Horvits-Thompson estimator [@aronow2017estimating], which employs both the marginal probability of an individual $ik$ to be exposed to the treatment level $(w,g)$ $\pi_{ik}(w,g)$ and the joint probablity of two individuals $ik$ and $jk'$ to be simultaneously exposed to the treatment levels $(w,g)$ and $(w',g')$, respectively, $\pi_{ikjk'}(w,g;w',g')$. 
 
