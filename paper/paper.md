@@ -84,7 +84,7 @@ dataset <- data_generator(N = 4000,
                           param_er = 0.1)
 ```
 
-We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package.
+We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package. To run this function, the user has to input the data $ \(`W`,`Y`,`X`,`M` \) = \{W_{ik}, Y_{ik}, \mathbd{X}_{ik}, M_{ik} \}_{ik\in \mathcal{V}}$; the vector collecting individual treatment assignment probabilities `p`, the global adjacency matrix `A` = $\boldsymbol{A}$,  which includes the cluster-specific blocks $\boldsymbol{A}_{k}$ (all these elements are provided by the output of `data_generator()`). Moreover, users must specify the elements of the vector $\omega(w,g;w',g')$, ruling the extent of which estimands contribute to the criterion funciton (`effect_weights`); the `ratio_disc` parameter, representing the ratio of clusters to be included in the discovery set only; two parameters ruling the stopping criteria of the tree (`depth` measures the maximum depth, while `minsize` specifies the minimum number of observaztions for each level of the joint intervention $(w,g)$ to be required in the leafs; method to compute the objective function: `method = "singular"` for NCT targeted to one single effect; `method = "composite"` for NCT targeted to multiple effects; `method = "penalized"` for a criterion function computed while considering a single effect only and including a penalization term related to the variance within the leafs; the desired `output` of the function ( if `output = "detection"` only point estimates are computed, if `output = "estimation"` both estimated effects and  are computed )
 
 
 **Example 1.** Running Network Causal Tree while relying on a singular in-sample splitting criterion function, that assesses the heterogeneity of the main treatment effect ($\tau_{(1,0;0,0)}$)  only 
@@ -98,7 +98,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             M = dataset[["M"]],
                             p = dataset[["p"]], 
                             effect_weights = c(1,0,0,0),
-                            ratio_dis = 0.5,
+                            ratio_disc = 0.5,
                             depth = 3,
                             minsize = 5, 
                             method = "singular",
@@ -116,7 +116,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             M = dataset[["M"]],
                             p = dataset[["p"]], 
                             effect_weights = c(0.25,0.25,0.25,0.25),
-                            ratio_dis = 0.5,
+                            ratio_disc = 0.5,
                             depth = 3,
                             minsize = 5, 
                             method = "composite",
@@ -124,7 +124,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 ```
 
 
-The results are included in a `data.frame` object which provides information about i) the partitions identified by the tree, ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors, in all leaves. The function `print()` displays these results and the `plot_NCT()` function visualizes results. For instance, the plot related to the `NetworkCausalTree` resulted in the **Example 1** is obtained using: 
+The results are included in a `data.frame` object which provides information about i) the partitions identified by the tree, ii) the number of units included in all partitions, iii) the estimated CACEs, with their corresponding standard errors, in all leaves. The function `print()` displays these results and the `plot_NCT()` function visualizes the tree with the estimated effects in each leaf. For instance, the plot related to the `NetworkCausalTree` resulted in the **Example 1** is obtained using: 
 
 ```r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
@@ -135,7 +135,7 @@ plot_NCT(NCT = result,
          title = title)
 ```
 
-Figure 1 reports the visualization of the results for Example 1, which discovers correctly the underlying CATE decomposition.
+Figure 1 reports the visualization of the results for Example 1, which discovers the underlying CATE decomposition.
 
 ![Network Causal Tree targeted to the main treatment effect](images/result.jpeg)
 
