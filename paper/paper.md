@@ -16,10 +16,10 @@ authors:
     affiliation: "2"
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
-    affiliation: "2"
+    affiliation: "3"
   - name: Laura Forastiere
     orcid: 0000-0003-3721-9826
-    affiliation: "3"
+    affiliation: "4"
 affiliations:
  - name: Sant'Anna School for Advanced Studies
    index: 1
