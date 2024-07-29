@@ -21,7 +21,7 @@ authors:
     orcid: 0000-0003-3721-9826
     affiliation: "4"
 affiliations:
- - name: Sant'Anna School for Advanced Studies
+ - name: Bank of Italy and Sant'Anna School for Advanced Studies
    index: 1
  - name: Department of Biostatistics, Harvard School of Public Health
    index: 2
@@ -67,13 +67,12 @@ These effects will be estimated by a Horvits-Thompson estimator [@bargagli2024he
 `NetworkCausalTree` is available on [GitHub](https://github.com/fbargaglistoffi/NetworkCausalTree) and can be installed and loaded into the R session
 using:
 
-
 ```r
 library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world  data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. To generate synthetic data, the user has to specify the sample size `N`, the number of clusters `m`, the number of covariates `K`, the vector collecting individual treatment assignment probabilities `p`, the parameter that specifies whether treatment heterogeneity is present in the data `het`, the simulated size of the main treatment effect $\tau_{(1,0;0,0)}$ `h`, the method employed to generate the cluster-specific networks `method_networks` and its required parameters (here, since networks are generated according to the Erdos-Renyi model (`method_networks = er`), parameters are specified within the option `param_er`)
+`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world  data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. To generate synthetic data, the user has to specify the sample size (`N`), the number of clusters (`m`), the number of covariates (`K`), the vector collecting individual treatment assignment probabilities (`p`), the parameter that specifies whether treatment heterogeneity is present in the data (`het`), the simulated size of the main treatment effect $\tau_{(1,0;0,0)}$ (`h`), the method employed to generate the cluster-specific networks (`method_networks`), and its required parameters---here, since networks are generated according to the Erdos-Renyi model (`method_networks = er`)---, parameters are specified using `param_er` the option.
 
 ```r
 dataset <- data_generator(N = 4000, 
@@ -86,7 +85,7 @@ dataset <- data_generator(N = 4000,
                           param_er = 0.1)
 ```
 
-We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package. To run this function, the user has to input the data  (`W`,`Y`,`X`,`M`) = $(W_{ik}, Y_{ik}, \mathbf{X_{ik}}, M_{ik})$, where $ik \in \mathcal{V}$ ; the vector collecting individual treatment assignment probabilities `p`, the global adjacency matrix `A` that includes the cluster specific matrices $\mathbf{A_{k}}$ (all these elements are provided by the output of `data_generator()`). Moreover, users must specify the elements of the vector $\omega(w,g;w',g')$, ruling the extent of which estimands contribute to the criterion funciton (`effect_weights`); the `ratio_disc` parameter, representing the ratio of clusters to be included in the discovery set only; two parameters ruling the stopping criteria of the tree (`depth` measures the maximum depth, while `minsize` specifies the minimum number of observaztions for each level of the joint intervention $(w,g)$ to be required in the leafs; method to compute the objective function: `method = "singular"` for NCT targeted to one single effect; `method = "composite"` for NCT targeted to multiple effects; `method = "penalized"` for a criterion function computed while considering a single effect only and including a penalization term related to the variance within the leafs; the desired `output` of the function ( if `output = "detection"` only point estimates are computed, if `output = "estimation"` both estimated effects and their standard errors are computed)
+We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package. To run the `NetworkCausalTree` function, the user has to input the following arguments: the data  (`W`,`Y`,`X`,`M`) = $(W_{ik}, Y_{ik}, \mathbf{X_{ik}}, M_{ik})$, where $ik \in \mathcal{V}$; the vector collecting individual treatment assignment probabilities `p`, the global adjacency matrix `A` that includes the cluster specific matrices $\mathbf{A_{k}}$ (all these elements are provided by the output of `data_generator()`). Moreover, users must specify the weights vector $\omega(w,g;w',g')$, ruling the extent of which each causal estimands contribute to the objective funciton (`effect_weights`); the `ratio_disc` parameter, representing the ratio of clusters to be included in the discovery set only; two parameters ruling the stopping criteria of the tree (`depth` measures the maximum depth, while `minsize` specifies the minimum number of observations for each level of the joint treatment $(w,g)$ to be required in the leafs; the method to compute the objective function, that is, `method = "singular"` for NCT targeted to one single effect; `method = "composite"` for NCT targeted to multiple effects; `method = "penalized"` for a criterion function computed while considering a single effect only and including a penalization term related to the variance within the leafs; the desired `output` of the function ( if `output = "detection"` only point estimates are computed, if `output = "estimation"` both estimated effects and their standard errors are computed).
 
 
 **Example 1.** Running Network Causal Tree while relying on a singular in-sample splitting criterion function, that assesses the heterogeneity of the main treatment effect ($\tau_{(1,0;0,0)}$)  only 
@@ -126,7 +125,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 ```
 
 
-The results are included in a `data.frame` object which provides information about i) the nodes identified by the tree, ii) the number of units included in all nodes, iii) the estimated CACEs, with their corresponding standard errors, in all leaves. The function `print()` displays these results and the `plot_NCT()` function visualizes the tree with the estimated effects in each leaf. For instance, the plot related to the `NetworkCausalTree` resulted in the **Example 1** is obtained using: 
+The results are included in a `data.frame` object which provides information about i) the nodes identified by the tree, ii) the number of units included in all nodes, iii) the estimated CACEs, with their corresponding standard errors, in all leaves. The function `print()` displays these results and the `plot_NCT()` function visualizes the tree with the estimated effects in each leaf. For instance, Figure 1 shows the tree obtained from **Example 1**. The code used to produce the plot is as follows:
 
 ```r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
@@ -136,8 +135,6 @@ plot_NCT(NCT = result,
          cov_names = cov_names,
          title = title)
 ```
-
-Figure 1 reports the visualization of the results for Example 1, which discovers the underlying CATE decomposition.
 
 ![Network Causal Tree targeted to the main treatment effect](images/result.jpeg)
 
