@@ -1,11 +1,15 @@
 set.seed(13256)
 
+library(devtools)
+install_github("fbargaglistoffi/NetworkCausalTree", ref="master",force=TRUE)
+library("NetworkCausalTree")
+
 dataset <- data_generator(N = 4000, 
                           M = 4,
-                          k = 40, 
-                          p = rep(0.2,4000), 
+                          k = 80, 
+                          p = rep(0.2,2000), 
                           het = TRUE, 
-                          h = 4, 
+                          h = 2, 
                           method_networks = "er", 
                           param_er = 0.1)
 
@@ -20,13 +24,12 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             depth = 3,
                             minsize = 5, 
                             method = "singular",
-                            output = "detection")
+                            output = "estimation")
 
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset[["X"]])
 
-plot_NCT(NCT = result, 
-         cov_names = cov_names,
-         title = title,
-         output = "detection"
-         )
+plot_NCT(result, 
+         cov_names, 
+         title,
+         output = "estimation")

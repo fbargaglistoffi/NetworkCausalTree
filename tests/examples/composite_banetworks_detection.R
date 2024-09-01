@@ -1,8 +1,8 @@
 set.seed(13256)
 
 dataset <- data_generator(N = 4000,
-                          K = 4,
-                          m = 80,
+                          M = 4,
+                          k = 80,
                           p = rep(0.2,4000),
                           het = TRUE,
                           h = 3,
