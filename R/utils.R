@@ -4,9 +4,9 @@
 #' @description
 #' Generates a simulated clustered network environment
 #'
-#' @param  m Number of clusters
+#' @param  k Number of clusters
 #' @param  N Number of units
-#' @param X N x K Observed Covariates Matrix.
+#' @param X N x M Observed Covariates Matrix.
 #' @param  method_networks method to generate the m networks: "ergm" (Exponential Random Graph Models) ,
 #'  "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
 #' Note: in this function, clusters have the same size, so N should be a multiple of m
@@ -17,7 +17,7 @@
 #' @return: An adjacency matrix which describes a clustered network environment
 #'
 #'
-generate_clustered_networks = function(m,
+generate_clustered_networks = function(k,
                                        N,
                                        method_networks, 
                                        param_er,
@@ -29,10 +29,10 @@ generate_clustered_networks = function(m,
   comba <- matrix(0, N, N)
 
   # Compute cluster size
-  cluster_size <- N / m
+  cluster_size <- N / k
 
-  # Generate m networks
-  for (i in 1:m) {
+  # Generate k networks
+  for (i in 1:k) {
 
     # ERGM networks
     if (method_networks == "ergm") {

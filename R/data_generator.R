@@ -5,8 +5,8 @@
 #' Generates Network Causal Tree synthetic data.
 #'
 #' @param  N Sample size (default: 2000).
-#' @param  K Number of binary regressors (default: 5).
-#' @param  m Number of clusters (default: 40).
+#' @param  M Number of binary regressors (default: 5).
+#' @param  k Number of clusters (default: 40).
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual
 #' intervention (default: rep(0.2,2000))
 #' @param het TRUE if the treatment effects 1000 and 1101 are heterogeneous with
@@ -19,17 +19,17 @@
 #' (Barabasi-Albert model) (default: "er").
 #' Note: in this function, clusters have the same size, so N should be a multiple of m
 #' @param  param_er Probability of the "er" model, if used (default: 0.2).
-#' @param  coef_ergm Coefficients of the "ergm" model , if used (default: NULL).
+#' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
 #' @param  var_homophily_ergm Variable to account for homophily in the "ergm"
 #' model (default: NULL).
 #'
 #' @return A list of synthetic data containing:
-#' - NxK covariates matrix (`X`).
+#' - NxM covariates matrix (`X`).
 #' - Nx1 outcome vector (`Y`),
 #' - Nx1 individual intervention vector (`W`),
 #' - NxN adjacency matrix (`A`),
 #' - Nx1 neighborhood intervention vector (`G`),
-#' - Nx1 group membership vector (`M`),
+#' - Nx1 group membership vector (`K`),
 #' - Nx1 probability to be assigned to the active individual intervention vector
 #' (`p`),
 #'
@@ -38,8 +38,8 @@
 #' @export
 
 data_generator = function(N = 2000,
-                          K = 5,
-                          m = 40,
+                          M = 5,
+                          k = 40,
                           p = rep(0.2,2000),
                           het = TRUE,
                           h = 2,
@@ -48,17 +48,23 @@ data_generator = function(N = 2000,
                           coef_ergm = NULL,
                           var_homophily_ergm = NULL){
 
+  # check the validity of input parameters
+  if (length(p) != N) {
+    stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
+  }
+  
+  
   # Generate Covariates
   X <- NULL
-  for (k in 1 : K) {
+  for (m in 1 : M) {
     x <- rbinom(N, 1, 0.5)
     X <- cbind(X, x)
-    colnames(X)[k] <- paste0(colnames(X)[k], k)
+    colnames(X)[m] <- paste0(colnames(X)[m], m)
   }
 
   # Generate m networks
   A <- generate_clustered_networks(N = N,
-                                   m = m,
+                                   k = k,
                                    method_networks = method_networks,
                                    param_er = param_er,
                                    coef_ergm = coef_ergm,
@@ -68,10 +74,10 @@ data_generator = function(N = 2000,
   net <- igraph::graph_from_adjacency_matrix(A)
 
   # Group Indicator
-  cluster_size <- N / m
-  M <- c(rep(1 : m, cluster_size))
-  M <- sort(M)
-  levels(M) <- c(1 : m)
+  cluster_size <- N / k
+  K <- c(rep(1 : k, cluster_size))
+  K <- sort(K)
+  levels(K) <- c(1 : k)
   
 
   # Randomly assign unit to treatment arms
@@ -88,7 +94,7 @@ data_generator = function(N = 2000,
   # Remove isolates
   W <- W[Ne > 0]
   G <- G[Ne > 0]
-  M <- as.numeric(M[Ne > 0])
+  K <- as.numeric(K[Ne > 0])
   X <- X[Ne > 0, ]
   p <- p[Ne > 0]
   N <- length(W)
@@ -120,7 +126,7 @@ data_generator = function(N = 2000,
                   W = W,
                   A = A,
                   G = G,
-                  M = M,
+                  K = K,
                   p = p)
   return(dataset)
 }

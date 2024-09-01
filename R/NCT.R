@@ -4,7 +4,7 @@
 #' @description
 #' Returns a Network Causal Tree, with the corresponding estimates
 #'
-#' @param X N x K Observed Covariates Matrix.
+#' @param X N x M Observed Covariates Matrix.
 #' @param Y N x 1 Observed Outcome vector.
 #' @param W N x 1 Individual Treatment vector.
 #' @param effect_weights Treatment Effect weights vector (4 elements):
@@ -17,7 +17,7 @@
 #' - delta: weight associated to the spillover effect 0100 (effect of the
 #' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
-#' @param M N x 1 Cluster Membership vector.
+#' @param K N x 1 Cluster Membership vector.
 #' @param p  N x 1 Probability to be assigned to the active individual
 #' intervention vector.
 #' @param ratio_disc Ratio of clusters to be assigned to the discovery set only.
@@ -51,7 +51,7 @@
 #'
 #' @import stringi
 #' @import statnet
-#' @import intergraph
+#' @import network
 #' @import ergm
 #' @import plyr
 #' @import stats
@@ -63,9 +63,9 @@
 NetworkCausalTree <- function(X, Y, W,
                                effect_weights = c(1,0,0,0),
                                A = NULL,
-                               M = NULL,
+                               K = NULL,
                                p = NULL,
-                               ratio_disc = 0.5,
+                               ratio_disc,
                                depth = 3,
                                minsize = 10,
                                method = "singular",
@@ -73,7 +73,7 @@ NetworkCausalTree <- function(X, Y, W,
 
   # compute sample size and number of clusters
   N <- length(W)
-  m <- length(unique(M))
+  k <- length(unique(K))
 
   # get effects - specific input weights
   alpha <- effect_weights[1]
@@ -124,15 +124,14 @@ NetworkCausalTree <- function(X, Y, W,
                                                    Ne = Ne)
 
   # sample the clusters to be assigned to the discovery set
-  nclusters_disc = round(m * ratio_disc)
-  clusters_disc <- sample(1 : m,
+  nclusters_disc = round(k * ratio_disc)
+  clusters_disc <- sample(1 : k,
                           size = nclusters_disc, 
                           replace = FALSE)
 
   # generate the tree on the discovery set
   tree <- sprout_nct(method = method,
                      sampled_clusters = clusters_disc,
-                     m = m,
                      depth = depth,
                      minsize = minsize,
                      alpha = alpha,
@@ -144,7 +143,7 @@ NetworkCausalTree <- function(X, Y, W,
                      G = G,
                      Y = Y,
                      X = X,
-                     M = M,
+                     K = K,
                      Ne = Ne,
                      p = p,
                      population_effects = population_effects,

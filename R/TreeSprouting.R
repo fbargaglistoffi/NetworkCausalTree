@@ -101,7 +101,7 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
 #' @param W N x 1 vector, Individual Treatment
 #' @param G N x 1 vector, Neighborhood Treatment
 #' @param Y N x 1 vector, Observed Outcome
-#' @param X N x K matrix, Observed Covariate Matrix
+#' @param X N x N matrix, Observed Covariate Matrix
 #' @param p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param Ne N x 1 vector, Degree
 #' @param Ne_list List of N elements - where N is the sample size -
@@ -210,7 +210,7 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
 #' @param  W N x 1 vector, Individual Treatment
 #' @param  G N x 1 vector, Neighborhood Treatment
 #' @param  Y N x 1 vector, Observed Outcome
-#' @param  X N x K matrix, Observed Covariate Matrix
+#' @param  X N x M matrix, Observed Covariate Matrix
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
@@ -378,12 +378,11 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 #' @param delta weight associated to the effect 0100
 #' @param  N Sample size
 #' @param sampled_clusters Clusters assigned to the discovery set
-#' @param m Total number of clusters
 #' @param  W N x 1 vector, Individual Treatment
 #' @param  G N x 1 vector, Neighborhood Treatment
 #' @param  Y N x 1 vector, Observed Outcome
-#' @param  M N x 1 vector, Cluster Membership
-#' @param  X N x K matrix, Observed Covariates Matrix
+#' @param  K N x 1 vector, Cluster Membership
+#' @param  X N x M matrix, Observed Covariates Matrix
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
@@ -402,17 +401,17 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 #' 'role' of the node - parent or leaf -.
 #'
 sprout_nct = function(method, sampled_clusters,
-                      m, alpha, beta, gamma, delta,
-                      depth, minsize, N, W, G, Y, X, M, p, Ne,
+                      alpha, beta, gamma, delta,
+                      depth, minsize, N, W, G, Y, X, K, p, Ne,
                       population_effects, Ne_list){
 
 
   # Initialize
   data <- data.frame(idunit = c(1:N), W = W, G = G,
-                     Y = Y, X = X, M = M)
+                     Y = Y, X = X, K = K)
 
   # Take only those observations that have been assigned to the discovery set
-  datasample <- data[which(M %in% sampled_clusters), ]
+  datasample <- data[which(K %in% sampled_clusters), ]
   datasample <- datasample[order(datasample$idunit), ]
   sampleid <- unique(datasample$idunit)
 
@@ -449,7 +448,7 @@ sprout_nct = function(method, sampled_clusters,
 #' @param  W N x 1 vector, Individual Treatment
 #' @param  G N x 1 vector, Neighborhood Treatment
 #' @param  Y N x 1 vector, Observed Outcome
-#' @param  X N x K matrix, Observed Covariates Matrix
+#' @param  X N x M matrix, Observed Covariates Matrix
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
