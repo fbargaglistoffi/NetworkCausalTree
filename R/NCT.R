@@ -35,7 +35,6 @@
 #' @return A data.frame describing the obtained Network Causal Trees.
 #' Each row represents a partition (of a specific tree) with 10/14 entries.
 #' Columns summary:
-#' - `OF`: value of the OF in the corresponding partition,
 #' - `NOBS_TR`: number of training observations in the partition,
 #' - `FILTER`: values of the covariates `X` that identify the partition,
 #' - `NOBS_EST`: number of estimation observations in the partition,

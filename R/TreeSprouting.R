@@ -575,7 +575,8 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
       colnames(nct_partition)<-c("OF", "FILTER", "TERMINAL", "NOBS_TR", "NOBS_EST",
                              "EFF1000_EST", "SE1000_EST", "EFF1101_EST", "SE1101_EST",
                              "EFF1110_EST", "SE1110_EST", "EFF0100_EST", "SE0100_EST")
-
+      
+      nct_partition = nct_partition[,-1]
     }
 
   # If output equals to "detection", then only compute the estimated conditional average
@@ -640,6 +641,7 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
       colnames(nct_partition)<-c("OF", "FILTER", "TERMINAL", "NOBS_TR", "NOBS_EST",
                              "EFF1000_EST", "EFF1101_EST", "EFF1110_EST", "EFF0100_EST")
 
+      nct_partition = nct_partition[,-1]
     }
 
   return(nct_partition)
