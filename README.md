@@ -113,10 +113,10 @@ Please note that the CRE project is released with a [Contributor Code of Conduct
 ## Cite
 
 ```bibtex
-@article{bargagli2020heterogeneous,
-  title={Heterogeneous treatment and spillover effects under clustered network interference},
+@article{bargagli2024heterogeneous,
+  title={Heterogeneous Treatment and Spillover Effects under Clustered Network Interference},
   author={Bargagli-Stoffi, Falco J and Tortu, Costanza and Forastiere, Laura},
-  journal={arXiv preprint arXiv:2008.00707},
-  year={2020}
+  journal={Annals of Applied Statistics},
+  year={2024}
 }
 ```
