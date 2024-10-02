@@ -16,12 +16,13 @@
 #'
 #' @return: An adjacency matrix which describes a clustered network environment
 #'
+#' @import intergraph
 #'
 generate_clustered_networks = function(k,
                                        N,
-                                       method_networks, 
+                                       method_networks,
                                        param_er,
-                                       var_homophily_ergm, 
+                                       var_homophily_ergm,
                                        coef_ergm,
                                        X = NULL){
 
@@ -36,12 +37,12 @@ generate_clustered_networks = function(k,
 
     # ERGM networks
     if (method_networks == "ergm") {
-      test.net <- make_empty_graph(n = cluster_size, 
+      test.net <- make_empty_graph(n = cluster_size,
                                    directed = FALSE)
       test.net <- intergraph::asNetwork(test.net)
       homophily_vector <- X[,var_homophily_ergm]
       test.net%v%"homophily" =  homophily_vector[(cluster_size * i -
-                                                 (cluster_size - 1)) : 
+                                                 (cluster_size - 1)) :
                                                  (cluster_size * i) ]
       g <- ergm::simulate_formula(test.net ~ nodematch("homophily") + edges,
                                   coef = coef_ergm)
@@ -55,7 +56,7 @@ generate_clustered_networks = function(k,
       # Erdos Renyi networks
       if (method_networks == "er") {
         g = igraph::erdos.renyi.game(cluster_size,
-                                   p.or.m=param_er, 
+                                   p.or.m=param_er,
                                    type = "gnp")}
 
       # Barabasi-Albert networks
@@ -88,18 +89,20 @@ generate_clustered_networks = function(k,
 #' @return A data frame with all combinations of the elements of the vectors,
 #' with no rows characterized by equal elements
 #'
+#' @import dplyr
+#'
 expand.grid.unique <- function(x, y, include.equals = FALSE){
 
   x <- unique(x)
   y <- unique(y)
-  
+
   g <- function(i){
     z <- dplyr::setdiff(y, x[seq_len(i - include.equals)])
     if (length(z)) cbind(x[i], z, deparse.level = 0)
   }
 
   do.call(rbind, lapply(seq_along(x), g))
-  
+
 }
 
 
@@ -117,6 +120,9 @@ expand.grid.unique <- function(x, y, include.equals = FALSE){
 #'
 #' @return A numeric value representing the number of shared neighbors between
 #' unit i and j.
+#'
+#' @import dplyr
+#'
 #'
 shared_neigh = function(i, j, Ne_list){
 

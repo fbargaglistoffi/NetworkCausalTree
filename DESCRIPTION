@@ -23,7 +23,9 @@ Imports:
   stats,
   plyr,
   network,
-  data.tree
+  data.tree,
+  dplyr,
+  intergraph,
 License: MIT + file LICENSE
 URL: https://github.com/fbargaglistoffi/NetworkCausalTree
 BugReports: https://github.com/fbargaglistoffi/NetworkCausalTree/issues
