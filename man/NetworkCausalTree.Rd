@@ -10,9 +10,9 @@ NetworkCausalTree(
   W,
   effect_weights = c(1, 0, 0, 0),
   A = NULL,
-  M = NULL,
+  K = NULL,
   p = NULL,
-  ratio_disc = 0.5,
+  ratio_disc,
   depth = 3,
   minsize = 10,
   method = "singular",
@@ -20,7 +20,7 @@ NetworkCausalTree(
 )
 }
 \arguments{
-\item{X}{N x K Observed Covariates Matrix.}
+\item{X}{N x M Observed Covariates Matrix.}
 
 \item{Y}{N x 1 Observed Outcome vector.}
 
@@ -40,7 +40,7 @@ neighborhood treatment, with the individual treatment set at 0).
 
 \item{A}{N x N Adjacency matrix.}
 
-\item{M}{N x 1 Cluster Membership vector.}
+\item{K}{N x 1 Cluster Membership vector.}
 
 \item{p}{N x 1 Probability to be assigned to the active individual
 intervention vector.}
@@ -66,7 +66,6 @@ A data.frame describing the obtained Network Causal Trees.
 Each row represents a partition (of a specific tree) with 10/14 entries.
 Columns summary:
 \itemize{
-\item \code{OF}: value of the OF in the corresponding partition,
 \item \code{NOBS_TR}: number of training observations in the partition,
 \item \code{FILTER}: values of the covariates \code{X} that identify the partition,
 \item \code{NOBS_EST}: number of estimation observations in the partition,

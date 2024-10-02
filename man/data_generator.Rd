@@ -6,8 +6,8 @@
 \usage{
 data_generator(
   N = 2000,
-  K = 5,
-  m = 40,
+  M = 5,
+  k = 40,
   p = rep(0.2, 2000),
   het = TRUE,
   h = 2,
@@ -20,16 +20,16 @@ data_generator(
 \arguments{
 \item{N}{Sample size (default: 2000).}
 
-\item{K}{Number of binary regressors (default: 5).}
+\item{M}{Number of binary regressors (default: 5).}
 
-\item{m}{Number of clusters (default: 40).}
+\item{k}{Number of clusters (default: 40).}
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual
 intervention (default: rep(0.2,2000))}
 
 \item{het}{TRUE if the treatment effects 1000 and 1101 are heterogeneous with
-respect to the first regressor (+taui with X1=0, -taui with X0=0), FALSE if
-constant (+taui) (default: TRUE).}
+respect to the first regressor (h with X1=0, -taui with X0=0), FALSE if
+constant (-h) (default: TRUE).}
 
 \item{h}{Absolute value of the treatment effects 1000 and 1101
 (default: 2).}
@@ -41,7 +41,7 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 
 \item{param_er}{Probability of the "er" model, if used (default: 0.2).}
 
-\item{coef_ergm}{Coefficients of the "ergm" model , if used (default: NULL).}
+\item{coef_ergm}{Coefficients of the "ergm" model, if used (default: NULL).}
 
 \item{var_homophily_ergm}{Variable to account for homophily in the "ergm"
 model (default: NULL).}
@@ -49,12 +49,12 @@ model (default: NULL).}
 \value{
 A list of synthetic data containing:
 \itemize{
-\item NxK covariates matrix (\code{X}).
+\item NxM covariates matrix (\code{X}).
 \item Nx1 outcome vector (\code{Y}),
 \item Nx1 individual intervention vector (\code{W}),
 \item NxN adjacency matrix (\code{A}),
 \item Nx1 neighborhood intervention vector (\code{G}),
-\item Nx1 group membership vector (\code{M}),
+\item Nx1 group membership vector (\code{K}),
 \item Nx1 probability to be assigned to the active individual intervention vector
 (\code{p}),
 }

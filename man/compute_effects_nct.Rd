@@ -32,7 +32,7 @@ are computed, if output = "estimation" both estimated effects and variances are 
 
 \item{Y}{N x 1 vector, Observed Outcome}
 
-\item{X}{N x K matrix, Observed Covariates Matrix}
+\item{X}{N x M matrix, Observed Covariates Matrix}
 
 \item{Ne}{N x 1 vector, Degree}
 

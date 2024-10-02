@@ -49,7 +49,7 @@ to be required in the leafs}
 
 \item{Y}{N x 1 vector, Observed Outcome}
 
-\item{X}{N x K matrix, Observed Covariate Matrix}
+\item{X}{N x M matrix, Observed Covariate Matrix}
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 

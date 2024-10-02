@@ -7,7 +7,6 @@
 sprout_nct(
   method,
   sampled_clusters,
-  m,
   alpha,
   beta,
   gamma,
@@ -19,7 +18,7 @@ sprout_nct(
   G,
   Y,
   X,
-  M,
+  K,
   p,
   Ne,
   population_effects,
@@ -32,8 +31,6 @@ sprout_nct(
 considering a single effect only and including a penalization term related to the variance}
 
 \item{sampled_clusters}{Clusters assigned to the discovery set}
-
-\item{m}{Total number of clusters}
 
 \item{alpha}{weight associated to the effect 1000}
 
@@ -56,9 +53,9 @@ to be required in the leafs}
 
 \item{Y}{N x 1 vector, Observed Outcome}
 
-\item{X}{N x K matrix, Observed Covariates Matrix}
+\item{X}{N x M matrix, Observed Covariates Matrix}
 
-\item{M}{N x 1 vector, Cluster Membership}
+\item{K}{N x 1 vector, Cluster Membership}
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 

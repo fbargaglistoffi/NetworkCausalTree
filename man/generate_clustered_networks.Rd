@@ -5,7 +5,7 @@
 \title{Simulate a Clustered Network Environment}
 \usage{
 generate_clustered_networks(
-  m,
+  k,
   N,
   method_networks,
   param_er,
@@ -15,7 +15,7 @@ generate_clustered_networks(
 )
 }
 \arguments{
-\item{m}{Number of clusters}
+\item{k}{Number of clusters}
 
 \item{N}{Number of units}
 
@@ -29,7 +29,7 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 
 \item{coef_ergm}{If method "ergm", coefficients of the ERGM model}
 
-\item{X}{N x K Observed Covariates Matrix.}
+\item{X}{N x M Observed Covariates Matrix.}
 }
 \value{
 : An adjacency matrix which describes a clustered network environment
