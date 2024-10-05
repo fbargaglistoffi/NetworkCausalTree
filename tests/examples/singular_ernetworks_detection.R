@@ -1,5 +1,10 @@
 set.seed(13256)
 
+library(devtools)
+install_github("fbargaglistoffi/NetworkCausalTree", ref="master",force=TRUE)
+library("NetworkCausalTree")
+
+
 dataset <- data_generator(N = 4000, 
                           M = 4,
                           k = 40, 
@@ -13,7 +18,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
                             W = dataset[["W"]], 
                             A = dataset[["A"]],
-                            M = dataset[["M"]],
+                            K = dataset[["K"]],
                             p = dataset[["p"]], 
                             effect_weights = c(1,0,0,0),
                             ratio_dis = 0.5,
