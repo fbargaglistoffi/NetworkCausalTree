@@ -10,25 +10,27 @@ authors:
     orcid: 0000-0003-2561-9726
     equal-contrib: true
     affiliation: "1"
+  - name: Riccardo Cadei
+    orcid: 0000-0003-2416-8943
+    affiliation: "2"
+  - name: Laura Forastiere
+    orcid: 0000-0003-3721-9826
+    affiliation: "3"
   - name: Falco J. Bargagli Stoffi
     orcid: 0000-0002-6131-8165
     equal-contrib: true
-    affiliation: "2"
-  - name: Riccardo Cadei
-    orcid: 0000-0003-2416-8943
-    affiliation: "3"
-  - name: Laura Forastiere
-    orcid: 0000-0003-3721-9826
-    affiliation: "4"
+    affiliation: "4,5"
 affiliations:
  - name: Bank of Italy and Sant'Anna School for Advanced Studies
    index: 1
- - name: Department of Biostatistics, Harvard School of Public Health
-   index: 2
  - name: Causal Learning and Artificial Intelligence lab, Institute of Science and Technology Austria
-   index: 3
+   index: 2
  - name: Department of Biostatistics, Yale School of Public Health
+   index: 3
+- name: Department of Biostatistics, UCLA School of Public Health
    index: 4
+- name: Department of Biostatistics, Harvard School of Public Health
+   index: 5
 date: 01 January 2024
 bibliography: paper.bib
 ---
