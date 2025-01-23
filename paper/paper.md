@@ -6,7 +6,7 @@ tags:
   - heterogeneous effects
   - machine learning 
 authors:
-  - name: Falco J. Bargagli Stoffi
+  - name: Falco J. Bargagli-Stoffi
     orcid: 0000-0002-6131-8165
     equal-contrib: true
     affiliation: "1"
