@@ -21,7 +21,7 @@ authors:
     orcid: 0000-0003-3721-9826
     affiliation: "3"
 affiliations:
-- name: Department of Biostatistics, UCLA School of Public Health
+ - name: Department of Biostatistics, UCLA School of Public Health
    index: 1
  - name: Bank of Italy and Sant'Anna School for Advanced Studies
    index: 2
