@@ -20,6 +20,9 @@ authors:
   - name: Laura Forastiere
     orcid: 0000-0003-3721-9826
     affiliation: "3"
+  - name: Charlie Wang
+    orcid: 0000-0000-0000-0000
+    affiliation: "5"
 affiliations:
  - name: Department of Biostatistics, UCLA School of Public Health
    index: 1
@@ -29,6 +32,8 @@ affiliations:
    index: 3
  - name: Department of Biostatistics, Yale School of Public Health
    index: 4
+ - name: Department of Statistics and Data Science, University of California, Los Angeles
+  index: 5
 
 date: 01 January 2025
 bibliography: paper.bib
@@ -79,8 +84,8 @@ The `data_generator()` function returns as output a list of synthetic data inclu
 
 ```r
 dataset <- data_generator(N = 4000, 
-                          K = 4,
-                          m = 80, 
+                          M = 4,
+                          k = 80, 
                           p = rep(0.2,4000), 
                           het = TRUE, 
                           h = 2, 
@@ -100,7 +105,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
                             W = dataset[["W"]], 
                             A = dataset[["A"]],
-                            M = dataset[["M"]],
+                            K = dataset[["K"]],
                             p = dataset[["p"]], 
                             effect_weights = c(1,0,0,0),
                             ratio_disc = 0.5,
@@ -118,7 +123,7 @@ result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
                             W = dataset[["W"]], 
                             A = dataset[["A"]],
-                            M = dataset[["M"]],
+                            K = dataset[["K"]],
                             p = dataset[["p"]], 
                             effect_weights = c(0.25,0.25,0.25,0.25),
                             ratio_disc = 0.5,
