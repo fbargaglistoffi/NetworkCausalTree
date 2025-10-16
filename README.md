@@ -1,19 +1,21 @@
-# Network Causal Tree
+# Network Causal Tree <img src="paper/images/JOSS_logo.png" align="right" width="120"/>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 The `NetworkCausalTree` package introduces a machine learning method that uses tree-based algorithms and an Horvitz-Thompson estimator to assess the heterogeneity of treatment and spillover effects in clustered network interference. Causal inference studies typically assume no interference between individuals, but in real-world scenarios where individuals are interconnected through social, physical, or virtual ties, the effect of a treatment can spill over to other connected individuals in the network. To avoid biased estimates of treatment effects, interference should be considered. Understanding the heterogeneity of treatment and spillover effects can help policy-makers scale up interventions, target strategies more effectively, and generalize treatment spillover effects to other populations.
 
 ## Getting Started
 
-Installing the latest developing version: 
+Installing the latest developing version:
 
-```r
+``` r
 library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
 Import:
 
-```r
+``` r
 library("NetworkCausalTree")
 ```
 
@@ -21,9 +23,9 @@ library("NetworkCausalTree")
 
 ### Example 1
 
-Data generated using Erdos Renyi networks. 
+Data generated using Erdos Renyi networks.
 
-```r
+``` r
 ## Examples
 dataset <- data_generator(N = 4000, 
                           M = 4,
@@ -35,9 +37,9 @@ dataset <- data_generator(N = 4000,
                           param_er = 0.1)
 ```
 
-Singular splitting based on the main treatment effect only 
+Singular splitting based on the main treatment effect only
 
-```r
+``` r
 
 
 result <- NetworkCausalTree(X = dataset[["X"]],
@@ -64,9 +66,9 @@ plot_NCT(NCT = result,
 
 ### Example 2
 
-Data generated using Barabasi - Albert networks. 
+Data generated using Barabasi - Albert networks.
 
-```r
+``` r
 
 
 dataset <- data_generator(N = 4000,
@@ -76,12 +78,11 @@ dataset <- data_generator(N = 4000,
                           het = TRUE,
                           h = 3,
                           method_networks = "sf")
-
 ```
 
 Composite splitting (NCT based on all the four effects)
 
-```r
+``` r
 
 result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
@@ -107,15 +108,14 @@ plot_NCT(NCT = result,
 
 ## Code of Conduct
 
-Please note that the CRE project is released with a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct). By contributing to this project, you agree to abide by its terms. More information about the opening issues and contributing (i.e., git branching model) can be found [here](https://nsaph-software.github.io/CRE/articles/Contribution.html).
-
+Please note that the **NetworkCausalTree (NCT)** project is released with a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct). By contributing to this project, you agree to abide by its terms. More information about the opening issues and contributing (i.e., git branching model) can be found [here](https://nsaph-software.github.io/CRE/articles/Contribution.html).
 
 ## Cite
 
-```bibtex
+``` bibtex
 @article{bargagli2025heterogeneous,
   title={Heterogeneous treatment and spillover effects under clustered network interference},
-  author={Bargagli-Stoffi, Falco J. and Tort{\'u}, Costanza and Forastiere, Laura},
+  author={Bargagli-Stoffi, Falco J. and Tortu, Costanza and Forastiere, Laura and Wang, Charlie},
   journal={The Annals of Applied Statistics},
   volume={19},
   number={1},
