@@ -1,17 +1,43 @@
-# NetworkCausalTree: An R package for heterogeneous treatment and spillover effects under network interference
+---
+title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover effects under network interference'
+tags:
+  - causal inference
+  - interference
+  - heterogeneous effects
+  - machine learning 
+authors:
+  - name: Falco J. Bargagli-Stoffi
+    orcid: 0000-0002-6131-8165
+    equal-contrib: true
+    affiliation: "1"
+  - name: Costanza Tortù
+    orcid: 0000-0003-2561-9726
+    equal-contrib: true
+    affiliation: "1"
+  - name: Riccardo Cadei
+    orcid: 0000-0003-2416-8943
+    affiliation: "2"
+  - name: Laura Forastiere
+    orcid: 0000-0003-3721-9826
+    affiliation: "3"
+  - name: Charlie Wang
+    orcid: 0000-0000-0000-0000
+    affiliation: "3"
+affiliations:
+ - name: Department of Biostatistics, UCLA School of Public Health
+   index: 1
+ - name: Bank of Italy and Sant'Anna School for Advanced Studies
+   index: 2
+ - name: Causal Learning and Artificial Intelligence lab, Institute of Science and Technology Austria
+   index: 3
+ - name: Department of Biostatistics, Yale School of Public Health
+   index: 4
+ - name: Department of Statistics and Data Science, University of California, Los Angeles, USA
+   index: 4
 
-<strong>Falco J. Bargagli Stoffi<sup>1</sup></strong>, <strong>Costanza Tortù<sup>1</sup></strong>, <strong>Riccardo Cadei<sup>2</sup></strong>, <strong>Laura Forastiere<sup>3</sup></strong>, <strong>Charlie Wang<sup>4¶</sup></strong>
-
-<br>
-
-<sup>1</sup> Department of Biostatistics, UCLA School of Public Health, Los Angeles, California, USA\
-<sup>2</sup> Bank of Italy and Sant’Anna School for Advanced Studies, Pisa, Italy\
-<sup>3</sup> Causal Learning and Artificial Intelligence Lab, Institute of Science and Technology Austria, Klosterneuburg, Austria\
-<sup>4</sup> Department of Statistics and Data Science, University of California, Los Angeles, USA
-
-<br>
-
-¶ Corresponding author  \* These authors contributed equally.
+date: 01 January 2025
+bibliography: paper.bib
+---
 
 # Summary
 
