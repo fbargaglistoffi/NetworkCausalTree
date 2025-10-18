@@ -21,7 +21,6 @@ authors:
     orcid: 0000-0003-3721-9826
     affiliation: "3"
   - name: Charlie Wang
-    orcid: 0000-0000-0000-0000
     affiliation: "5"
 affiliations:
  - name: Department of Biostatistics, UCLA School of Public Health
@@ -35,6 +34,10 @@ affiliations:
  - name: Department of Statistics and Data Science, University of California, Los Angeles, USA
    index: 5
 
+corresponding:
+  - name: Riccardo Cadei
+    email: rcadei@hsph.harvard.edu
+
 date: 01 January 2025
 bibliography: paper.bib
 ---
@@ -45,6 +48,8 @@ Interference occurs when treatment assigned to one unit influences the outcomes 
 
 To integrate the aforementioned two topics in the field of causal inference, @bargagli2024heterogeneous introduces a novel machine learning algorithm, named Network Causal Tree (NCT), that explores the heterogeneity of treatment and spillover effects concerning individual, neighborhood, and network characteristics within randomized settings. Evaluating the heterogeneity of treatment and spillover effect is crucial for identifying both those sub-populations who are responsive to the treatment they received and those who are highly susceptible to the treatment received by other units. Heterogeneity exploration is performed via an interpretable decision tree algorithm. Decision trees provide high levels of interpretability by offering transparent insights into the relationships in the data that are learned by the model [@murdoch2019definitions]. By recursively partitioning the data via decision rules, decision trees transform complex data patterns into an intelligible series of *if-then* decision rules. NCT is designed to operate within clustered neighborhood interference (CNI), where units are partitioned into distinct clusters, spillover mechanisms exclusively take place within clusters based on the links of a cluster-specific network and units are assumed to receive an indirect exposure to the intervention if they have at least one treated peer within their immediate neighbors. The estimation of conditional effects is carried out using an extended version of the Horvitz-Thompson estimator [@aronow2017estimating], tailored to accommodate clustered network interference. `NetworkCausalTree` is an R Package providing a flexible implementation of the Network Causal Tree algorithm.
 
+This paper introduces the `NetworkCausalTree` R package, the first open-source implementation of a decision-tree method for estimating heterogeneous treatment and spillover effects under clustered network interference. All analyses and figures in this paper can be reproduced using the scripts and example data provided in the package’s GitHub repository.
+
 # Statement of need
 
 Existing R packages and algorithms are designed either to detect and estimate Heterogeneous Treatment Effects (HTEs) in the absence of interference or to estimate average causal effects in the presence of interference.
@@ -54,6 +59,18 @@ On the one hand, there are a plethora of methods to discover and estimate HTEs e
 On the other hand, there are three main packages to estimate average causal effects in the presence of interference: i) the `inferference` package implements the inverse probability weighting estimator proposed by @tchetgen2012causal to evaluate the causal effect of an intervention in the presence of partial interference in observational studies; ii) the `interference` package estimates causal effects under network interference in randomized experiments [@aronow2017estimating]; iii) the `inferference` `latenetwork` package estimates the causal effect of an intervention under noncompliance and unknown network interference.
 
 To account for the current lack of existing methods for a data-driven discovery of the heterogeneity of causal effects in the presence of network interference, we propose `NetworkCausalTree`, an R package providing a flexible implementation of the Network Causal Tree algorithm. `NetworkCausalTree` provides i) an interpretable representation of the heterogeneity of treatment and spillover effects in the presence of CNI, within randomized settings; ii) the possibility for the researcher to simultaneously model the heterogeneity of both treatment and spillover effects. To the best of our knowledge, there aren't existing packages to explore, in a data-driven manner, the heterogeneity of treatment and spillover effects in the presence of network interference.
+
+| Package | Handles Interference | Handles Heterogeneity | Network Structure |
+|------------------|------------------|-------------------|------------------|
+| `causalTree` [@athey2016recursive] | ✗ | ✓ | ✗ |
+| `policytree` [@athey2021policy] | ✗ | ✓ | ✗ |
+| `interference` [@aronow2017estimating] | ✓ | ✗ | ✓ |
+| `inferference` [@tchetgen2012causal] | ✓ | ✗ | ✓ |
+| **`NetworkCausalTree` (ours)** | **✓** | **✓** | **✓** |
+
+NetworkCausalTree fills this methodological gap by providing the first interpretable, decision-tree-based approach for discovering heterogeneity in both treatment and spillover effects under network interference.
+
+Existing methods for causal inference either handle treatment effect heterogeneity *without interference* or interference *without heterogeneity*. The table below summarizes this gap:
 
 # Algorithm
 
