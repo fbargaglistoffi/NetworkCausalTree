@@ -165,7 +165,15 @@ plot_NCT(NCT = result,
 
 In this example, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator()` function, `h = 2` and `het = TRUE`)
 
-Online documentation for the package can be found at <https://github.com/fbargaglistoffi/NetworkCausalTree>.
+Online documentation for the package can be found at [fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
+
+# Reproducibility and dependencies
+
+All examples in this paper can be reproduced using the scripts provided in the tests/examples/ directory of the package’s GitHub repository. The package relies solely on standard R libraries, which are automatically installed and loaded upon installation of `NetworkCausalTree`. Numerical stability and reproducibility have been validated through extensive simulation studies and example analyses across multiple systems.
+
+# Implementation and future work
+
+This package is implemented in R and follows standard R development conventions and has been tested to ensure compatibility across systems. Our Github repository provides detailed vignettes and example scripts to facilitate reproducibility. Future extensions will include support for continuous exposures (e.g., multiple dosage levels of a vaccine), integration with random forest estimators for ensemble-based causal discovery (similar to how `grf` (Generalized Random Forest) builds on `causalTree`), and diagnostic tools for sensitivity analysis under partial interference (e.g., assessing whether the CNI assumption is reasonable given the data).
 
 # Acknowledgements
 
