@@ -169,7 +169,7 @@ Online documentation for the package can be found at [fbargaglistoffi/NetworkCau
 
 # Reproducibility and dependencies
 
-All examples in this paper can be reproduced using the scripts provided in the tests/examples/ directory of the package’s GitHub repository. The package relies solely on standard R libraries, which are automatically installed and loaded upon installation of `NetworkCausalTree`. Numerical stability and reproducibility have been validated through extensive simulation studies and example analyses across multiple systems.
+All examples in this paper can be reproduced using the scripts provided in the `tests/examples/` directory of the package’s GitHub repository. The package relies solely on standard R libraries, which are automatically installed and loaded upon installation of `NetworkCausalTree`. Numerical stability and reproducibility have been validated through extensive simulation studies and example analyses across multiple systems.
 
 # Implementation and future work
 
