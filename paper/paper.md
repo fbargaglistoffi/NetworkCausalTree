@@ -60,10 +60,14 @@ On the other hand, there are three main packages to estimate average causal effe
 
 To account for the current lack of existing methods for a data-driven discovery of the heterogeneity of causal effects in the presence of network interference, we propose `NetworkCausalTree`, an R package providing a flexible implementation of the Network Causal Tree algorithm. `NetworkCausalTree` provides i) an interpretable representation of the heterogeneity of treatment and spillover effects in the presence of CNI, within randomized settings; ii) the possibility for the researcher to simultaneously model the heterogeneity of both treatment and spillover effects. To the best of our knowledge, there aren't existing packages to explore, in a data-driven manner, the heterogeneity of treatment and spillover effects in the presence of network interference.
 
-| Package | Handles Interference | Handles Heterogeneity | Network Structure |
-|------------------|------------------|-------------------|------------------|
+Existing methods for causal inference either handle treatment effect heterogeneity *without interference* or interference *without heterogeneity*. The table below summarizes this gap:
+
+| Package               | Handles Interference | Handles Heterogeneity | Network Structure |
+|-----------------------|----------------------|------------------------|-------------------|
+| `aVirtualTwins` [@foster2011subgroup] | ✗ | ✓ | ✗ |
 | `causalTree` [@athey2016recursive] | ✗ | ✓ | ✗ |
 | `policytree` [@athey2021policy] | ✗ | ✓ | ✗ |
+| `CRE` [@bargagli2020causal] | ✗ | ✓ | ✗ |
 | `interference` [@aronow2017estimating] | ✓ | ✗ | ✓ |
 | `inferference` [@tchetgen2012causal] | ✓ | ✗ | ✓ |
 | **`NetworkCausalTree` (ours)** | **✓** | **✓** | **✓** |
