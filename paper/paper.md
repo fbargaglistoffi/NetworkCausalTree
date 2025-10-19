@@ -21,7 +21,7 @@ authors:
     orcid: 0000-0003-3721-9826
     affiliation: "4"
   - name: Charlie Wang
-    orcid: 0000-0000-0000-0000
+    orcid: 0009-0003-1672-0774
     affiliation: "5"
 affiliations:
  - name: Department of Biostatistics, UCLA School of Public Health
