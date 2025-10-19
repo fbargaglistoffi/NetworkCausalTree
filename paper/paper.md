@@ -13,21 +13,22 @@ authors:
   - name: Costanza Tortù
     orcid: 0000-0003-2561-9726
     equal-contrib: true
-    affiliation: "1"
+    affiliation: "2"
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
-    affiliation: "2"
+    affiliation: "3"
   - name: Laura Forastiere
     orcid: 0000-0003-3721-9826
-    affiliation: "3"
+    affiliation: "4"
   - name: Charlie Wang
+    orcid: 0000-0000-0000-0000
     affiliation: "5"
 affiliations:
  - name: Department of Biostatistics, UCLA School of Public Health
    index: 1
  - name: Bank of Italy and Sant'Anna School for Advanced Studies
    index: 2
- - name: Causal Learning and Artificial Intelligence lab, Institute of Science and Technology Austria
+ - name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
    index: 3
  - name: Department of Biostatistics, Yale School of Public Health
    index: 4
