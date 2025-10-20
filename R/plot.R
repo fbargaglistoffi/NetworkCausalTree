@@ -242,24 +242,24 @@ edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.char
 E(grafo_tree)$label <- edges_names_final
 
   # Attach nodes' labels
+  digits <- 4
   if (output == "estimation") {
-  eff1 <- paste(round(NCT$EFF1000_EST, 2), "(", round(NCT$SE1000_EST, 2), ")", sep="")
-  eff2 <- paste(round(NCT$EFF1101_EST, 2), "(", round(NCT$SE1101_EST, 2), ")", sep="")
-  eff3 <- paste(round(NCT$EFF1110_EST, 2), "(", round(NCT$SE1110_EST, 2), ")", sep="")
-  eff4 <- paste(round(NCT$EFF0100_EST, 2), "(", round(NCT$SE0100_EST, 2), ")", sep="")
-  } else {
-    eff1 <- paste(round(NCT$EFF1000_EST, 2), sep="")
-    eff2 <- paste(round(NCT$EFF1101_EST, 2), sep="")
-    eff3 <- paste(round(NCT$EFF1110_EST, 2), sep="")
-    eff4 <- paste(round(NCT$EFF0100_EST, 2), sep="")
+    eff1 <- paste(round(NCT$EFF1000_EST, digits), "(", round(NCT$SE1000_EST, digits), ")", sep = "")
+    eff2 <- paste(round(NCT$EFF1101_EST, digits), "(", round(NCT$SE1101_EST, digits), ")", sep = "")
+    eff3 <- paste(round(NCT$EFF1110_EST, digits), "(", round(NCT$SE1110_EST, digits), ")", sep = "")
+    eff4 <- paste(round(NCT$EFF0100_EST, digits), "(", round(NCT$SE0100_EST, digits), ")", sep = "")
+  }
+  else {
+    eff1 <- paste(round(NCT$EFF1000_EST, digits), sep="")
+    eff2 <- paste(round(NCT$EFF1101_EST, digits), sep="")
+    eff3 <- paste(round(NCT$EFF1110_EST, digits), sep="")
+    eff4 <- paste(round(NCT$EFF0100_EST, digits), sep="")
   }
 
   # First line: direct effect τ(1,0;0,0)
   # Second line: spillover effect τ(0,1;0,0)
   # Third line: number of observations
   V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep = "\n")
-
-
 
   # Plot the tree
   par(mar = margins)
