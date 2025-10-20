@@ -1,3 +1,9 @@
 ^NetworkCausalTree\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+^paper/
+^README\.md$
+^\.gitignore$
+^\.Rbuildignore$
+^LICENSE$
+^tests/
