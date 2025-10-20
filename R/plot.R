@@ -56,9 +56,9 @@
 #'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
 #'
 #' @importFrom data.tree Node
-#' @importFrom igraph graph_from_data_frame union V E as_data_frame
+#' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
+#' @importFrom graphics plot lines text legend par
 #' @importFrom grDevices colorRampPalette
-#' @importFrom graphics plot lines text
 #' @importFrom utils read.table write.table
 #'
 #' @export
@@ -146,7 +146,7 @@ edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
     V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
     V(grafo_tree)$SE1110 <- NCT$SE1110_EST
     V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
-    V(grafo_tree)$SE0100 <- NCT$SE0100_EST    
+    V(grafo_tree)$SE0100 <- NCT$SE0100_EST
   } else {
     V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
     V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
@@ -154,7 +154,7 @@ edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
     V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
   }
 
-  
+
 
   # Set the nodes' colors and attach them as an attribute
   if (effect_color_nodes == "1000") {
@@ -231,7 +231,7 @@ edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
     }
 
   edges_names_final[l] <- paste(edgelabel[[l]][1],
-                                gsub("\\s", "", 
+                                gsub("\\s", "",
                                 x = edgelabel[[l]][2]),
                                 sep = "\n")
 
@@ -251,16 +251,16 @@ E(grafo_tree)$label <- edges_names_final
     eff1 <- paste(round(NCT$EFF1000_EST, 2), sep="")
     eff2 <- paste(round(NCT$EFF1101_EST, 2), sep="")
     eff3 <- paste(round(NCT$EFF1110_EST, 2), sep="")
-    eff4 <- paste(round(NCT$EFF0100_EST, 2), sep="")  
+    eff4 <- paste(round(NCT$EFF0100_EST, 2), sep="")
   }
-  
+
   V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep="\n")
 
-  
-  
+
+
   # Plot the tree
   par(mar = margins)
-  
+
   NCTPLOT <- plot(grafo_tree,
                   layout = layout_as_tree(grafo_tree),
                   edge.label.color = edge_label_color,
