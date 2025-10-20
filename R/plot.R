@@ -254,7 +254,10 @@ E(grafo_tree)$label <- edges_names_final
     eff4 <- paste(round(NCT$EFF0100_EST, 2), sep="")
   }
 
-  V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep="\n")
+  # First line: direct effect τ(1,0;0,0)
+  # Second line: spillover effect τ(0,1;0,0)
+  # Third line: number of observations
+  V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep = "\n")
 
 
 
