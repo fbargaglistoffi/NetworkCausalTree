@@ -60,7 +60,7 @@ On the other hand, there are three main packages to estimate average causal effe
 Existing methods for causal inference either handle treatment effect heterogeneity *without interference* or interference *without heterogeneity*. The table below summarizes this gap:
 
 | Package | Handles Interference | Handles Heterogeneity | Network Structure |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | `aVirtualTwins` [@foster2011subgroup] | ✗ | ✓ | ✗ |
 | `causalTree` [@athey2016recursive] | ✗ | ✓ | ✗ |
 | `policytree` [@athey2021policy] | ✗ | ✓ | ✗ |
