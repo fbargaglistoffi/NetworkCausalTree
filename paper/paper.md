@@ -60,7 +60,7 @@ On the other hand, there are three main packages to estimate average causal effe
 Existing methods for causal inference either handle treatment effect heterogeneity *without interference* or interference *without heterogeneity*. The table below summarizes this gap:
 
 | Package | Handles Interference | Handles Heterogeneity | Network Structure |
-|----|----|----|----|
+|------------------|------------------|------------------|------------------|
 | `aVirtualTwins` [@foster2011subgroup] | ✗ | ✓ | ✗ |
 | `causalTree` [@athey2016recursive] | ✗ | ✓ | ✗ |
 | `policytree` [@athey2021policy] | ✗ | ✓ | ✗ |
@@ -160,7 +160,20 @@ plot_NCT(NCT = result,
          title = title)
 ```
 
-![Network Causal Tree targeted to the main treatment effect](images/result.jpeg)
+![Network Causal Tree targeted to the main treatment effect](images/nct1.png)
+
+Figure 2 shows the tree obtained from **Example 2**.
+
+``` r
+title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
+cov_names <- colnames(dataset[["X"]])
+
+plot_NCT(NCT = result, 
+         cov_names = cov_names,
+         title = title)
+```
+
+![Network Causal Tree targeted to all effects](images/nct2.png)
 
 In this example, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator()` function, `h = 2` and `het = TRUE`)
 
