@@ -23,7 +23,6 @@ Imports:
   igraph,
   ergm,
   stats,
-  plyr,
   network,
   data.tree,
   dplyr,
