@@ -48,14 +48,15 @@
 #' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
-#' @import stringi
-#' @import statnet
-#' @import network
-#' @import ergm
-#' @import plyr
-#' @import stats
-#'
-#' @export
+#' @importFrom dplyr rename mutate summarise filter arrange count desc lag groups
+#' @importFrom igraph graph_from_data_frame union V E
+#' @importFrom stats decompose spectrum rnorm runif
+#' @importFrom network add.vertices add.edges delete.vertices delete.edges get.vertex.attribute
+#' @importFrom network get.edge.attribute set.edge.attribute list.edge.attributes list.vertex.attributes
+#' @importFrom plyr failwith
+#' @importFrom stringi stri_detect_fixed
+#' @importFrom data.tree Node
+NULL
 
 
 
