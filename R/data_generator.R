@@ -33,7 +33,7 @@
 #' - Nx1 probability to be assigned to the active individual intervention vector
 #' (`p`),
 #'
-#' @import igraph
+#' @importFrom igraph graph_from_data_frame union V E as_data_frame
 #'
 #' @export
 

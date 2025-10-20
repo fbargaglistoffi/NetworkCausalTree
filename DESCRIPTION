@@ -21,7 +21,6 @@ License: MIT + file LICENSE
 Imports: 
   stringi,
   igraph,
-  statnet,
   ergm,
   stats,
   plyr,

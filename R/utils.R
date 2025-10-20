@@ -16,7 +16,7 @@
 #'
 #' @return: An adjacency matrix which describes a clustered network environment
 #'
-#' @import intergraph
+#' @importFrom intergraph asNetwork asIgraph
 #'
 generate_clustered_networks = function(k,
                                        N,

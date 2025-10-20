@@ -55,11 +55,11 @@
 #'  iii) the size of the sub popuedgeson
 #'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
 #'
-#' @import data.tree
-#' @import igraph
-#' @import grDevices
-#' @import graphics
-#' @import utils
+#' @importFrom data.tree Node
+#' @importFrom igraph graph_from_data_frame union V E as_data_frame
+#' @importFrom grDevices colorRampPalette
+#' @importFrom graphics plot lines text
+#' @importFrom utils read.table write.table
 #'
 #' @export
 

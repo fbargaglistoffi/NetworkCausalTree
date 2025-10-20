@@ -18,6 +18,21 @@ NetworkCausalTree(
   method = "singular",
   output = "estimation"
 )
+
+NetworkCausalTree(
+  X,
+  Y,
+  W,
+  effect_weights = c(1, 0, 0, 0),
+  A = NULL,
+  K = NULL,
+  p = NULL,
+  ratio_disc,
+  depth = 3,
+  minsize = 10,
+  method = "singular",
+  output = "estimation"
+)
 }
 \arguments{
 \item{X}{N x M Observed Covariates Matrix.}
