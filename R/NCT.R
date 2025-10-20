@@ -53,7 +53,6 @@
 #' @importFrom network get.vertex.attribute get.edge.attribute set.edge.attribute
 #' @importFrom network list.edge.attributes list.vertex.attributes "%v%<-"
 #' @importFrom stats decompose spectrum rnorm runif na.omit rbinom
-#' @importFrom plyr failwith
 #' @importFrom stringi stri_detect_fixed
 #' @importFrom data.tree Node
 #' @export
