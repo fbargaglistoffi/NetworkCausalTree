@@ -134,29 +134,36 @@ edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
     edges_names = c(edges_names, edges_names_i)
   }
 
-  # Generate a tree graph corresponding to the NCT object
   grafo_tree <- igraph::graph_from_edgelist(edges_tree, directed = TRUE)
 
-  # Add the effects as nodes' attributes
   if (output == "estimation") {
-    V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
-    V(grafo_tree)$SE1000 <- NCT$SE1000_EST
-    V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
-    V(grafo_tree)$SE1101 <- NCT$SE1101_EST
-    V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
-    V(grafo_tree)$SE1110 <- NCT$SE1110_EST
-    V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
-    V(grafo_tree)$SE0100 <- NCT$SE0100_EST
+    for (i in seq_len(nrow(NCT))) {
+      node_name <- as.character(NCT$FILTER[i])
+      vid <- which(names(V(grafo_tree)) == node_name)
+      if (length(vid) == 1) {
+        V(grafo_tree)$TAU1000[vid] <- NCT$EFF1000_EST[i]
+        V(grafo_tree)$SE1000[vid]  <- NCT$SE1000_EST[i]
+        V(grafo_tree)$TAU1101[vid] <- NCT$EFF1101_EST[i]
+        V(grafo_tree)$SE1101[vid]  <- NCT$SE1101_EST[i]
+        V(grafo_tree)$TAU1110[vid] <- NCT$EFF1110_EST[i]
+        V(grafo_tree)$SE1110[vid]  <- NCT$SE1110_EST[i]
+        V(grafo_tree)$TAU0100[vid] <- NCT$EFF0100_EST[i]
+        V(grafo_tree)$SE0100[vid]  <- NCT$SE0100_EST[i]
+      }
+    }
   } else {
-    V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
-    V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
-    V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
-    V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
+    for (i in seq_len(nrow(NCT))) {
+      node_name <- as.character(NCT$FILTER[i])
+      vid <- which(names(V(grafo_tree)) == node_name)
+      if (length(vid) == 1) {
+        V(grafo_tree)$TAU1000[vid] <- NCT$EFF1000_EST[i]
+        V(grafo_tree)$TAU1101[vid] <- NCT$EFF1101_EST[i]
+        V(grafo_tree)$TAU1110[vid] <- NCT$EFF1110_EST[i]
+        V(grafo_tree)$TAU0100[vid] <- NCT$EFF0100_EST[i]
+      }
+    }
   }
 
-
-
-  # Set the nodes' colors and attach them as an attribute
   if (effect_color_nodes == "1000") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1000
   }
