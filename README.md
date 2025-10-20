@@ -1,6 +1,7 @@
 # Network Causal Tree <img src="paper/images/JOSS_logo.png" align="right" width="120"/>
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)\
+[![R-CMD-check](https://github.com/charliewang123/NetworkCausalTree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/charliewang123/NetworkCausalTree/actions/workflows/R-CMD-check.yaml)
 
 The `NetworkCausalTree` package introduces a machine learning method that uses tree-based algorithms and a Horvitz-Thompson estimator to assess the heterogeneity of treatment and spillover effects in clustered network interference. Causal inference studies typically assume no interference between individuals, but in real-world scenarios where individuals are interconnected through social, physical, or virtual ties, the effect of a treatment can spill over to other connected individuals in the network. To avoid biased estimates of treatment effects, interference should be considered. Understanding the heterogeneity of treatment and spillover effects can help policy-makers scale up interventions, target strategies more effectively, and generalize treatment spillover effects to other populations.
 
@@ -20,6 +21,7 @@ Import:
 ``` r
 library("NetworkCausalTree")
 ```
+
 ## Examples
 
 ### Example 1
