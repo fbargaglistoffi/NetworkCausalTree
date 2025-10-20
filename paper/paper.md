@@ -34,11 +34,9 @@ affiliations:
    index: 4
  - name: Department of Statistics and Data Science, University of California, Los Angeles, USA
    index: 5
-
 corresponding:
   - name: Riccardo Cadei
     email: rcadei@hsph.harvard.edu
-
 date: 01 January 2025
 bibliography: paper.bib
 ---
@@ -62,7 +60,7 @@ On the other hand, there are three main packages to estimate average causal effe
 Existing methods for causal inference either handle treatment effect heterogeneity *without interference* or interference *without heterogeneity*. The table below summarizes this gap:
 
 | Package | Handles Interference | Handles Heterogeneity | Network Structure |
-|------------------|------------------|-------------------|------------------|
+|------------------|------------------|------------------|------------------|
 | `aVirtualTwins` [@foster2011subgroup] | ✗ | ✓ | ✗ |
 | `causalTree` [@athey2016recursive] | ✗ | ✓ | ✗ |
 | `policytree` [@athey2021policy] | ✗ | ✓ | ✗ |
