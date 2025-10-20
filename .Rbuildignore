@@ -6,4 +6,3 @@
 ^\.gitignore$
 ^\.Rbuildignore$
 ^LICENSE$
-^tests/
