@@ -33,7 +33,7 @@
 #' - Nx1 probability to be assigned to the active individual intervention vector
 #' (`p`),
 #'
-#' @importFrom igraph graph_from_data_frame union V E as_data_frame
+#' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
 #'
 #' @export
 
@@ -52,8 +52,8 @@ data_generator = function(N = 2000,
   if (length(p) != N) {
     stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
   }
-  
-  
+
+
   # Generate Covariates
   X <- NULL
   for (m in 1 : M) {
@@ -70,7 +70,7 @@ data_generator = function(N = 2000,
                                    coef_ergm = coef_ergm,
                                    var_homophily_ergm = var_homophily_ergm,
                                    X = X)
-  
+
   net <- igraph::graph_from_adjacency_matrix(A)
 
   # Group Indicator
@@ -78,18 +78,18 @@ data_generator = function(N = 2000,
   K <- c(rep(1 : k, cluster_size))
   K <- sort(K)
   levels(K) <- c(1 : k)
-  
+
 
   # Randomly assign unit to treatment arms
   W <- rbinom(N, 1, prob = p)
-  
+
   # Network information
   Ne <- rowSums(A)
   Ne_treated <- as.vector(A %*% W)
   G = rep(1, N)
   G[Ne_treated == 0] <- 0
 
-  
+
 
   # Remove isolates
   W <- W[Ne > 0]
