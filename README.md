@@ -108,9 +108,14 @@ plot_NCT(NCT = result,
          output = "detection")
 ```
 
-## Code of Conduct
+# Community guidelines
 
-Please note that the **NetworkCausalTree (NCT)** project is released with a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct). By contributing to this project, you agree to abide by its terms. More information about contributing to this project will be added soon.
+We welcome community involvement in the continued development of **NetworkCausalTree**.
+
+-   **Contributions:** Developers are encouraged to fork the repository and submit pull requests following the instructions in [`CONTRIBUTING.md`](https://github.com/charliewang123/NetworkCausalTree/CONTRIBUTING.md).
+-   **Reporting issues:** Bug reports and feature requests can be submitted via the GitHub [Issues](https://github.com/charliewang123/NetworkCausalTree/issues) tab. Please include a minimal reproducible example and session information (`sessionInfo()`).
+-   **Code of conduct:** All participants are expected to adhere to the principles outlined in our [`CODE_OF_CONDUCT.md`](https://github.com/charliewang123/NetworkCausalTree/CODE_OF_CONDUCT.md).
+-   **Support:** For questions about usage or troubleshooting, please open a GitHub Discussion or contact the maintainers listed in the `DESCRIPTION` file.
 
 ## Cite
 
