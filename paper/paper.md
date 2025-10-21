@@ -185,7 +185,9 @@ All examples in this paper can be reproduced using the scripts provided in the `
 
 # Implementation and future work
 
-This package is implemented in R and follows standard R development conventions and has been tested to ensure compatibility across systems. Our Github repository provides detailed vignettes and example scripts to facilitate reproducibility. Future extensions will include support for continuous exposures (e.g., multiple dosage levels of a vaccine), integration with random forest estimators for ensemble-based causal discovery (similar to how `grf` (Generalized Random Forest) builds on `causalTree`), and diagnostic tools for sensitivity analysis under partial interference (e.g., assessing whether the CNI assumption is reasonable given the data).
+This package is implemented in R and follows standard R development conventions, ensuring compatibility across systems. The GitHub repository provides detailed vignettes and example scripts to facilitate reproducibility. Community engagement is encouraged through documented contribution guidelines (CONTRIBUTING.md) and a code of conduct (CODE_OF_CONDUCT.md). Users can report issues or request support through the GitHub Issues page.
+
+Future extensions will include support for continuous exposures (e.g., multiple dosage levels of a vaccine), integration with random forest estimators for ensemble-based causal discovery (similar to how grf builds on causalTree), and diagnostic tools for sensitivity analysis under partial interference (e.g., assessing whether the CNI assumption is reasonable given the data).
 
 # Acknowledgements
 
