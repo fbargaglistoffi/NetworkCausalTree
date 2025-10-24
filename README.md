@@ -112,9 +112,9 @@ plot_NCT(NCT = result,
 
 We welcome community involvement in the continued development of **NetworkCausalTree**.
 
--   **Contributions:** Developers are encouraged to fork the repository and submit pull requests following the instructions in [`CONTRIBUTING.md`](https://github.com/charliewang123/NetworkCausalTree/CONTRIBUTING.md).
+-   **Contributions:** Developers are encouraged to fork the repository and submit pull requests following the instructions in [`CONTRIBUTING.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md).
 -   **Reporting issues:** Bug reports and feature requests can be submitted via the GitHub [Issues](https://github.com/charliewang123/NetworkCausalTree/issues) tab. Please include a minimal reproducible example and session information (`sessionInfo()`).
--   **Code of conduct:** All participants are expected to adhere to the principles outlined in our [`CODE_OF_CONDUCT.md`](https://github.com/charliewang123/NetworkCausalTree/CODE_OF_CONDUCT.md).
+-   **Code of conduct:** All participants are expected to adhere to the principles outlined in our [`CODE_OF_CONDUCT.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md).
 -   **Support:** For questions about usage or troubleshooting, please open a GitHub Discussion or contact the maintainers listed in the `DESCRIPTION` file.
 
 ## Cite
