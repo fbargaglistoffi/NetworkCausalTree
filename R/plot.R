@@ -89,6 +89,7 @@ plot_NCT <- function(NCT,
                      adj = 1,
                      main_color = "black",
                      margins = c(0.1, 0.5, 1.5, 0.7)
+                     digits = 4
                      ){
 
   options(warn = -1)
@@ -248,8 +249,6 @@ edges_names_final <- gsub(pattern = "<\\(1\\)", replacement = "=0", x = as.chara
 edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.character(edges_names_final))
 E(grafo_tree)$label <- edges_names_final
 
-  # Attach nodes' labels
-  digits <- 4
   if (output == "estimation") {
     eff1 <- paste(round(NCT$EFF1000_EST, digits), "(", round(NCT$SE1000_EST, digits), ")", sep = "")
     eff2 <- paste(round(NCT$EFF1101_EST, digits), "(", round(NCT$SE1101_EST, digits), ")", sep = "")
