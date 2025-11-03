@@ -14,7 +14,8 @@ data_generator(
   method_networks = "er",
   param_er = 0.1,
   coef_ergm = NULL,
-  var_homophily_ergm = NULL
+  var_homophily_ergm = NULL,
+  remove_isolates = TRUE
 )
 }
 \arguments{
@@ -43,7 +44,9 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 
 \item{coef_ergm}{Coefficients of the "ergm" model, if used (default: NULL).}
 
-\item{var_homophily_ergm}{Variable to account for homophily in the "ergm"
+\item{var_homophily_ergm}{Variable to account for homophily in the "ergm"}
+
+\item{remove_isolates}{Logical; remove isolated nodes? (default TRUE)
 model (default: NULL).}
 }
 \value{
