@@ -21,6 +21,7 @@
 #' @param  param_er Probability of the "er" model, if used (default: 0.2).
 #' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
 #' @param  var_homophily_ergm Variable to account for homophily in the "ergm"
+#' @param remove_isolates Logical; remove isolated nodes? (default TRUE)
 #' model (default: NULL).
 #'
 #' @return A list of synthetic data containing:
@@ -46,7 +47,8 @@ data_generator = function(N = 2000,
                           method_networks = "er",
                           param_er = 0.1,
                           coef_ergm = NULL,
-                          var_homophily_ergm = NULL){
+                          var_homophily_ergm = NULL,
+                          remove_isolates = TRUE){
 
   # check the validity of input parameters
   if (length(p) != N) {
@@ -91,14 +93,15 @@ data_generator = function(N = 2000,
 
 
 
-  # Remove isolates
-  W <- W[Ne > 0]
-  G <- G[Ne > 0]
-  K <- as.numeric(K[Ne > 0])
-  X <- X[Ne > 0, ]
-  p <- p[Ne > 0]
-  N <- length(W)
-  A <- A[Ne > 0, Ne > 0]
+  if (remove_isolates) {
+    W <- W[Ne > 0]
+    G <- G[Ne > 0]
+    K <- as.numeric(K[Ne > 0])
+    X <- X[Ne > 0, ]
+    p <- p[Ne > 0]
+    N <- length(W)
+    A <- A[Ne > 0, Ne > 0]
+  }
 
   # Generate Potential Outcomes
   if (het) {
