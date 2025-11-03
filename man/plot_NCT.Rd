@@ -30,7 +30,8 @@ plot_NCT(
   main_cex = 1,
   adj = 1,
   main_color = "black",
-  margins = c(0.1, 0.5, 1.5, 0.7)
+  margins = c(0.1, 0.5, 1.5, 0.7),
+  digits = 4
 )
 }
 \arguments{
@@ -95,7 +96,9 @@ Legend - specific parameters}
 
 \item{margins}{4 - dimensional vector setting the figure margins. The first element denotes
 the bottom margin, the second the left side margin, the third the top margin
-and the fourth the right side marhin
+and the fourth the right side marhin}
+
+\item{digits}{Number of digits to round effect labels
 
 Edge - specific parameters}
 }
