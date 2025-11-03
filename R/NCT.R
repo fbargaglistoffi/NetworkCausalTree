@@ -243,7 +243,8 @@ NetworkCausalTree <- function(X, Y, W,
     Ne = Ne,
     p = p,
     population_effects = population_effects,
-    Ne_list = Ne_list
+    Ne_list = Ne_list,
+    A = A
   )
 
   # --- Organize and compute final estimates ---
