@@ -234,7 +234,8 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                     Ne, Ne_list, population_effects) {
 
   # Initialize
-  data_tree <- data.frame(idunit = c(1 : N) , W = W, G = G, Y = Y, X = X)
+  data_tree <- data.frame(idunit = 1:N, W = W, G = G, Y = Y)
+  data_tree <- cbind(data_tree, as.data.frame(X))
   do_splits <- TRUE
   total_variance = NULL
 
@@ -260,7 +261,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                      gamma = gamma, delta = delta,
                                      N = nrow(this_data), W = this_data$W,
                                      G = this_data$G, Y = this_data$Y,
-                                     X = this_data[, grepl("X.", names(this_data))],
+                                     X = this_data[, grepl("^X\\.", names(this_data)), drop = FALSE],
                                      Ne = Ne[this_data$idunit], p = p[this_data$idunit],
                                      Ne_list = Ne_list[this_data$idunit],
                                      population_effects = population_effects,
@@ -277,10 +278,10 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         mn <- max(tree_info$NODE)
 
       # Paste splitting rules
-        tmp_filter <- c(paste("data_tree$",splitting[3], ">=","(" ,
-                              as.numeric(splitting[2]),")",sep=""),
-                        paste("data_tree$",splitting[3], "<", "(",
-                              as.numeric(splitting[2]),")",sep=""))
+        tmp_filter <- c(
+          paste0(splitting[3], " >= ", as.numeric(splitting[2])),
+          paste0(splitting[3], " < ", as.numeric(splitting[2]))
+        )
       }
 
 
@@ -310,7 +311,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 
 
       # STOP if exceeded depth
-      depth_tree <- as.numeric(stringi::stri_count_regex(tree_info[j, "FILTER"], "X."))
+      depth_tree <- as.numeric(stringi::stri_count_regex(tree_info[j, "FILTER"], "X\\."))
       if (depth_tree >= depth & !is.na(depth_tree)) {
         split_here <- rep(FALSE, 2)
         print('split has stopped for reached depth')
@@ -349,7 +350,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 
       }
 
-      tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "PARENT")
+      tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "SPLIT")
       tree_info <- rbind(tree_info, children)
       do_splits <- !all(tree_info$TERMINAL != "SPLIT")
     }
@@ -392,6 +393,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 #' @param minsize minimum number of observaztions for each level of the joint intervention
 #' to be required in the leafs
 #' @param depth depth of the tree
+#' @param A Adjacency matrix (internal use)
 #'
 #' @return A data frame describing the Network Causal Tree. Specifically,
 #' the data frame includes the NODE column identifying the node number, the OF variable
@@ -400,37 +402,81 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 #' valyes of the Xs to identify the given partition,, the column TERMINAL reports the
 #' 'role' of the node - parent or leaf -.
 #'
-sprout_nct = function(method, sampled_clusters,
+sprout_nct = function(method,
+                      sampled_clusters,
+                      depth,
+                      minsize,
                       alpha, beta, gamma, delta,
-                      depth, minsize, N, W, G, Y, X, K, p, Ne,
-                      population_effects, Ne_list){
+                      N, W, G, Y, X, K,
+                      Ne, p, population_effects,
+                      Ne_list,
+                      A = NULL) {
 
+  if (is.null(A)) A <- matrix(0, nrow = N, ncol = N)
 
-  # Initialize
-  data <- data.frame(idunit = c(1:N), W = W, G = G,
-                     Y = Y, X = X, K = K)
+  Ne <- rowSums(A)
+  Ne_treated <- as.vector(A %*% W)
+  G <- as.numeric(Ne_treated > 0)
+  if (length(G) != N) G <- rep(0, N)
 
-  # Take only those observations that have been assigned to the discovery set
-  datasample <- data[which(K %in% sampled_clusters), ]
+  W <- as.numeric(W)[seq_len(N)]
+  Y <- as.numeric(Y)[seq_len(N)]
+  G <- as.numeric(G)[seq_len(N)]
+  K <- as.numeric(K)[seq_len(N)]
+
+  df <- data.frame(
+    idunit = seq_len(N),
+    W = W,
+    G = G,
+    Y = Y,
+    K = K
+  )
+
+  datasample <- df[K %in% sampled_clusters, , drop = FALSE]
+  
+  # No units → return leaf
+  if (nrow(datasample) == 0) {
+    return(data.frame(
+      NODE = 1,
+      OF = NA,
+      NOBS = 0,
+      FILTER = NA,
+      TERMINAL = "LEAF"
+    ))
+  }
+
   datasample <- datasample[order(datasample$idunit), ]
-  sampleid <- unique(datasample$idunit)
+  sampleid <- datasample$idunit
+  W <- datasample$W
+  G <- datasample$G
+  Y <- datasample$Y
 
-  W = as.numeric(datasample$W)
-  G = as.numeric(datasample$G)
-  Y = as.numeric(datasample$Y)
-  X = as.matrix(datasample[, -c(1 : 4, dim(datasample)[2])])
-  colnames(X)=sub("X.","",colnames(X))
+  if (is.null(X) || length(X) == 0) {
+    X <- matrix(NA, nrow = nrow(datasample), ncol = 0)
+  } else {
+    X <- as.matrix(X)[sampleid, , drop = FALSE]
+    if (ncol(X) == 0) X <- matrix(NA, nrow = nrow(datasample), ncol = 0)
+    if (!is.null(X) && ncol(X) > 0) {
+      colnames(X) <- paste0("X.", seq_len(ncol(X)))
+    }
+  }
 
-  # Identify partitions of the NCT on the discovery set
-  tree_info <- identify_partitions_nct(method = method, alpha = alpha, beta = beta,
-                                       gamma = gamma, delta = delta,
-                                       N = length(sampleid), depth = depth,
-                                       minsize = minsize,
-                                       W = W, G = G,Y = Y, X = X,
-                                       p = p[sampleid], Ne = Ne[sampleid],
-                                       Ne_list = Ne_list[sampleid],
-                                       population_effects = population_effects)
+  Ne_s <- Ne[sampleid]
+  Ne_list_s <- Ne_list[sampleid]
 
+  tree_info <- identify_partitions_nct(
+    method = method,
+    alpha = alpha, beta = beta, gamma = gamma, delta = delta,
+    N = length(sampleid),
+    depth = depth,
+    minsize = minsize,
+    W = W, G = G, Y = Y, X = X,
+    p = p[sampleid],
+    Ne = Ne_s,
+    Ne_list = Ne_list_s,
+    population_effects = population_effects
+  )
+  
   return(tree_info)
 }
 
@@ -529,8 +575,12 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
 
         for (j in 2 : nrow(nct_partition)) {
 
-          texts = gsub(pattern = "data_tree", replacement = "data_est",nct_partition[j, "FILTER"])
-          this_data <- subset(data_est, eval(parse(text = texts)))
+          if (!is.na(nct_partition[j, "FILTER"])) {
+            texts = gsub("data_tree", "data_est", nct_partition[j, "FILTER"])
+            this_data <- subset(data_est, eval(parse(text = texts)))
+          } else {
+            this_data <- data_est
+          }
 
           if (any(as.numeric(table(this_data$W, this_data$G)) < minsize / 2)) {
             print('subpopulations not sufficiently represented in some nodes of the Estimation Set')
@@ -571,12 +621,19 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                                                    Ne_list = Ne_listsub))
         }
       }
+      names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
 
-      colnames(nct_partition)<-c("OF", "FILTER", "TERMINAL", "NOBS_TR", "NOBS_EST",
-                             "EFF1000_EST", "SE1000_EST", "EFF1101_EST", "SE1101_EST",
-                             "EFF1110_EST", "SE1110_EST", "EFF0100_EST", "SE0100_EST")
+      expected_names <- c(
+        "NODE","OF","NOBS_TR","FILTER","TERMINAL",
+        "NOBS_EST",
+        "EFF1000_EST","SE1000_EST","EFF1101_EST","SE1101_EST",
+        "EFF1110_EST","SE1110_EST","EFF0100_EST","SE0100_EST"
+      )
       
-      nct_partition = nct_partition[,-1]
+      # only assign up to the number of existing columns
+      colnames(nct_partition)[seq_len(min(ncol(nct_partition), length(expected_names)))] <- 
+        expected_names[seq_len(min(ncol(nct_partition), length(expected_names)))]
+
     }
 
   # If output equals to "detection", then only compute the estimated conditional average
@@ -615,8 +672,12 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
         for (j in 2 : nrow(nct_partition)){
 
 
-          texts = gsub(pattern = "data_tree", replacement = "data_est",nct_partition[j, "FILTER"])
-          this_data <- subset(data_est, eval(parse(text = texts)))
+          if (!is.na(nct_partition[j, "FILTER"])) {
+            texts = gsub("data_tree", "data_est", nct_partition[j, "FILTER"])
+            this_data <- subset(data_est, eval(parse(text = texts)))
+          } else {
+            this_data <- data_est
+          }
 
           if (any(as.numeric(table(this_data$W, this_data$G)) < 3)){
             warning('subpopulations not sufficiently represented')
@@ -637,11 +698,16 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                                                 p = p[this_data$idunit], Ne = Ne[this_data$idunit])
 
         } }
+      names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
 
-      colnames(nct_partition)<-c("OF", "FILTER", "TERMINAL", "NOBS_TR", "NOBS_EST",
-                             "EFF1000_EST", "EFF1101_EST", "EFF1110_EST", "EFF0100_EST")
+      expected_names <- c(
+        "NODE","OF","NOBS_TR","FILTER","TERMINAL",
+        "NOBS_EST","EFF1000_EST","EFF1101_EST","EFF1110_EST","EFF0100_EST"
+      )
+      
+      colnames(nct_partition)[seq_len(min(ncol(nct_partition), length(expected_names)))] <- 
+        expected_names[seq_len(min(ncol(nct_partition), length(expected_names)))]
 
-      nct_partition = nct_partition[,-1]
     }
 
   return(nct_partition)
