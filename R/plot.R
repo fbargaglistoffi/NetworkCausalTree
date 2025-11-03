@@ -12,6 +12,7 @@
 #' @param margins 4 - dimensional vector setting the figure margins. The first element denotes
 #' the bottom margin, the second the left side margin, the third the top margin
 #'  and the fourth the right side marhin
+#' @param digits Number of digits to round effect labels
 #'
 
 #' Edge - specific parameters
@@ -60,6 +61,7 @@
 #' @importFrom graphics plot lines text legend par
 #' @importFrom grDevices colorRampPalette
 #' @importFrom utils read.table write.table
+#' @importFrom graphics plot.new
 #'
 #' @export
 
@@ -88,10 +90,24 @@ plot_NCT <- function(NCT,
                      main_cex = 1,
                      adj = 1,
                      main_color = "black",
-                     margins = c(0.1, 0.5, 1.5, 0.7)
+                     margins = c(0.1, 0.5, 1.5, 0.7),
                      digits = 4
                      ){
 
+  if (!("FILTER" %in% names(NCT)) ||
+      nrow(NCT) == 1 ||
+      all(is.na(NCT$FILTER)) ||
+      length(unique(na.omit(NCT$FILTER))) <= 1) {
+    
+    # safe minimal plot so testthat sees no error
+    par(mar = c(1,1,2,1))
+    plot.new()
+    title(title)
+    text(0.5, 0.5, "Single leaf tree\n(No splits)", cex = 1.3)
+    
+    return(invisible(NCT))
+  }
+  
   options(warn = -1)
 
   # Clean causal rules
@@ -117,6 +133,23 @@ plot_NCT <- function(NCT,
   NCT$FILTER <- gsub(pattern = "_bin", replacement ="",
                    x = as.character(NCT$FILTER))
   NCT$FILTER[which(NCT$FILTER!="NA")] <- paste0("NA & ", NCT$FILTER[which(NCT$FILTER!="NA")])
+
+  if (
+    nrow(NCT) == 1 ||                             
+    all(is.na(NCT$FILTER)) ||                        
+    length(unique(NCT$FILTER[!is.na(NCT$FILTER)])) <= 1
+  ) {
+   
+    par(mar = margins)
+    plot.new()
+    title(title)
+    text(0.5, 0.5,
+         "Single Leaf Tree\n(No splits detected)",
+         cex = 1.2)
+    
+    return(invisible(NCT))
+  }
+  
 
   # Reshape the NCT object as a tree dataset
   tree_data <- data.tree::as.Node(NCT, mode = "table",
