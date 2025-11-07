@@ -7,7 +7,7 @@
 #' @param  k Number of clusters
 #' @param  N Number of units
 #' @param X N x M Observed Covariates Matrix.
-#' @param  method_networks method to generate the m networks: "ergm" (Exponential Random Graph Models) ,
+#' @param  method_networks method to generate the k networks: "ergm" (Exponential Random Graph Models) ,
 #'  "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
 #' Note: in this function, clusters have the same size, so N should be a multiple of m
 #' @param  param_er If method "er", probability of the ER model
@@ -20,11 +20,12 @@
 #'
 generate_clustered_networks = function(k,
                                        N,
+                                       X = NULL,
                                        method_networks,
                                        param_er,
                                        var_homophily_ergm,
-                                       coef_ergm,
-                                       X = NULL){
+                                       coef_ergm
+                                       ){
 
   # Initialize
   comba <- matrix(0, N, N)
@@ -55,13 +56,12 @@ generate_clustered_networks = function(k,
 
       # Erdos Renyi networks
       if (method_networks == "er") {
-        g = igraph::erdos.renyi.game(cluster_size,
-                                   p.or.m=param_er,
-                                   type = "gnp")}
+        g = igraph::sample_gnp(cluster_size, p = param_er, directed = FALSE)
+      }
 
       # Barabasi-Albert networks
       if (method_networks == "sf") {
-        g = igraph::barabasi.game(cluster_size)
+        g = igraph::sample_pa(cluster_size, directed = FALSE)
       }
 
 
