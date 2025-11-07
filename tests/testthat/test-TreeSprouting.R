@@ -16,9 +16,13 @@ test_that("compute_OF_Value works for singular case on tiny example", {
   
   N <- length(Y)
 
+  # not actually used but need for argument
   pe <- compute_population_effects(N, W, G, Y, p, Ne)
 
-  alpha <- 1; beta <- 0; gamma <- 0; delta <- 0
+  alpha <- 1
+  beta <- 0
+  gamma <- 0
+  delta <- 0
   
   result <- compute_OF_Value(
     method = "singular",
@@ -74,7 +78,7 @@ test_that("compute_OF_Split runs on tiny data and returns valid structure", {
 })
 
 test_that("identify_partitions_nct runs without error and returns a tree dataframe", {
-  set.seed(42)
+  set.seed(67)
   
   N <- 6
   W <- c(0,1,0,1,0,1)
@@ -88,26 +92,24 @@ test_that("identify_partitions_nct runs without error and returns a tree datafra
   colnames(X) <- "X.1"
   
   population_effects <- rep(1,4)
+  # for composite, they should add to 1, but for singluar, normalization doesnt
+  # matter
   alpha <- beta <- gamma <- delta <- 1
   depth <- 1
   minsize <- 1
 
-  res <- try(
-    identify_partitions_nct(
+  res <- identify_partitions_nct(
       method = "singular",
       alpha = alpha, beta = beta, gamma = gamma, delta = delta,
       depth = depth, minsize = minsize,
       N = N, W = W, G = G, Y = Y, X = X,
       p = p, Ne = Ne, Ne_list = Ne_list,
       population_effects = population_effects
-    ),
-    silent = TRUE
-  )
-
-  expect_false(inherits(res, "try-error"))
+    )
 
   expect_s3_class(res, "data.frame")
 
+  # >= 1 row
   expect_gte(nrow(res), 1)
 
   expect_true(all(c("NODE","OF","NOBS","FILTER","TERMINAL") %in% colnames(res)))
@@ -118,7 +120,7 @@ test_that("identify_partitions_nct runs without error and returns a tree datafra
 })
 
 test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
-  set.seed(101)
+  set.seed(67)
 
   N <- 6
   W <- c(0,1,0,1,0,1)
@@ -140,19 +142,15 @@ test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
   depth <- 1
   minsize <- 1
 
-  res <- try(
-    sprout_nct(
+  res <- sprout_nct(
       method = "singular",
       sampled_clusters = sampled_clusters,
       alpha = alpha, beta = beta, gamma = gamma, delta = delta,
       depth = depth, minsize = minsize,
       N = N, W = W, G = G, Y = Y, X = X, K = K, p = p, Ne = Ne,
       population_effects = population_effects, Ne_list = Ne_list
-    ),
-    silent = TRUE
-  )
+    )
 
-  expect_false(inherits(res, "try-error"))
 
   expect_s3_class(res, "data.frame")
 
@@ -164,7 +162,7 @@ test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
 })
 
 test_that("compute_effects_nct runs on tiny tree and returns valid output", {
-  set.seed(202)
+  set.seed(67)
 
   N <- 6
   W <- c(0,1,0,1,0,1)
@@ -182,26 +180,20 @@ test_that("compute_effects_nct runs on tiny tree and returns valid output", {
     OF = c(0,0.2),
     NOBS = c(N, 3),
     FILTER = c(NA, "data_tree$X.1 >= 3"),
-    TERMINAL = c("PARENT", "LEAF"),
-    stringsAsFactors = FALSE
+    TERMINAL = c("PARENT", "LEAF")
   )
   
   output <- "estimation"
   minsize <- 1
   
-  res <- try(
-    compute_effects_nct(
+  res <- compute_effects_nct(
       output = output,
       nct_partition = nct_partition,
       N = N,
       W = W, G = G, Y = Y, X = X,
       Ne = Ne, Ne_list = Ne_list,
       p = p, minsize = minsize
-    ),
-    silent = TRUE
-  )
-
-  expect_false(inherits(res, "try-error"))
+    )
 
   expect_s3_class(res, "data.frame")
 
