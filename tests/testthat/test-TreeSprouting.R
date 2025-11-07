@@ -78,7 +78,7 @@ test_that("compute_OF_Split runs on tiny data and returns valid structure", {
 })
 
 test_that("identify_partitions_nct runs without error and returns a tree dataframe", {
-  set.seed(67)
+  set.seed(100)
   
   N <- 6
   W <- c(0,1,0,1,0,1)
@@ -120,7 +120,7 @@ test_that("identify_partitions_nct runs without error and returns a tree datafra
 })
 
 test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
-  set.seed(67)
+  set.seed(100)
 
   N <- 6
   W <- c(0,1,0,1,0,1)
@@ -162,7 +162,7 @@ test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
 })
 
 test_that("compute_effects_nct runs on tiny tree and returns valid output", {
-  set.seed(67)
+  set.seed(100)
 
   N <- 6
   W <- c(0,1,0,1,0,1)
