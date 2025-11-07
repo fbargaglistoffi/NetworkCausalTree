@@ -1,5 +1,5 @@
 test_that("Variance and covariance functions run on tiny network without errors", {
-  set.seed(67)
+  set.seed(100)
 
   N <- 6
   W <- c(0,1,0,1,0,1)
