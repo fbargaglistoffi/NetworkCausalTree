@@ -39,6 +39,8 @@ Vary = function(N, w, g, Y, W, G,
       
       if (shared_neigh(i = i, j = j, Ne_list = Ne_list) > 0) {
         
+        # covariance correction term
+        # accounts for correlation between connected individuals
         second_element = c(varzero, sum(((pij(i, j, w, g, w, g, Ne, Ne_list, p = p)
                          -pi(i, w, g, p, Ne) * pi(j, w, g, p, Ne)) /
                          (pij(i, j, w, g, w, g, Ne, Ne_list, p = p))) *
@@ -47,6 +49,7 @@ Vary = function(N, w, g, Y, W, G,
       
       }
     
+    # total estimate variance = individual variance component + second_element
     vary = sum((1 - pi(which(W == w & G==g), w, g, p, Ne)) *
            (Y[which(W == w & G == g)] / pi(which(W == w & G == g), w, g, p, Ne)) ^ 2) +
            sum(second_element)
