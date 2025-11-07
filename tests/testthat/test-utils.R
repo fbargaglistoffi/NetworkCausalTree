@@ -1,5 +1,5 @@
 test_that("generate_clustered_networks produces valid adjacency matrices", {
-  set.seed(123)
+  set.seed(100)
   
   N <- 20
   k <- 4
