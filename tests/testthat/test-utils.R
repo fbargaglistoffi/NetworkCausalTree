@@ -34,6 +34,9 @@ test_that("generate_clustered_networks produces valid adjacency matrices", {
   expect_true(is.matrix(A_sf))
   expect_equal(dim(A_sf), c(N, N))
   expect_true(all(A_sf %in% c(0, 1)))
+  
+  # ERGM network is available but not covered in the test suite because of
+  # computational reasons (as it uses the ergm package internally)
 })
 
 test_that("expand.grid.unique works correctly", {
@@ -42,11 +45,11 @@ test_that("expand.grid.unique works correctly", {
   
   result <- expand.grid.unique(x, y, include.equals = FALSE)
   
-  # check structure
+  # result must be a dataframe and have only 2 columns 
   expect_true(is.data.frame(result))
   expect_equal(ncol(result), 2)
   
-  # ensure no equal elements in rows
+  # because include.equals = FALSE, there will be no rows with equal elements
   expect_true(all(result[,1] != result[,2]))
   
   # include.equals = TRUE allows equal values
@@ -54,21 +57,19 @@ test_that("expand.grid.unique works correctly", {
   expect_true(any(result2[,1] == result2[,2]))
 })
 
-test_that("shared_neigh computes shared neighbors accurately", {
-  # Example adjacency and neighbor list
-  A <- matrix(c(
-    0,1,1,
-    1,0,1,
-    1,1,0
-  ), nrow = 3, byrow = TRUE)
+test_that("shared_neigh counts common neighbors correctly", {
   
   Ne_list <- list(
-    c(2,3),
+    c(2),
     c(1,3),
-    c(1,2)
+    c(2)
   )
   
-  expect_equal(shared_neigh(1, 2, Ne_list), 1)  # shared neighbor = node 3
-  expect_equal(shared_neigh(1, 3, Ne_list), 1)  # shared = node 2
-  expect_equal(shared_neigh(2, 3, Ne_list), 1)  # shared = node 1
+  expect_equal(shared_neigh(1, 2, Ne_list), 0)
+  
+  expect_equal(shared_neigh(2, 3, Ne_list), 0)
+  
+  expect_equal(shared_neigh(1, 3, Ne_list), 1)
+  
+  expect_equal(shared_neigh(2, 2, Ne_list), 2)
 })
