@@ -42,10 +42,10 @@ data_generator = function(N = 2000,
                           M = 5,
                           k = 40,
                           p = rep(0.2,2000),
-                          het = TRUE,
                           h = 2,
+                          het = TRUE,
                           method_networks = "er",
-                          param_er = 0.1,
+                          param_er = 0.2,
                           coef_ergm = NULL,
                           var_homophily_ergm = NULL,
                           remove_isolates = TRUE){
@@ -104,6 +104,7 @@ data_generator = function(N = 2000,
   }
 
   # Generate Potential Outcomes
+  # effect size depends on first covariate
   if (het) {
     x1 <- X[,1]
     tau <- rep(0, N)
