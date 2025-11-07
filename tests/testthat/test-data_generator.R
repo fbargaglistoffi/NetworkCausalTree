@@ -38,6 +38,7 @@ test_that("data_generator runs and returns valid structure", {
   expect_true(all(data$A %in% c(0,1)))
   expect_equal(sum(diag(data$A)), 0)
 
+  # remove_isolates = TRUE
   expect_true(all(rowSums(data$A) > 0))
 })
 
@@ -53,7 +54,7 @@ test_that("data_generator handles homogeneous vs heterogeneous effects", {
   expect_type(data_het, "list")
   expect_type(data_hom, "list")
 
-  expect_false( sd(data_het$Y) == sd(data_hom$Y) )
+  expect_false(sd(data_het$Y) == sd(data_hom$Y))
 })
 
 test_that("data_generator errors if p length mismatches N", {
