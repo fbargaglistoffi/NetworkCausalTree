@@ -34,6 +34,7 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
   inof=NULL
 
   # composite criterion
+  # divide by population effects to normalize effect 
   if (method == "composite") {
 
     inof <- alpha * (((EffTau1000(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
@@ -247,16 +248,18 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   # Recursively split the sample until one stopping criterion is met
   while (do_splits) {
     to_calculate <- which(tree_info$TERMINAL == "SPLIT")
-
+    # loop through every node
     for (j in to_calculate) {
-
+      # extract that node's subset of data
       if (!is.na(tree_info[j, "FILTER"])) {
         texts = tree_info[j, "FILTER"]
         this_data <- subset(data_tree, eval(parse(text = texts)))
       } else {this_data <- data_tree}
 
+      # number of nodes
       nleafs = nrow(tree_info)
 
+      # find the best split for this node
       splitting <- compute_OF_Split( method = method, alpha = alpha, beta = beta,
                                      gamma = gamma, delta = delta,
                                      N = nrow(this_data), W = this_data$W,
@@ -268,12 +271,13 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                      nleafs = nleafs, total_variance = total_variance)
 
       if (any(is.na(splitting))) {
-
+        # node becomes a leaf
         split_here <- rep(FALSE, 2)
         print('splits has stopped couse OF is all NA')
 
       } else {
 
+        # extract split info
         maxof <- as.numeric(splitting[1])
         mn <- max(tree_info$NODE)
 
@@ -350,6 +354,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 
       }
 
+      # update the tree
       tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "SPLIT")
       tree_info <- rbind(tree_info, children)
       do_splits <- !all(tree_info$TERMINAL != "SPLIT")
@@ -367,8 +372,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 #' Generation of the Network Causal Tree
 #'
 #' @description
-#' Sprouts the network causal tree, eventually including a fraction of the initial -discovery-
-#' sample.
+#
 #'
 #' @param method method to compute the Objective function: "singular" for NCT targeted to one single effect;
 #' "composite" for NCT targeted to multiple effects; "penalized" for a OF computed while
@@ -412,8 +416,10 @@ sprout_nct = function(method,
                       Ne_list,
                       A = NULL) {
 
+  # create all-zero matrix if no adjacency matrix is passed
   if (is.null(A)) A <- matrix(0, nrow = N, ncol = N)
 
+  # compute network features
   Ne <- rowSums(A)
   Ne_treated <- as.vector(A %*% W)
   G <- as.numeric(Ne_treated > 0)
@@ -434,7 +440,7 @@ sprout_nct = function(method,
 
   datasample <- df[K %in% sampled_clusters, , drop = FALSE]
   
-  # No units → return leaf
+  # edge case: no data in discovery sample
   if (nrow(datasample) == 0) {
     return(data.frame(
       NODE = 1,
@@ -445,12 +451,14 @@ sprout_nct = function(method,
     ))
   }
 
+  # order and extract discovery subset
   datasample <- datasample[order(datasample$idunit), ]
   sampleid <- datasample$idunit
   W <- datasample$W
   G <- datasample$G
   Y <- datasample$Y
 
+  # ensure covariate matrix is consistent with the subset used for discovery
   if (is.null(X) || length(X) == 0) {
     X <- matrix(NA, nrow = nrow(datasample), ncol = 0)
   } else {
@@ -461,6 +469,7 @@ sprout_nct = function(method,
     }
   }
 
+  # degrees and neighbors for sampled individuals
   Ne_s <- Ne[sampleid]
   Ne_list_s <- Ne_list[sampleid]
 
@@ -571,10 +580,12 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                                                 G = data_est$G, Y = data_est$Y, p = p[data_est$idunit],
                                                 Ne = Ne[data_est$idunit], Ne_list = Ne_list))
 
+      # loop over all the nodes except root
       if (nrow(nct_partition) > 1) {
 
         for (j in 2 : nrow(nct_partition)) {
 
+          # extract the filter condition
           if (!is.na(nct_partition[j, "FILTER"])) {
             texts = gsub("data_tree", "data_est", nct_partition[j, "FILTER"])
             this_data <- subset(data_est, eval(parse(text = texts)))
@@ -582,13 +593,17 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
             this_data <- data_est
           }
 
+          # check subgroup size
           if (any(as.numeric(table(this_data$W, this_data$G)) < minsize / 2)) {
             print('subpopulations not sufficiently represented in some nodes of the Estimation Set')
           }
 
 
+          # extract neighbor info
           Ne_listsub = Ne_list[this_data$idunit]
           nct_partition$NOBS_EST[j] <- nrow(this_data)
+          
+          # computed estimated effects
           nct_partition$EFFTAU1000[j] <- EffTau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                 Y = this_data$Y, p = p[this_data$idunit],
                                                 Ne = Ne[this_data$idunit])
@@ -603,26 +618,30 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                                                 Ne = Ne[this_data$idunit])
 
 
-         nct_partition$SETAU1000[j] <- sqrt(Vartau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
+          # compute standard errors
+          nct_partition$SETAU1000[j] <- sqrt(Vartau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                    Y = this_data$Y, p = p[this_data$idunit],
                                                    Ne = Ne[this_data$idunit],
                                                    Ne_list = Ne_listsub))
-         nct_partition$SETAU1101[j] <- sqrt(Vartau1101(N = nrow(this_data), W = this_data$W, G = this_data$G,
+          nct_partition$SETAU1101[j] <- sqrt(Vartau1101(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                    Y = this_data$Y, p = p[this_data$idunit],
                                                    Ne = Ne[this_data$idunit],
                                                    Ne_list = Ne_listsub))
-         nct_partition$SETAU1110[j] <- sqrt(Vartau1110(N = nrow(this_data), W = this_data$W, G = this_data$G,
+          nct_partition$SETAU1110[j] <- sqrt(Vartau1110(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                    Y = this_data$Y, p = p[this_data$idunit],
                                                    Ne = Ne[this_data$idunit],
                                                    Ne_list = Ne_listsub))
-         nct_partition$SETAU0100[j] <- sqrt(Vartau0100(N = nrow(this_data), W = this_data$W, G = this_data$G,
+          nct_partition$SETAU0100[j] <- sqrt(Vartau0100(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                    Y = this_data$Y, p = p[this_data$idunit],
                                                    Ne = Ne[this_data$idunit],
                                                    Ne_list = Ne_listsub))
         }
       }
+      
+      # rename column to NOBS_TR
       names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
 
+      # expected final column names
       expected_names <- c(
         "NODE","OF","NOBS_TR","FILTER","TERMINAL",
         "NOBS_EST",
