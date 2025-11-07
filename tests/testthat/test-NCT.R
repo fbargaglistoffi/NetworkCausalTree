@@ -1,5 +1,5 @@
 test_that("NetworkCausalTree runs and returns expected structure", {
-  set.seed(67)
+  set.seed(100)
   N <- 20
   M <- 2
   
