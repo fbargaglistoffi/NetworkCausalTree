@@ -1,5 +1,5 @@
-test_that("Variance & covariance functions run on tiny network without errors", {
-  set.seed(22)
+test_that("Variance and covariance functions run on tiny network without errors", {
+  set.seed(67)
 
   N <- 6
   W <- c(0,1,0,1,0,1)
@@ -7,7 +7,7 @@ test_that("Variance & covariance functions run on tiny network without errors", 
   Y <- 1 + W + G + rnorm(N, 0, 0.05)
   p <- rep(0.5, N)
   Ne <- rep(1, N)
-  Ne_list <- list(2,1,4,3,6,5)
+  Ne_list <- list(2,1,4,3,6,5) # (1 <-> 2, 3 <-> 4, 5 <-> 6)
 
   pi  <- NetworkCausalTree:::pi
   pij <- NetworkCausalTree:::pij
