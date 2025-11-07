@@ -1,25 +1,37 @@
-test_that("plot_NCT runs without crashing on a small NCT object", {
-  skip("Plot tests skipped (only tested interactively)")
-  skip_if_not_installed("igraph")
-  skip_if_not_installed("data.tree")
-
-  NCT <- data.frame(
-    FILTER = c("Root", "Root & X.1>=0.5"),
-    NOBS_EST = c(10, 5),
-    NOBS_TR = c(5, 2),
-    EFF1000_EST = c(1.0, 2.0),
-    SE1000_EST = c(0.1, 0.2),
-    EFF1101_EST = c(0.5, 1.5),
-    SE1101_EST = c(0.2, 0.3),
-    EFF1110_EST = c(0.3, 1.0),
-    SE1110_EST = c(0.1, 0.2),
-    EFF0100_EST = c(0.2, 0.8),
-    SE0100_EST = c(0.1, 0.1)
+test_that("NetworkCausalTree runs and returns expected structure", {
+  set.seed(67)
+  N <- 20
+  M <- 2
+  
+  dataset <- list(
+    X = matrix(rbinom(N, size = 1, prob = 0.5)),
+    Y = rnorm(N),
+    W = rbinom(N, 1, 0.5),
+    A = {
+      A <- matrix(sample(0:1, N * N, replace = TRUE, prob = c(0.8, 0.2)), nrow = N)
+      diag(A) <- 0
+      A
+    },
+    K = sample(1:4, N, replace = TRUE),
+    p = rbinom(N, size = 1, prob = 0.5)
   )
   
-  cov_names <- c("cov1")
-  
-  expect_silent(
-    plot_NCT(NCT = NCT, cov_names = cov_names, title = "Test Tree")
+  result <- NetworkCausalTree(
+    X = dataset[["X"]],
+    Y = dataset[["Y"]],
+    W = dataset[["W"]],
+    A = dataset[["A"]],
+    K = dataset[["K"]],
+    p = dataset[["p"]],
+    effect_weights = c(1, 0, 0, 0),
+    ratio_disc = 0.5,
+    depth = 3,
+    minsize = 5,
+    method = "singular",
+    output = "estimation"
   )
+  
+  expect_true(is.data.frame(result))
+  expect_true(all(c("FILTER", "NOBS_EST") %in% names(result)))
+  expect_gt(nrow(result), 0)
 })
