@@ -1,5 +1,5 @@
 test_that("data_generator runs and returns valid structure", {
-  set.seed(123)
+  set.seed(100)
   
   N <- 50
   M <- 3
@@ -43,7 +43,7 @@ test_that("data_generator runs and returns valid structure", {
 })
 
 test_that("data_generator handles homogeneous vs heterogeneous effects", {
-  set.seed(321)
+  set.seed(100)
   N <- 80
   
   p <- rep(0.5, N)
