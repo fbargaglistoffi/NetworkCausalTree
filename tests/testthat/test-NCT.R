@@ -3,7 +3,7 @@ test_that("NetworkCausalTree runs and returns expected structure", {
   N <- 20
   M <- 2
   
-  dataset <- list(
+  dataset_list <- list(
     X = matrix(rbinom(N, size = 1, prob = 0.5)),
     Y = rnorm(N),
     W = rbinom(N, 1, 0.5),
@@ -17,12 +17,12 @@ test_that("NetworkCausalTree runs and returns expected structure", {
   )
   
   result <- NetworkCausalTree(
-    X = dataset[["X"]],
-    Y = dataset[["Y"]],
-    W = dataset[["W"]],
-    A = dataset[["A"]],
-    K = dataset[["K"]],
-    p = dataset[["p"]],
+    X = dataset_list[["X"]],
+    Y = dataset_list[["Y"]],
+    W = dataset_list[["W"]],
+    A = dataset_list[["A"]],
+    K = dataset_list[["K"]],
+    p = dataset_list[["p"]],
     effect_weights = c(1, 0, 0, 0),
     ratio_disc = 0.5,
     depth = 3,
