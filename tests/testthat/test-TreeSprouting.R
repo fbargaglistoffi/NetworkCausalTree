@@ -92,13 +92,13 @@ test_that("identify_partitions_nct runs without error and returns a tree datafra
   colnames(X) <- "X.1"
   
   population_effects <- rep(1,4)
-  # for composite, they should add to 1, but for singluar, normalization doesnt
+  # for composite, they should add to 1, but for singular, normalization doesn't
   # matter
   alpha <- beta <- gamma <- delta <- 1
   depth <- 1
   minsize <- 1
 
-  res <- identify_partitions_nct(
+  result <- identify_partitions_nct(
       method = "singular",
       alpha = alpha, beta = beta, gamma = gamma, delta = delta,
       depth = depth, minsize = minsize,
@@ -107,16 +107,16 @@ test_that("identify_partitions_nct runs without error and returns a tree datafra
       population_effects = population_effects
     )
 
-  expect_s3_class(res, "data.frame")
+  expect_s3_class(result, "data.frame")
 
   # >= 1 row
-  expect_gte(nrow(res), 1)
+  expect_gte(nrow(result), 1)
 
-  expect_true(all(c("NODE","OF","NOBS","FILTER","TERMINAL") %in% colnames(res)))
+  expect_true(all(c("NODE","OF","NOBS","FILTER","TERMINAL") %in% colnames(result)))
 
-  expect_true(all(res$TERMINAL %in% c("SPLIT", "LEAF")))
+  expect_true(all(result$TERMINAL %in% c("SPLIT", "LEAF")))
 
-  expect_true(all(is.numeric(res$OF) | is.na(res$OF)))
+  expect_true(all(is.numeric(result$OF) | is.na(result$OF)))
 })
 
 test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
@@ -142,7 +142,7 @@ test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
   depth <- 1
   minsize <- 1
 
-  res <- sprout_nct(
+  result <- sprout_nct(
       method = "singular",
       sampled_clusters = sampled_clusters,
       alpha = alpha, beta = beta, gamma = gamma, delta = delta,
@@ -152,13 +152,13 @@ test_that("sprout_nct builds tree on tiny sample and returns valid structure", {
     )
 
 
-  expect_s3_class(res, "data.frame")
+  expect_s3_class(result, "data.frame")
 
-  expect_true(all(c("NODE","OF","NOBS","FILTER","TERMINAL") %in% colnames(res)))
+  expect_true(all(c("NODE","OF","NOBS","FILTER","TERMINAL") %in% colnames(result)))
 
-  expect_gte(nrow(res), 1)
+  expect_gte(nrow(result), 1)
 
-  expect_true(all(res$TERMINAL %in% c("SPLIT", "LEAF")))
+  expect_true(all(result$TERMINAL %in% c("SPLIT", "LEAF")))
 })
 
 test_that("compute_effects_nct runs on tiny tree and returns valid output", {
@@ -186,7 +186,7 @@ test_that("compute_effects_nct runs on tiny tree and returns valid output", {
   output <- "estimation"
   minsize <- 1
   
-  res <- compute_effects_nct(
+  result <- compute_effects_nct(
       output = output,
       nct_partition = nct_partition,
       N = N,
@@ -195,19 +195,19 @@ test_that("compute_effects_nct runs on tiny tree and returns valid output", {
       p = p, minsize = minsize
     )
 
-  expect_s3_class(res, "data.frame")
+  expect_s3_class(result, "data.frame")
 
-  expect_gte(nrow(res), 1)
+  expect_gte(nrow(result), 1)
 
-  required_cols <- c("NODE","FILTER","TERMINAL","NOBS_TR","NOBS_EST",
+  required_columns <- c("NODE","FILTER","TERMINAL","NOBS_TR","NOBS_EST",
                      "EFF1000_EST","SE1000_EST",
                      "EFF1101_EST","SE1101_EST",
                      "EFF1110_EST","SE1110_EST",
                      "EFF0100_EST","SE0100_EST")
   
-  expect_true(all(required_cols %in% colnames(res)))
+  expect_true(all(required_columns %in% colnames(result)))
 
-  expect_true(all(sapply(res$EFF1000_EST, is.numeric)))
-  expect_true(all(sapply(res$SE1000_EST, is.numeric)))
+  expect_true(all(sapply(result$EFF1000_EST, is.numeric)))
+  expect_true(all(sapply(result$SE1000_EST, is.numeric)))
 })
 
