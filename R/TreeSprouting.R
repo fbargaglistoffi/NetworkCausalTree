@@ -273,7 +273,6 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
       if (any(is.na(splitting))) {
         # node becomes a leaf
         split_here <- rep(FALSE, 2)
-        print('splits has stopped couse OF is all NA')
 
       } else {
 
@@ -310,7 +309,6 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
       # STOP if insufficient minimum number of observations in the leafs
       if (any(as.numeric(table(this_data$W, this_data$G)) < minsize)) {
         split_here <- rep(FALSE, 2)
-        print('split has stopped for insufficient minsize')
       }
 
 
@@ -318,7 +316,6 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
       depth_tree <- as.numeric(stringi::stri_count_regex(tree_info[j, "FILTER"], "X\\."))
       if (depth_tree >= depth & !is.na(depth_tree)) {
         split_here <- rep(FALSE, 2)
-        print('split has stopped for reached depth')
       }
 
 
@@ -595,7 +592,6 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
 
           # check subgroup size
           if (any(as.numeric(table(this_data$W, this_data$G)) < minsize / 2)) {
-            print('subpopulations not sufficiently represented in some nodes of the Estimation Set')
           }
 
 
