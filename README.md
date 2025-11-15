@@ -122,7 +122,7 @@ We welcome community involvement in the continued development of **NetworkCausal
 ``` bibtex
 @article{bargagli2025heterogeneous,
   title={Heterogeneous treatment and spillover effects under clustered network interference},
-  author={Bargagli–Stoffi, Falco J. and Tortu, Costanza and Forastiere, Laura and Wang, Charlie},
+  author={Bargagli–Stoffi, Falco J. and Tortu, Costanza and Forastiere, Laura},
   journal={The Annals of Applied Statistics},
   volume={19},
   number={1},
