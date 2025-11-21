@@ -9,12 +9,13 @@ data_generator(
   M = 5,
   k = 40,
   p = rep(0.2, 2000),
-  het = TRUE,
   h = 2,
+  het = TRUE,
   method_networks = "er",
-  param_er = 0.1,
+  param_er = 0.2,
   coef_ergm = NULL,
-  var_homophily_ergm = NULL
+  var_homophily_ergm = NULL,
+  remove_isolates = TRUE
 )
 }
 \arguments{
@@ -27,12 +28,12 @@ data_generator(
 \item{p}{N x 1 vector, Probability to be assigned to the active individual
 intervention (default: rep(0.2,2000))}
 
+\item{h}{Absolute value of the treatment effects 1000 and 1101
+(default: 2).}
+
 \item{het}{TRUE if the treatment effects 1000 and 1101 are heterogeneous with
 respect to the first regressor (h with X1=0, -taui with X0=0), FALSE if
 constant (-h) (default: TRUE).}
-
-\item{h}{Absolute value of the treatment effects 1000 and 1101
-(default: 2).}
 
 \item{method_networks}{Method to generate the m networks:
 "ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
@@ -43,7 +44,9 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 
 \item{coef_ergm}{Coefficients of the "ergm" model, if used (default: NULL).}
 
-\item{var_homophily_ergm}{Variable to account for homophily in the "ergm"
+\item{var_homophily_ergm}{Variable to account for homophily in the "ergm"}
+
+\item{remove_isolates}{Logical; remove isolated nodes? (default TRUE)
 model (default: NULL).}
 }
 \value{

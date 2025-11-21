@@ -1,32 +1,32 @@
 Package: NetworkCausalTree
-Title: Network Causal Tree algorithm
+Title: Network Causal Tree Algorithm
 Version: 0.0.1
 Authors@R: c(
     person("Falco Joannes", "Bargagli Stoffi", , "fbargaglistoffi@hsph.harvard.edu", 
            role = "aut", comment = c(ORCID = "0000-0002-6131-8165")),
     person("Costanza", "Tortu'", , "costanza.tortu@santannapisa.it", role = "aut",
            comment = c(ORCID = "0000-0003-2561-9726")),
-    person("Riccardo", "Cadei", , "rcadei@hsph.harvard.edu", role = "cre",
+    person("Riccardo", "Cadei", , "rcadei@hsph.harvard.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-2416-8943")),
     person("Forastiere", "Laura", , "laura.forastiere@yale.edu", role = "aut",
-           comment = c(ORCID = "0000-0003-3721-9826"))
+           comment = c(ORCID = "0000-0003-3721-9826")),
+    person("Charlie", "Wang", , "charliewang123@g.ucla.edu", role = "ctb",
+           comment = c(ORCID = "0009-0003-1672-0774"))
   )
-Manteiner: Riccardo Cadei <rcadei@hsph.harvard.edu>
+Maintainer: Riccardo Cadei <rcadei@hsph.harvard.edu>
 Description: The NetworkCausalTree package introduces a machine learning method 
     that uses tree-based algorithms to assess the heterogeneity of treatment and 
     spillover effects in clustered network interference.
+License: MIT + file LICENSE
 Imports: 
   stringi,
   igraph,
-  statnet,
   ergm,
   stats,
-  plyr,
   network,
   data.tree,
   dplyr,
-  intergraph,
-License: MIT + file LICENSE
+  intergraph
 URL: https://github.com/fbargaglistoffi/NetworkCausalTree
 BugReports: https://github.com/fbargaglistoffi/NetworkCausalTree/issues
 Depends: 
@@ -34,4 +34,7 @@ Depends:
 Language: en-US
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

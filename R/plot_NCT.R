@@ -12,6 +12,7 @@
 #' @param margins 4 - dimensional vector setting the figure margins. The first element denotes
 #' the bottom margin, the second the left side margin, the third the top margin
 #'  and the fourth the right side marhin
+#' @param digits Number of digits to round effect labels
 #'
 
 #' Edge - specific parameters
@@ -55,11 +56,12 @@
 #'  iii) the size of the sub popuedgeson
 #'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
 #'
-#' @import data.tree
-#' @import igraph
-#' @import grDevices
-#' @import graphics
-#' @import utils
+#' @importFrom data.tree Node
+#' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
+#' @importFrom graphics plot lines text legend par
+#' @importFrom grDevices colorRampPalette
+#' @importFrom utils read.table write.table
+#' @importFrom graphics plot.new
 #'
 #' @export
 
@@ -88,9 +90,24 @@ plot_NCT <- function(NCT,
                      main_cex = 1,
                      adj = 1,
                      main_color = "black",
-                     margins = c(0.1, 0.5, 1.5, 0.7)
+                     margins = c(0.1, 0.5, 1.5, 0.7),
+                     digits = 4
                      ){
 
+  if (!("FILTER" %in% names(NCT)) ||
+      nrow(NCT) == 1 ||
+      all(is.na(NCT$FILTER)) ||
+      length(unique(na.omit(NCT$FILTER))) <= 1) {
+    
+    # safe minimal plot so testthat sees no error
+    par(mar = c(1,1,2,1))
+    plot.new()
+    title(title)
+    text(0.5, 0.5, "Single leaf tree\n(No splits)", cex = 1.3)
+    
+    return(invisible(NCT))
+  }
+  
   options(warn = -1)
 
   # Clean causal rules
@@ -117,6 +134,23 @@ plot_NCT <- function(NCT,
                    x = as.character(NCT$FILTER))
   NCT$FILTER[which(NCT$FILTER!="NA")] <- paste0("NA & ", NCT$FILTER[which(NCT$FILTER!="NA")])
 
+  if (
+    nrow(NCT) == 1 ||                             
+    all(is.na(NCT$FILTER)) ||                        
+    length(unique(NCT$FILTER[!is.na(NCT$FILTER)])) <= 1
+  ) {
+   
+    par(mar = margins)
+    plot.new()
+    title(title)
+    text(0.5, 0.5,
+         "Single Leaf Tree\n(No splits detected)",
+         cex = 1.2)
+    
+    return(invisible(NCT))
+  }
+  
+
   # Reshape the NCT object as a tree dataset
   tree_data <- data.tree::as.Node(NCT, mode = "table",
                           pathName = "FILTER",
@@ -134,29 +168,36 @@ edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
     edges_names = c(edges_names, edges_names_i)
   }
 
-  # Generate a tree graph corresponding to the NCT object
   grafo_tree <- igraph::graph_from_edgelist(edges_tree, directed = TRUE)
 
-  # Add the effects as nodes' attributes
   if (output == "estimation") {
-    V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
-    V(grafo_tree)$SE1000 <- NCT$SE1000_EST
-    V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
-    V(grafo_tree)$SE1101 <- NCT$SE1101_EST
-    V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
-    V(grafo_tree)$SE1110 <- NCT$SE1110_EST
-    V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
-    V(grafo_tree)$SE0100 <- NCT$SE0100_EST    
+    for (i in seq_len(nrow(NCT))) {
+      node_name <- as.character(NCT$FILTER[i])
+      vid <- which(names(V(grafo_tree)) == node_name)
+      if (length(vid) == 1) {
+        V(grafo_tree)$TAU1000[vid] <- NCT$EFF1000_EST[i]
+        V(grafo_tree)$SE1000[vid]  <- NCT$SE1000_EST[i]
+        V(grafo_tree)$TAU1101[vid] <- NCT$EFF1101_EST[i]
+        V(grafo_tree)$SE1101[vid]  <- NCT$SE1101_EST[i]
+        V(grafo_tree)$TAU1110[vid] <- NCT$EFF1110_EST[i]
+        V(grafo_tree)$SE1110[vid]  <- NCT$SE1110_EST[i]
+        V(grafo_tree)$TAU0100[vid] <- NCT$EFF0100_EST[i]
+        V(grafo_tree)$SE0100[vid]  <- NCT$SE0100_EST[i]
+      }
+    }
   } else {
-    V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
-    V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
-    V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
-    V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
+    for (i in seq_len(nrow(NCT))) {
+      node_name <- as.character(NCT$FILTER[i])
+      vid <- which(names(V(grafo_tree)) == node_name)
+      if (length(vid) == 1) {
+        V(grafo_tree)$TAU1000[vid] <- NCT$EFF1000_EST[i]
+        V(grafo_tree)$TAU1101[vid] <- NCT$EFF1101_EST[i]
+        V(grafo_tree)$TAU1110[vid] <- NCT$EFF1110_EST[i]
+        V(grafo_tree)$TAU0100[vid] <- NCT$EFF0100_EST[i]
+      }
+    }
   }
 
-  
-
-  # Set the nodes' colors and attach them as an attribute
   if (effect_color_nodes == "1000") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1000
   }
@@ -231,7 +272,7 @@ edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
     }
 
   edges_names_final[l] <- paste(edgelabel[[l]][1],
-                                gsub("\\s", "", 
+                                gsub("\\s", "",
                                 x = edgelabel[[l]][2]),
                                 sep = "\n")
 
@@ -241,26 +282,27 @@ edges_names_final <- gsub(pattern = "<\\(1\\)", replacement = "=0", x = as.chara
 edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.character(edges_names_final))
 E(grafo_tree)$label <- edges_names_final
 
-  # Attach nodes' labels
   if (output == "estimation") {
-  eff1 <- paste(round(NCT$EFF1000_EST, 2), "(", round(NCT$SE1000_EST, 2), ")", sep="")
-  eff2 <- paste(round(NCT$EFF1101_EST, 2), "(", round(NCT$SE1101_EST, 2), ")", sep="")
-  eff3 <- paste(round(NCT$EFF1110_EST, 2), "(", round(NCT$SE1110_EST, 2), ")", sep="")
-  eff4 <- paste(round(NCT$EFF0100_EST, 2), "(", round(NCT$SE0100_EST, 2), ")", sep="")
-  } else {
-    eff1 <- paste(round(NCT$EFF1000_EST, 2), sep="")
-    eff2 <- paste(round(NCT$EFF1101_EST, 2), sep="")
-    eff3 <- paste(round(NCT$EFF1110_EST, 2), sep="")
-    eff4 <- paste(round(NCT$EFF0100_EST, 2), sep="")  
+    eff1 <- paste(round(NCT$EFF1000_EST, digits), "(", round(NCT$SE1000_EST, digits), ")", sep = "")
+    eff2 <- paste(round(NCT$EFF1101_EST, digits), "(", round(NCT$SE1101_EST, digits), ")", sep = "")
+    eff3 <- paste(round(NCT$EFF1110_EST, digits), "(", round(NCT$SE1110_EST, digits), ")", sep = "")
+    eff4 <- paste(round(NCT$EFF0100_EST, digits), "(", round(NCT$SE0100_EST, digits), ")", sep = "")
   }
-  
-  V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep="\n")
+  else {
+    eff1 <- paste(round(NCT$EFF1000_EST, digits), sep="")
+    eff2 <- paste(round(NCT$EFF1101_EST, digits), sep="")
+    eff3 <- paste(round(NCT$EFF1110_EST, digits), sep="")
+    eff4 <- paste(round(NCT$EFF0100_EST, digits), sep="")
+  }
 
-  
-  
+  # First line: direct effect τ(1,0;0,0)
+  # Second line: spillover effect τ(0,1;0,0)
+  # Third line: number of observations
+  V(grafo_tree)$labels <- paste(eff1, eff4, NCT$NOBS, sep = "\n")
+
   # Plot the tree
   par(mar = margins)
-  
+
   NCTPLOT <- plot(grafo_tree,
                   layout = layout_as_tree(grafo_tree),
                   edge.label.color = edge_label_color,

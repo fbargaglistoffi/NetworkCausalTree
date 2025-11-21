@@ -21,6 +21,7 @@
 #' @param  param_er Probability of the "er" model, if used (default: 0.2).
 #' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
 #' @param  var_homophily_ergm Variable to account for homophily in the "ergm"
+#' @param remove_isolates Logical; remove isolated nodes? (default TRUE)
 #' model (default: NULL).
 #'
 #' @return A list of synthetic data containing:
@@ -33,7 +34,7 @@
 #' - Nx1 probability to be assigned to the active individual intervention vector
 #' (`p`),
 #'
-#' @import igraph
+#' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
 #'
 #' @export
 
@@ -41,19 +42,20 @@ data_generator = function(N = 2000,
                           M = 5,
                           k = 40,
                           p = rep(0.2,2000),
-                          het = TRUE,
                           h = 2,
+                          het = TRUE,
                           method_networks = "er",
-                          param_er = 0.1,
+                          param_er = 0.2,
                           coef_ergm = NULL,
-                          var_homophily_ergm = NULL){
+                          var_homophily_ergm = NULL,
+                          remove_isolates = TRUE){
 
   # check the validity of input parameters
   if (length(p) != N) {
     stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
   }
-  
-  
+
+
   # Generate Covariates
   X <- NULL
   for (m in 1 : M) {
@@ -70,7 +72,7 @@ data_generator = function(N = 2000,
                                    coef_ergm = coef_ergm,
                                    var_homophily_ergm = var_homophily_ergm,
                                    X = X)
-  
+
   net <- igraph::graph_from_adjacency_matrix(A)
 
   # Group Indicator
@@ -78,29 +80,31 @@ data_generator = function(N = 2000,
   K <- c(rep(1 : k, cluster_size))
   K <- sort(K)
   levels(K) <- c(1 : k)
-  
+
 
   # Randomly assign unit to treatment arms
   W <- rbinom(N, 1, prob = p)
-  
+
   # Network information
   Ne <- rowSums(A)
   Ne_treated <- as.vector(A %*% W)
   G = rep(1, N)
   G[Ne_treated == 0] <- 0
 
-  
 
-  # Remove isolates
-  W <- W[Ne > 0]
-  G <- G[Ne > 0]
-  K <- as.numeric(K[Ne > 0])
-  X <- X[Ne > 0, ]
-  p <- p[Ne > 0]
-  N <- length(W)
-  A <- A[Ne > 0, Ne > 0]
+
+  if (remove_isolates) {
+    W <- W[Ne > 0]
+    G <- G[Ne > 0]
+    K <- as.numeric(K[Ne > 0])
+    X <- X[Ne > 0, ]
+    p <- p[Ne > 0]
+    N <- length(W)
+    A <- A[Ne > 0, Ne > 0]
+  }
 
   # Generate Potential Outcomes
+  # effect size depends on first covariate
   if (het) {
     x1 <- X[,1]
     tau <- rep(0, N)

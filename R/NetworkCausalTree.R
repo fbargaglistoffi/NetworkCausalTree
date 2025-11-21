@@ -1,6 +1,5 @@
-#' @title
-#' Network Causal Tree
-
+#' @title Network Causal Tree
+#'
 #' @description
 #' Returns a Network Causal Tree, with the corresponding estimates
 #'
@@ -18,7 +17,7 @@
 #' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
 #' @param K N x 1 Cluster Membership vector.
-#' @param p  N x 1 Probability to be assigned to the active individual
+#' @param p N x 1 Probability to be assigned to the active individual
 #' intervention vector.
 #' @param ratio_disc Ratio of clusters to be assigned to the discovery set only.
 #' @param minsize Minimum number of observaztions for each level of the joint
@@ -48,27 +47,25 @@
 #' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
-#' @import stringi
-#' @import statnet
-#' @import network
-#' @import ergm
-#' @import plyr
-#' @import stats
-#'
+#' @importFrom dplyr rename mutate summarise filter arrange count desc lag groups
+#' @importFrom igraph graph_from_data_frame V E
+#' @importFrom network add.vertices add.edges delete.vertices delete.edges
+#' @importFrom network get.vertex.attribute get.edge.attribute set.edge.attribute
+#' @importFrom network list.edge.attributes list.vertex.attributes "%v%<-"
+#' @importFrom stats decompose spectrum rnorm runif na.omit rbinom
+#' @importFrom stringi stri_detect_fixed
+#' @importFrom data.tree Node
 #' @export
-
-
-
 NetworkCausalTree <- function(X, Y, W,
-                               effect_weights = c(1,0,0,0),
-                               A = NULL,
-                               K = NULL,
-                               p = NULL,
-                               ratio_disc,
-                               depth = 3,
-                               minsize = 10,
-                               method = "singular",
-                               output = "estimation"){
+                              effect_weights = c(1,0,0,0),
+                              A = NULL,
+                              K = NULL,
+                              p = NULL,
+                              ratio_disc,
+                              depth = 3,
+                              minsize = 10,
+                              method = "singular",
+                              output = "estimation"){
 
   # compute sample size and number of clusters
   N <- length(W)
@@ -104,28 +101,28 @@ NetworkCausalTree <- function(X, Y, W,
   # compute network - specific information (the degree Ne, the number of treated friends Ne_treated,
   # the value of the neighborhood exposure G and the list of direct neighbors Ne_list)
 
-    Ne <- rowSums(A)
-    Ne_treated <- as.vector(A %*% W)
-    G = rep(1,N)
-    G[Ne_treated == 0] <- 0
-    Ne_list <- vector(mode = "list", length = N)
+  Ne <- rowSums(A)
+  Ne_treated <- as.vector(A %*% W)
+  G = rep(1,N)
+  G[Ne_treated == 0] <- 0
+  Ne_list <- vector(mode = "list", length = N)
 
   for (i in  1:N) {
     Ne_list[[i]] <- which(A[i,] > 0)
   }
 
   # compute the estimated effects in the whole population
-  population_effects <- compute_population_effects(N = N, 
+  population_effects <- compute_population_effects(N = N,
                                                    W = W,
                                                    G = G,
-                                                   Y = Y, 
-                                                   p = p, 
+                                                   Y = Y,
+                                                   p = p,
                                                    Ne = Ne)
 
   # sample the clusters to be assigned to the discovery set
   nclusters_disc = round(k * ratio_disc)
   clusters_disc <- sample(1 : k,
-                          size = nclusters_disc, 
+                          size = nclusters_disc,
                           replace = FALSE)
 
   # generate the tree on the discovery set

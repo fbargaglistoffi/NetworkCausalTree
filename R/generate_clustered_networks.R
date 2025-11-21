@@ -7,7 +7,7 @@
 #' @param  k Number of clusters
 #' @param  N Number of units
 #' @param X N x M Observed Covariates Matrix.
-#' @param  method_networks method to generate the m networks: "ergm" (Exponential Random Graph Models) ,
+#' @param  method_networks method to generate the k networks: "ergm" (Exponential Random Graph Models) ,
 #'  "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
 #' Note: in this function, clusters have the same size, so N should be a multiple of m
 #' @param  param_er If method "er", probability of the ER model
@@ -16,15 +16,16 @@
 #'
 #' @return: An adjacency matrix which describes a clustered network environment
 #'
-#' @import intergraph
+#' @importFrom intergraph asNetwork asIgraph
 #'
 generate_clustered_networks = function(k,
                                        N,
+                                       X = NULL,
                                        method_networks,
                                        param_er,
                                        var_homophily_ergm,
-                                       coef_ergm,
-                                       X = NULL){
+                                       coef_ergm
+                                       ){
 
   # Initialize
   comba <- matrix(0, N, N)
@@ -55,13 +56,12 @@ generate_clustered_networks = function(k,
 
       # Erdos Renyi networks
       if (method_networks == "er") {
-        g = igraph::erdos.renyi.game(cluster_size,
-                                   p.or.m=param_er,
-                                   type = "gnp")}
+        g = igraph::sample_gnp(cluster_size, p = param_er, directed = FALSE)
+      }
 
       # Barabasi-Albert networks
       if (method_networks == "sf") {
-        g = igraph::barabasi.game(cluster_size)
+        g = igraph::sample_pa(cluster_size, directed = FALSE)
       }
 
 
@@ -73,60 +73,4 @@ generate_clustered_networks = function(k,
 
   }
   return(comba)
-}
-
-
-#' @title
-#' Generate all combinations of the supplied vectors, without rows characterized
-#' by equal elements
-#' @description
-#' Create a data frame including all combinations of the supplied vectors or factors,
-#' while omitting rows characterized by equal elements.
-#' @param  x A vector
-#' @param  y A vector
-#' @param  include.equals Boolean (dafault: FALSE)
-#'
-#' @return A data frame with all combinations of the elements of the vectors,
-#' with no rows characterized by equal elements
-#'
-#' @import dplyr
-#'
-expand.grid.unique <- function(x, y, include.equals = FALSE){
-
-  x <- unique(x)
-  y <- unique(y)
-
-  g <- function(i){
-    z <- dplyr::setdiff(y, x[seq_len(i - include.equals)])
-    if (length(z)) cbind(x[i], z, deparse.level = 0)
-  }
-
-  do.call(rbind, lapply(seq_along(x), g))
-
-}
-
-
-
-#' @title
-#' Number of Shared Neighbors
-#'
-#' @description
-#' Computes the number of shared neighbors between unit i and unit j.
-#'
-#' @param  i Unit ID
-#' @param  j Unit ID
-#' @param  Ne_list List of N elements - where N is the sample size -
-#' where each element i contains the IDs of the direct neighbors of unit i
-#'
-#' @return A numeric value representing the number of shared neighbors between
-#' unit i and j.
-#'
-#' @import dplyr
-#'
-#'
-shared_neigh = function(i, j, Ne_list){
-
-  shared_neighbors <- length(dplyr::intersect(Ne_list[[i]], Ne_list[[j]]))
-
-  return(shared_neighbors)
 }
