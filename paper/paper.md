@@ -35,9 +35,9 @@ affiliations:
  - name: Department of Biostatistics, Yale School of Public Health
    index: 5
 corresponding:
-  - name: Riccardo Cadei
-    email: rcadei@hsph.harvard.edu
-date: 01 January 2025
+  - name: Falco J. Bargagli-Stoffi
+    email: falco@ucla.edu
+date: 01 January 2026
 bibliography: paper.bib
 ---
 
