@@ -17,11 +17,11 @@ authors:
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
     affiliation: "3"
+      - name: Charlie Wang
+    orcid: 0009-0003-1672-0774
+    affiliation: "4"
   - name: Laura Forastiere
     orcid: 0000-0003-3721-9826
-    affiliation: "4"
-  - name: Charlie Wang
-    orcid: 0009-0003-1672-0774
     affiliation: "5"
 affiliations:
  - name: Department of Biostatistics, UCLA School of Public Health
@@ -30,9 +30,9 @@ affiliations:
    index: 2
  - name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
    index: 3
- - name: Department of Biostatistics, Yale School of Public Health
-   index: 4
  - name: Department of Statistics and Data Science, University of California, Los Angeles, USA
+   index: 4
+ - name: Department of Biostatistics, Yale School of Public Health
    index: 5
 corresponding:
   - name: Riccardo Cadei
