@@ -17,7 +17,7 @@ authors:
   - name: Riccardo Cadei
     orcid: 0000-0003-2416-8943
     affiliation: "3"
-      - name: Charlie Wang
+  - name: Charlie Wang
     orcid: 0009-0003-1672-0774
     affiliation: "4"
   - name: Laura Forastiere
