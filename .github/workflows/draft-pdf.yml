@@ -1,5 +1,4 @@
-on:
-  workflow_dispatch:  # allows manual runs only
+on: [push]
 
 jobs:
   paper:

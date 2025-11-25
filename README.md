@@ -1,24 +1,19 @@
-# Network Causal Tree <img src="paper/images/JOSS_logo.png" align="right" width="120"/>
+# Network Causal Tree
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)\
-[![R-CMD-check](https://github.com/charliewang123/NetworkCausalTree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/charliewang123/NetworkCausalTree/actions/workflows/R-CMD-check.yaml)
-
-The `NetworkCausalTree` package introduces a machine learning method that uses tree-based algorithms and a Horvitz-Thompson estimator to assess the heterogeneity of treatment and spillover effects in clustered network interference. Causal inference studies typically assume no interference between individuals, but in real-world scenarios where individuals are interconnected through social, physical, or virtual ties, the effect of a treatment can spill over to other connected individuals in the network. To avoid biased estimates of treatment effects, interference should be considered. Understanding the heterogeneity of treatment and spillover effects can help policy-makers scale up interventions, target strategies more effectively, and generalize treatment spillover effects to other populations.
+The `NetworkCausalTree` package introduces a machine learning method that uses tree-based algorithms and an Horvitz-Thompson estimator to assess the heterogeneity of treatment and spillover effects in clustered network interference. Causal inference studies typically assume no interference between individuals, but in real-world scenarios where individuals are interconnected through social, physical, or virtual ties, the effect of a treatment can spill over to other connected individuals in the network. To avoid biased estimates of treatment effects, interference should be considered. Understanding the heterogeneity of treatment and spillover effects can help policy-makers scale up interventions, target strategies more effectively, and generalize treatment spillover effects to other populations.
 
 ## Getting Started
 
-Install the latest development version:
+Installing the latest developing version: 
 
-``` r
+```r
 library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-Full documentation and examples are available at [fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
-
 Import:
 
-``` r
+```r
 library("NetworkCausalTree")
 ```
 
@@ -26,9 +21,10 @@ library("NetworkCausalTree")
 
 ### Example 1
 
-Data generated using Erdos Renyi networks.
+Data generated using Erdos Renyi networks. 
 
-``` r
+```r
+## Examples
 dataset <- data_generator(N = 4000, 
                           M = 4,
                           k = 80, 
@@ -39,9 +35,9 @@ dataset <- data_generator(N = 4000,
                           param_er = 0.1)
 ```
 
-Singular splitting based on the main treatment effect only
+Singular splitting based on the main treatment effect only 
 
-``` r
+```r
 
 
 result <- NetworkCausalTree(X = dataset[["X"]],
@@ -68,9 +64,9 @@ plot_NCT(NCT = result,
 
 ### Example 2
 
-Data generated using Barabasi–Albert networks.
+Data generated using Barabasi - Albert networks. 
 
-``` r
+```r
 
 
 dataset <- data_generator(N = 4000,
@@ -80,11 +76,12 @@ dataset <- data_generator(N = 4000,
                           het = TRUE,
                           h = 3,
                           method_networks = "sf")
+
 ```
 
 Composite splitting (NCT based on all the four effects)
 
-``` r
+```r
 
 result <- NetworkCausalTree(X = dataset[["X"]],
                             Y = dataset[["Y"]],
@@ -108,21 +105,17 @@ plot_NCT(NCT = result,
          output = "detection")
 ```
 
-# Community guidelines
+## Code of Conduct
 
-We welcome community involvement in the continued development of **NetworkCausalTree**.
+Please note that the CRE project is released with a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct). By contributing to this project, you agree to abide by its terms. More information about the opening issues and contributing (i.e., git branching model) can be found [here](https://nsaph-software.github.io/CRE/articles/Contribution.html).
 
--   **Contributions:** Developers are encouraged to fork the repository and submit pull requests following the instructions in [`CONTRIBUTING.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md).
--   **Reporting issues:** Bug reports and feature requests can be submitted via the GitHub [Issues](https://github.com/charliewang123/NetworkCausalTree/issues) tab. Please include a minimal reproducible example and session information (`sessionInfo()`).
--   **Code of conduct:** All participants are expected to adhere to the principles outlined in our [`CODE_OF_CONDUCT.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md).
--   **Support:** For questions about usage or troubleshooting, please open a GitHub Discussion or contact the maintainers listed in the `DESCRIPTION` file.
 
 ## Cite
 
-``` bibtex
+```bibtex
 @article{bargagli2025heterogeneous,
   title={Heterogeneous treatment and spillover effects under clustered network interference},
-  author={Bargagli–Stoffi, Falco J. and Tortu, Costanza and Forastiere, Laura},
+  author={Bargagli-Stoffi, Falco J. and Tort{\'u}, Costanza and Forastiere, Laura},
   journal={The Annals of Applied Statistics},
   volume={19},
   number={1},
