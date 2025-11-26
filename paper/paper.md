@@ -1,44 +1,46 @@
 ---
-title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover effects under network interference'
+title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover
+  effects under network interference'
 tags:
-  - causal inference
-  - interference
-  - heterogeneous effects
-  - machine learning 
-authors:
-  - name: Falco J. Bargagli-Stoffi
-    orcid: 0000-0002-6131-8165
-    equal-contrib: true
-    affiliation: "1"
-  - name: Costanza Tortù
-    orcid: 0000-0003-2561-9726
-    equal-contrib: true
-    affiliation: "2"
-  - name: Riccardo Cadei
-    orcid: 0000-0003-2416-8943
-    affiliation: "3"
-  - name: Charlie Wang
-    orcid: 0009-0003-1672-0774
-    affiliation: "4"
-  - name: Laura Forastiere
-    orcid: 0000-0003-3721-9826
-    affiliation: "5"
-affiliations:
- - name: Department of Biostatistics, UCLA School of Public Health
-   index: 1
- - name: Bank of Italy and Sant'Anna School for Advanced Studies
-   index: 2
- - name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
-   index: 3
- - name: Department of Statistics and Data Science, University of California, Los Angeles, USA
-   index: 4
- - name: Department of Biostatistics, Yale School of Public Health
-   index: 5
+- causal inference
+- interference
+- heterogeneous effects
+- machine learning
+date: "01 January 2026"
+output: pdf_document
 corresponding:
-  - name: Falco J. Bargagli-Stoffi
-    email: falco@ucla.edu
-date: 01 January 2026
-bibliography: paper.bib
+- name: "Falco J. Bargagli-Stoffi"
+  email: falco@ucla.edu
+authors:
+- name: "Falco J. Bargagli-Stoffi"
+  orcid: "0000-0002-6131-8165"
+  equal-contrib: true
+  affiliation: '1'
+- name: Costanza Tortù
+  orcid: "0000-0003-2561-9726"
+  equal-contrib: true
+  affiliation: '2'
+- name: Riccardo Cadei
+  orcid: "0000-0003-2416-8943"
+  affiliation: '3'
+- name: Charlie Wang
+  orcid: "0009-0003-1672-0774"
+  affiliation: '4'
+- name: Laura Forastiere
+  orcid: "0000-0003-3721-9826"
+  affiliation: '5'
+affiliations:
+- name: Department of Biostatistics, UCLA School of Public Health
+  index: 1
+- name: Bank of Italy and Sant'Anna School for Advanced Studies
+  index: 2
+- name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
+  index: 3
+- name: Department of Statistics and Data Science, University of California, Los Angeles,
+    USA
+  index: 4
+- name: Department of Biostatistics, Yale School of Public Health
+  index: 5
 ---
 
 # Summary
@@ -61,13 +63,13 @@ Existing methods for causal inference either handle treatment effect heterogenei
 
 | Package | Handles Interference | Handles Heterogeneity | Network Structure |
 |------------------|------------------|------------------|------------------|
-| `aVirtualTwins` [@foster2011subgroup] | ✗ | ✓ | ✗ |
-| `causalTree` [@athey2016recursive] | ✗ | ✓ | ✗ |
-| `policytree` [@athey2021policy] | ✗ | ✓ | ✗ |
-| `CRE` [@bargagli2020causal] | ✗ | ✓ | ✗ |
-| `interference` [@aronow2017estimating] | ✓ | ✗ | ✓ |
-| `inferference` [@tchetgen2012causal] | ✓ | ✗ | ✓ |
-| **`NetworkCausalTree` (ours)** | **✓** | **✓** | **✓** |
+| `aVirtualTwins` [@foster2011subgroup] | No | Yes | No |
+| `causalTree` [@athey2016recursive] | No | Yes | No |
+| `policytree` [@athey2021policy] | No | Yes | No |
+| `CRE` [@bargagli2020causal] | No | Yes | No |
+| `interference` [@aronow2017estimating] | Yes | No | Yes |
+| `inferference` [@tchetgen2012causal] | Yes | No | Yes |
+| **`NetworkCausalTree` (ours)** | **Yes** | **Yes** | **Yes** |
 
 NetworkCausalTree fills this hole by providing the first interpretable, decision-tree-based approach for discovering heterogeneity in both treatment and spillover effects under network interference.
 
@@ -77,11 +79,20 @@ To account for the current lack of existing methods for a data-driven discovery 
 
 The NCT algorithm is designed to detect and estimate heterogeneous treatment and spillover effects in randomized settings under CNI. Under CNI, spillover is confined to units within the same cluster, and an individual's outcome is influenced by the treatment status of directly connected units in the cluster-specific network. Potential outcomes $Y_{ik}(w,g)$---where $k\in \mathcal{K}=[1, \ldots, K]$ is the cluster indicator, and $i=1,\ldots, n_k$ is the unit indicator in each cluster $k$---are indexed with respect to the individual treatment $W_{ik} = w$ and to the neighborhood treatment $G_{ik} = g$, which is defined as a binary variable that equals 1 if the unit $ik$ has at least one treated neighbor, 0 otherwise. For each observation $ik$ in the sample $\mathcal{V}$ we observe the cluster indicator $M_{ik}$ and a vector of individual or network characteristics $\mathbf{X_{ik}}$. The adjacency matrix describing interactions between units within a given cluster $k$ is denoted with $\mathbf{A_{k}}$. Estimands of interest $\tau_{(w,g;w',g')}$ encompass two treatment and two spillover effects, comparing average potential outcomes under varying individual or neighborhood treatment statuses, while keeping the other constant. For the subset of units with covariate vectors $\mathbf{x} \in \mathcal{X}$ that are mapped in the leaf $l(\mathbf{x})$, we define the leaf-specific conditional average causal effect (CACE) comparing the treatment status $(w,g)$ and the one $(w',g')$ as follows:
 
-![](https://latex.codecogs.com/svg.image?\tau_%7B(w,g;w',g')%7D(l(\mathbf%7Bx%7D))=\frac%7B1%7D%7BN(l(\mathbf%7Bx%7D))%7D\sum_%7Bk=1%7D%5E%7BK%7D\sum_%7Bi=1%7D%5E%7Bn_k%7DY_%7Bik%7D(w,g)I(\mathbf%7BX_%7Bik%7D%7D\in%20l(\mathbf%7Bx%7D))-\frac%7B1%7D%7BN(l(\mathbf%7Bx%7D))%7D\sum_%7Bk=1%7D%5E%7BK%7D\sum_%7Bi=1%7D%5E%7Bn_k%7DY_%7Bik%7D(w',g')I(\mathbf%7BX_%7Bik%7D%7D\in%20l(\mathbf%7Bx%7D)))
+$$
+\tau_{(w,g;w',g')}(l(\mathbf{x})) =
+\frac{1}{N(l(\mathbf{x}))}
+\sum_{k=1}^K \sum_{i=1}^{n_k}
+Y_{ik}(w,g)\, I(\mathbf{X}_{ik} \in l(\mathbf{x}))
+-
+\frac{1}{N(l(\mathbf{x}))}
+\sum_{k=1}^K \sum_{i=1}^{n_k}
+Y_{ik}(w',g')\, I(\mathbf{X}_{ik} \in l(\mathbf{x}))
+$$
 
 where $N(l(\mathbf{x}))$ is the number of units within the leaf $l(\mathbf{x})$.
 
-These effects will be estimated by a Horvits-Thompson estimator [@bargagli2024heterogeneous], which employs both the marginal probability of an individual $ik$ to be exposed to the treatment level $(w,g)$ $\pi_{ik}(w,g)$ and the joint probability of two individuals $ik$ and $jk'$ to be simultaneously exposed to the treatment levels $(w,g)$ and $(w',g')$, respectively, $\pi_{ikjk'}(w,g;w',g')$.
+These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2024heterogeneous], which employs both the marginal probability of an individual $ik$ to be exposed to the treatment level $(w,g)$ $\pi_{ik}(w,g)$ and the joint probability of two individuals $ik$ and $jk'$ to be simultaneously exposed to the treatment levels $(w,g)$ and $(w',g')$, respectively, $\pi_{ikjk'}(w,g;w',g')$.
 
 `NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate more than one causal estimand simultaneously: researchers rule the extent of which the four estimands contribute to the objective function used to partition the covariate space by assigning customized weights, included in the vector $\omega(w,g;w',g')$ . `NetworkCausalTree` procedure is divided into two steps: discovery and estimation. Each cluster is randomly assigned to either the discovery or the estimation set (using a procedure that is commonly referred to as *honest splitting*). In the discovery step, `NetworkCausalTree` builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves that are not sufficiently representative of the four exposure conditions. In the estimation step, `NetworkCausalTree` estimates the CACEs and their standard errors in each leaf. The steps of the `NetworkCausalTree` algorithm are illustrated in the Algorithm 1 table.
 
