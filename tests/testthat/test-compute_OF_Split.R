@@ -10,6 +10,8 @@ test_that("compute_OF_Split runs on tiny data and returns valid structure", {
   Ne_list <- list(2,1,4,3,6,5,8,7)
   p <- rep(0.5, N)
   
+  pe <- compute_population_effects(N, W, G, Y, p, Ne)
+  
   result <- compute_OF_Split(
     method = "singular",
     alpha = 1, beta = 0, gamma = 0, delta = 0,
