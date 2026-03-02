@@ -45,7 +45,7 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
     x = X[,j]
     
     # sorted unique values
-    ux <- sort(unique(x))
+    ux <- sort(unique(x[!is.na(x)]))
 
     if (length(ux) > 1) {
       splits <- ux[-1]
@@ -61,8 +61,11 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
       
       sp <- splits[i]
 
-      left_table  <- table(W[!is.na(x) & x < sp],  G[!is.na(x) & x < sp])
-      right_table <- table(W[!is.na(x) & x >= sp], G[!is.na(x) & x >= sp])
+      idx_left  <- !is.na(x) & x <  sp
+      idx_right <- !is.na(x) & x >= sp
+      
+      left_table  <- table(W[idx_left],  G[idx_left])
+      right_table <- table(W[idx_right], G[idx_right])
       
       if (any(left_table < 1) || any(right_table < 1)) {
         ofx[i] <- NA
@@ -71,13 +74,13 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
       
       ofx[i] <- 1/2 * (
         compute_OF_Value(method, alpha, beta, gamma, delta,
-                         N = sum(!is.na(x) & x <  sp), W = W[!is.na(x) & x <  sp], G = G[!is.na(x) & x <  sp], Y = Y[!is.na(x) & x <  sp],
-                         Ne = Ne[!is.na(x) & x <  sp], p = p[!is.na(x) & x <  sp], Ne_list = Ne_list[!is.na(x) & x <  sp],
+                         N = sum(idx_left), W = W[idx_left], G = G[idx_left], Y = Y[idx_left],
+                         Ne = Ne[idx_left], p = p[idx_left], Ne_list = Ne_list[idx_left],
                          population_effects = population_effects,
                          nleafs = nleafs, total_variance = total_variance) +
           compute_OF_Value(method, alpha, beta, gamma, delta,
-                           N = sum(!is.na(x) & x >= sp), W = W[!is.na(x) & x >= sp], G = G[!is.na(x) & x >= sp], Y = Y[!is.na(x) & x >= sp],
-                           Ne = Ne[!is.na(x) & x >= sp], p = p[!is.na(x) & x >= sp], Ne_list = Ne_list[!is.na(x) & x >= sp],
+                           N = sum(idx_right), W = W[idx_right], G = G[idx_right], Y = Y[idx_right],
+                           Ne = Ne[idx_right], p = p[idx_right], Ne_list = Ne_list[idx_right],
                            population_effects = population_effects,
                            nleafs = nleafs, total_variance = total_variance)
       )
