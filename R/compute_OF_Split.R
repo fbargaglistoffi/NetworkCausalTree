@@ -60,10 +60,11 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
     for (i in seq_along(splits)) {
       
       sp <- splits[i]
- 
-      # Allow splits even if some cells have zero counts
-      # Requires at least 1 obs on each side
-      if (sum(x < sp, na.rm = TRUE) == 0 || sum(x >= sp, na.rm = TRUE) == 0){
+
+      left_table  <- table(W[!is.na(x) & x < sp],  G[!is.na(x) & x < sp])
+      right_table <- table(W[!is.na(x) & x >= sp], G[!is.na(x) & x >= sp])
+      
+      if (any(left_table < 1) || any(right_table < 1)) {
         ofx[i] <- NA
         next
       }
