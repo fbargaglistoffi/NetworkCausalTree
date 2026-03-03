@@ -15,7 +15,7 @@
 #' @param W N x 1 vector, Individual Treatment
 #' @param G N x 1 vector, Neighborhood Treatment
 #' @param Y N x 1 vector, Observed Outcome
-#' @param p  N x 1 vector,Probability to be assigned to the active individual intervention
+#' @param p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param Ne N x 1 vector, Degree
 #' @param Ne_list List of N elements - where N is the sample size -
 #' where each element i contains the IDs of the direct neighbors of unit i
@@ -35,6 +35,10 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
 
   # Composite criterion
   if (method == "composite") {
+    
+    if (any(population_effects == 0)){
+      stop("population_effects contains zero: cannot normalize composite OF")  
+    }
 
     inof <- alpha * (((EffTau1000(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
                        (population_effects[1]) ^ 2) +
@@ -47,7 +51,7 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
   }
 
   # Penalized criterion
-  if (method == "penalized") {
+  else if (method == "penalized") {
 
   inof <-  alpha * (((EffTau1000(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
                     2 / nleafs * sum(c(total_variance, Vartau1000(N = N, W = W, Y = Y,G  = G,
@@ -65,7 +69,7 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
   }
 
   # Singular criterion
-  if (method == "singular") {
+  else if (method == "singular") {
 
    inof <- alpha * ((EffTau1000( N = N, W = W, G = G,
                                  Y = Y, p = p, Ne = Ne)) ^ 2) +
@@ -75,6 +79,10 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
                                  Y = Y, p = p, Ne = Ne)) ^ 2) +
            delta * ((EffTau0100( N = N, W = W, G = G,
                                  Y = Y, p = p, Ne = Ne)) ^ 2)
+  }
+  
+  if (is.null(inof)){
+    stop(paste("Unknown method:", method))  
   }
 
   return(inof)
