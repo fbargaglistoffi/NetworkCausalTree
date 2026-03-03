@@ -66,7 +66,7 @@ A data frame describing the Network Causal Tree. Specifically,
 the data frame includes the NODE column identifying the node number, the OF variable
 including the value of the  Objective Function in the corresponding partition, the NOBS column
 including the number of obs in the given partition, the column FILTER including the
-valyes of the Xs to identify the given partition, the column TERMINAL reports the
+the values of the Xs to identify the given partition, the column TERMINAL reports the
 'role' of the node - parent or leaf -
 }
 \description{

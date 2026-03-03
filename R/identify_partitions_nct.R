@@ -30,7 +30,7 @@
 #' the data frame includes the NODE column identifying the node number, the OF variable
 #' including the value of the  Objective Function in the corresponding partition, the NOBS column
 #' including the number of obs in the given partition, the column FILTER including the
-#' valyes of the Xs to identify the given partition, the column TERMINAL reports the
+#' the values of the Xs to identify the given partition, the column TERMINAL reports the
 #' 'role' of the node - parent or leaf -
 #'
 identify_partitions_nct <- function(method, alpha, beta, gamma,
@@ -43,8 +43,13 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   
   X <- as.data.frame(X)
   
-  if (nrow(X) == 0) {
+  if (ncol(X) == 0) {
     X <- matrix(nrow = N, ncol = 0)
+  } else {
+    cn <- colnames(X)
+    if (is.null(cn) || length(cn) != ncol(X) || !all(grepl("^X\\.", cn))) {
+      colnames(X) <- paste0("X.", seq_len(ncol(X)))
+    }
   }
   
   data_tree <- cbind(data_tree, X)
@@ -121,7 +126,8 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         for (child_idx in 1:2) {
           if (split_here[child_idx]) {
             child_data <- subset(this_data, eval(parse(text = tmp_filter[child_idx])))
-            child_table <- table(child_data$W, child_data$G)
+            child_table <- table(factor(child_data$W, levels = c(0,1)),
+                                 factor(child_data$G, levels = c(0,1)))
             
             if (any(as.numeric(child_table) < minsize)) {
               split_here[child_idx] <- FALSE
@@ -130,7 +136,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         }
         
         depth_tree <- as.numeric(stringi::stri_count_regex(tree_info[j, "FILTER"], "X\\."))
-        if (depth_tree >= depth & !is.na(depth_tree)) {
+        if (!is.na(depth_tree) && depth_tree >= depth) {
           split_here <- rep(FALSE, 2)
         }
         
@@ -179,5 +185,5 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   
   tree_info$TERMINAL[tree_info$TERMINAL == "PARENT"] <- "SPLIT"
   
-  return(tree = tree_info)
+  return(tree_info)
 }

@@ -47,11 +47,8 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
     # sorted unique values
     ux <- sort(unique(x[!is.na(x)]))
 
-    if (length(ux) > 1) {
-      splits <- ux[-1]
-    } else {
-      splits <- ux
-    }
+    if (length(ux) <= 1) next
+    splits <- ux[-1]
     
     ofx <- c()
     
@@ -64,8 +61,8 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
       idx_left  <- !is.na(x) & x <  sp
       idx_right <- !is.na(x) & x >= sp
       
-      left_table  <- table(W[idx_left],  G[idx_left])
-      right_table <- table(W[idx_right], G[idx_right])
+      left_table  <- table(factor(W[idx_left],  levels = c(0,1)), factor(G[idx_left],  levels = c(0,1)))
+      right_table <- table(factor(W[idx_right], levels = c(0,1)), factor(G[idx_right], levels = c(0,1)))
       
       if (any(left_table < 1) || any(right_table < 1)) {
         ofx[i] <- NA
