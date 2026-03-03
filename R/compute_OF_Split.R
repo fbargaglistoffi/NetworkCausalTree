@@ -11,11 +11,10 @@
 #' @param beta weight associated to the effect 1101
 #' @param gamma weight associated to the effect 1110
 #' @param delta weight associated to the effect 0100
-#' @param N Sample size
 #' @param W N x 1 vector, Individual Treatment
 #' @param G N x 1 vector, Neighborhood Treatment
 #' @param Y N x 1 vector, Observed Outcome
-#' @param X N x N matrix, Observed Covariate Matrix
+#' @param X N x M matrix, Observed Covariate Matrix
 #' @param p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param Ne N x 1 vector, Degree
 #' @param Ne_list List of N elements - where N is the sample size -
@@ -30,7 +29,7 @@
 #' the third one reports the corresponding variable
 #'
 compute_OF_Split = function(method, alpha, beta, gamma, delta,
-                            N, W, G, Y, X, p, Ne, Ne_list,
+                            W, G, Y, X, p, Ne, Ne_list,
                             population_effects, total_variance, nleafs){
   
   # Initialize
@@ -44,24 +43,29 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
   for (j in 1:dim(X)[2]) {
     
     x = X[,j]
-    split <- sort(unique(x))
-    if (length(split) > 1) {
-      splits <- (split[-1] + split[-length(split)]) / 2
+    
+    # sorted unique values
+    ux <- sort(unique(x[!is.na(x)]))
+
+    if (length(ux) > 1) {
+      splits <- ux[-1]
     } else {
-      splits <- split
+      splits <- ux
     }
-    valuesx<-c()
+    
     ofx <- c()
-    namesx <- c()
     
     # Loop over all the possible splits
     
     for (i in seq_along(splits)) {
       
       sp <- splits[i]
+
+      idx_left  <- !is.na(x) & x <  sp
+      idx_right <- !is.na(x) & x >= sp
       
-      left_table  <- table(W[x < sp],  G[x < sp])
-      right_table <- table(W[x >= sp], G[x >= sp])
+      left_table  <- table(W[idx_left],  G[idx_left])
+      right_table <- table(W[idx_right], G[idx_right])
       
       if (any(left_table < 1) || any(right_table < 1)) {
         ofx[i] <- NA
@@ -70,15 +74,15 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
       
       ofx[i] <- 1/2 * (
         compute_OF_Value(method, alpha, beta, gamma, delta,
-                         N = sum(x <  sp), W = W[x < sp],  G = G[x < sp],  Y = Y[x < sp],
-                         Ne = Ne[x < sp], p = p[x < sp], Ne_list = Ne_list[x < sp],
+                         N = sum(idx_left), W = W[idx_left], G = G[idx_left], Y = Y[idx_left],
+                         Ne = Ne[idx_left], p = p[idx_left], Ne_list = Ne_list[idx_left],
                          population_effects = population_effects,
                          nleafs = nleafs, total_variance = total_variance) +
           compute_OF_Value(method, alpha, beta, gamma, delta,
-                         N = sum(x >= sp), W = W[x >= sp], G = G[x >= sp], Y = Y[x >= sp],
-                         Ne = Ne[x >= sp], p = p[x >= sp], Ne_list = Ne_list[x >= sp],
-                         population_effects = population_effects,
-                         nleafs = nleafs, total_variance = total_variance)
+                           N = sum(idx_right), W = W[idx_right], G = G[idx_right], Y = Y[idx_right],
+                           Ne = Ne[idx_right], p = p[idx_right], Ne_list = Ne_list[idx_right],
+                           population_effects = population_effects,
+                           nleafs = nleafs, total_variance = total_variance)
       )
     }
     
