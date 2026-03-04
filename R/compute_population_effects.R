@@ -1,5 +1,5 @@
 #' @title
-#' Estimated Effects in the whole sample
+#' Estimated Effects in the Whole Population
 #'
 #' @description
 #' Computes the four Estimated Effects in the Whole Population
@@ -8,12 +8,12 @@
 #' @param  W N x 1 vector, Individual Treatment
 #' @param  G N x 1 vector, Neighborhood Treatment
 #' @param  Y N x 1 vector, Observed Outcome
-#' @param  p  N x 1 vector, Probability to be assigned to the active individual intervention
+#' @param  p N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param  Ne N x 1 vector, Degree
 #'
 #' @return A numeric vector made up by four elements, representing the
 #' estimated effects in the whole population: the first element is the effect 1000,
-#' the second one refers to the effect 1101, the third one refers to 1110 and the
+#' the second one refers to the effect 1101, the third one refers to 1110, and the
 #' fourth refers to 0100
 #'
 compute_population_effects = function(N, W, G, Y, p, Ne){
