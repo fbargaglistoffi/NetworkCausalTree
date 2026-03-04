@@ -54,10 +54,7 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
                        (population_effects[3]) ^ 2) +
             delta * (((EffTau0100(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
                        (population_effects[4]) ^ 2)
-  }
-
-  # Penalized criterion
-  else if (method == "penalized") {
+  } else if (method == "penalized") {
 
   inof <-  alpha * (((EffTau1000(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
                     2 / nleafs * sum(c(total_variance, Vartau1000(N = N, W = W, Y = Y,G  = G,
@@ -72,10 +69,7 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
                    2 / nleafs * sum(c(total_variance,Vartau0100(N = N, W = W, Y = Y, G = G,
                    p = p, Ne = Ne, Ne_list = Ne_list)))
     )
-  }
-
-  # Singular criterion
-  else if (method == "singular") {
+  } else if (method == "singular") {
 
    inof <- alpha * ((EffTau1000( N = N, W = W, G = G,
                                  Y = Y, p = p, Ne = Ne)) ^ 2) +
