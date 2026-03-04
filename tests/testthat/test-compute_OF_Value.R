@@ -76,3 +76,24 @@ test_that("compute_OF_Value stops when population_effects is wrong length in com
                      total_variance = NULL, nleafs = 1), "length 4"
   )
 })
+
+test_that("compute_OF_Value stops when population_effects contains NaN in composite method", {
+  expect_error(
+    compute_OF_Value("composite", 1, 0, 0, 0, N = 3,
+                     W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
+                     p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
+                     population_effects = c(NaN, 1, 1, 1),
+                     total_variance = NULL, nleafs = 1), "non-finite values"
+  )
+})
+
+test_that("compute_OF_Value stops when population_effects contains Inf in composite method", {
+  expect_error(
+    compute_OF_Value("composite", 1, 0, 0, 0, N = 3,
+                     W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
+                     p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
+                     population_effects = c(Inf, 1, 1, 1),
+                     total_variance = NULL, nleafs = 1), "non-finite values"
+  )
+})
+
