@@ -9,7 +9,7 @@ test_that("Covy runs on tiny network without errors", {
   Ne <- rep(1, N)
   Ne_list <- list(2,1,4,3,6,5)
   
-  c0010 <- Covy(0,0,1,0, N, Y, W, G, p, Ne, Ne_list)
+  c0010 <- Covy(0,0,1,0, Y, W, G, p, Ne, Ne_list)
   
   expect_true(is.numeric(c0010) || is.na(c0010))
 })
