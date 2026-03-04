@@ -36,6 +36,9 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
   # Composite criterion
   if (method == "composite") {
     
+    if (!is.numeric(population_effects) || length(population_effects) != 4) {
+      stop("population_effects must be a numeric vector of length 4")
+    }
     if (any(!is.finite(population_effects))) {
       stop("population_effects contains non-finite values: cannot normalize composite OF")
     }
