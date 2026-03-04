@@ -4,9 +4,8 @@
 #' @description
 #' Computes the estimated covariance of the average potential outcomes
 #' related to two given levels of the joint intervention
-#'  - denoted with (w1,g1) and (w2,g2), respectively -.
+#' - denoted with (w1,g1) and (w2,g2), respectively -.
 #'
-#' @param  N Sample size
 #' @param  w1 Individual Treatment level - 1
 #' @param  g1 Neighborhood Treatment level - 1
 #' @param  w2 Individual Treatment level - 2
@@ -20,24 +19,21 @@
 #' where each element i contains the IDs of the direct neighbors of unit i
 #'
 #' @return A numeric value corresponding to the estimated covariance of the
-#'  average potential outcome under the level w1,g1 and w2,g2 of the joint intervention
+#' average potential outcome under the level w1,g1 and w2,g2 of the joint intervention
 
 Covy = function(w1, g1, w2, g2, 
-                N, Y, W, G, p, 
+                W, G, Y, p, 
                 Ne, Ne_list) {
   
-  # Initialize
-  varzero = NULL
-  variab = c()
-  
-  # Check sufficient sample size
   if (length(which(W == w1 & G == g1)) > 1 & 
       length(which(W == w2 & G == g2)) > 1) {
     
-    # Create pairs of units
-    pairs <- expand.grid.unique(which(W == w1 & G == g1),
-                                which(W == w2 & G == g2),
-                                include.equals = FALSE)
+  pairs <- expand.grid.unique(which(W == w1 & G == g1),
+                              which(W == w2 & G == g2),
+                              include.equals = FALSE)
+  
+  # Initialize
+  variab = numeric(nrow(pairs))
     
     for (k in 1:nrow(pairs)) {
       
@@ -49,14 +45,13 @@ Covy = function(w1, g1, w2, g2,
       if (shared_neigh(i, j, Ne_list = Ne_list) > 0) {
         
         # Calculate variance component
-        variab = c(varzero,
-                   sum(1 / pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p)*
-                         (Y[i] / pi(i, w1, g1, p, Ne)) * 
-                         (Y[j] / pi(j, w2, g2, p, Ne))) *
-                     (pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p) -
-                        pi(i, w1, g1, p, Ne) * pi(j, w2, g2, p,Ne)))
-            }
-        }
+        pij_val <- pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p)
+        variab[k] = (1 / pij_val *
+                              (Y[i] / pi(i, w1, g1, p, Ne)) * 
+                              (Y[j] / pi(j, w2, g2, p, Ne))) *
+                     (pij_val - pi(i, w1, g1, p, Ne) * pi(j, w2, g2, p, Ne))
+      }
+    }
     
     # Calculate variance adjustment
     second_element <- sum(((Y[which(W == w1 & G == g1)]) ^ 2) / (2 * 
