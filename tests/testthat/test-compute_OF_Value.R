@@ -36,3 +36,25 @@ test_that("compute_OF_Value works for singular case on tiny example", {
   
   expect_equal(result, expected, tolerance = 1e-8)
 })
+
+test_that("compute_OF_Value stops when population_effects contains zero in composite method", {
+  expect_error(
+    compute_OF_Value("composite", 1, 0, 0, 0, N = 3,
+                     W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
+                     p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
+                     population_effects = c(0, 1, 1, 1),
+                     total_variance = NULL, nleafs = 1),
+    "population_effects contains zero"
+  )
+})
+
+test_that("compute_OF_Value stops on unknown method", {
+  expect_error(
+    compute_OF_Value("unknown", 1, 0, 0, 0, N = 3,
+                     W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
+                     p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
+                     population_effects = c(1,1,1,1),
+                     total_variance = NULL, nleafs = 1),
+    "Unknown method"
+  )
+})
