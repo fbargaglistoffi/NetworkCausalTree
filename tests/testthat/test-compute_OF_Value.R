@@ -43,8 +43,7 @@ test_that("compute_OF_Value stops when population_effects contains zero in compo
                      W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
                      p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
                      population_effects = c(0, 1, 1, 1),
-                     total_variance = NULL, nleafs = 1),
-    "population_effects contains zero"
+                     total_variance = NULL, nleafs = 1), "population_effects contains zero"
   )
 })
 
@@ -54,7 +53,26 @@ test_that("compute_OF_Value stops on unknown method", {
                      W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
                      p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
                      population_effects = c(1,1,1,1),
-                     total_variance = NULL, nleafs = 1),
-    "Unknown method"
+                     total_variance = NULL, nleafs = 1), "Unknown method"
+  )
+})
+
+test_that("compute_OF_Value stops when population_effects contains NA in composite method", {
+  expect_error(
+    compute_OF_Value("composite", 1, 0, 0, 0, N = 3,
+                     W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
+                     p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
+                     population_effects = c(NA, 1, 1, 1),
+                     total_variance = NULL, nleafs = 1), "non-finite values"
+  )
+})
+
+test_that("compute_OF_Value stops when population_effects is wrong length in composite method", {
+  expect_error(
+    compute_OF_Value("composite", 1, 0, 0, 0, N = 3,
+                     W = c(0,1,0), G = c(0,0,1), Y = c(1,2,3),
+                     p = rep(0.5,3), Ne = rep(1,3), Ne_list = NULL,
+                     population_effects = c(1, 1, 1),
+                     total_variance = NULL, nleafs = 1), "length 4"
   )
 })
