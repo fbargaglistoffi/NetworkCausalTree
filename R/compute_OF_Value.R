@@ -36,8 +36,11 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
   # Composite criterion
   if (method == "composite") {
     
-    if (any(population_effects == 0)){
-      stop("population_effects contains zero: cannot normalize composite OF")  
+    if (any(!is.finite(population_effects))) {
+      stop("population_effects contains non-finite values: cannot normalize composite OF")
+    }
+    if (any(population_effects == 0, na.rm = TRUE)) {
+      stop("population_effects contains zero: cannot normalize composite OF")
     }
 
     inof <- alpha * (((EffTau1000(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
