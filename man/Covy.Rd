@@ -4,9 +4,11 @@
 \alias{Covy}
 \title{Estimated Covariance of Average Potential Outcomes}
 \usage{
-Covy(w1, g1, w2, g2, W, G, Y, p, Ne, Ne_list)
+Covy(N, w1, g1, w2, g2, W, G, Y, p, Ne, Ne_list)
 }
 \arguments{
+\item{N}{Sample size}
+
 \item{w1}{Individual Treatment level - 1}
 
 \item{g1}{Neighborhood Treatment level - 1}
