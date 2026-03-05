@@ -6,6 +6,7 @@
 #' related to two given levels of the joint intervention
 #' - denoted with (w1,g1) and (w2,g2), respectively -.
 #'
+#' @param  N Sample size
 #' @param  w1 Individual Treatment level - 1
 #' @param  g1 Neighborhood Treatment level - 1
 #' @param  w2 Individual Treatment level - 2
@@ -21,7 +22,7 @@
 #' @return A numeric value corresponding to the estimated covariance of the
 #' average potential outcome under the level w1,g1 and w2,g2 of the joint intervention
 
-Covy = function(w1, g1, w2, g2, 
+Covy = function(N, w1, g1, w2, g2, 
                 W, G, Y, p, 
                 Ne, Ne_list) {
   
