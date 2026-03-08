@@ -14,9 +14,9 @@
 #' constant (-h) (default: TRUE).
 #' @param h Absolute value of the treatment effects 1000 and 1101
 #' (default: 2).
-#' @param  method_networks Method to generate the k clusters:
-#' "ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
-#' (Barabasi-Albert model) (default: "er").
+#' @param  method_networks Method to generate the k within-cluster networks
+#' (block-diagonal subgraphs): "ergm" (Exponential Random Graph Models),
+#' "er" (Erdos Renyi), "sf" (Barabasi-Albert model) (default: "er").
 #' Note: in this function, clusters have the same size, so N should be a multiple of k
 #' @param  param_er Probability of the "er" model, if used (default: 0.2).
 #' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
@@ -52,16 +52,16 @@ data_generator = function(N = 2000,
   if (length(p) != N) {
     stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
   }
+  
+  if (N %% k != 0) {
+    stop("N must be an exact multiple of k to form equal-sized clusters when constructing the network (before optional isolate removal).")
+  }
 
   X <- NULL
   for (m in 1 : M) {
     x <- rbinom(N, 1, 0.5)
     X <- cbind(X, x)
     colnames(X)[m] <- paste0(colnames(X)[m], m)
-  }
-  
-  if (N %% k != 0) {
-    stop("N must be an exact multiple of k so that all clusters have equal size.")
   }
 
   A <- generate_clustered_networks(N = N,
