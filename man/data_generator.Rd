@@ -35,9 +35,9 @@ constant (-h) (default: TRUE).}
 \item{h}{Absolute value of the treatment effects 1000 and 1101
 (default: 2).}
 
-\item{method_networks}{Method to generate the k clusters:
-"ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
-(Barabasi-Albert model) (default: "er").
+\item{method_networks}{Method to generate the k within-cluster networks
+(block-diagonal subgraphs): "ergm" (Exponential Random Graph Models),
+"er" (Erdos Renyi), "sf" (Barabasi-Albert model) (default: "er").
 Note: in this function, clusters have the same size, so N should be a multiple of k}
 
 \item{param_er}{Probability of the "er" model, if used (default: 0.2).}
