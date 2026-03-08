@@ -59,6 +59,10 @@ data_generator = function(N = 2000,
     X <- cbind(X, x)
     colnames(X)[m] <- paste0(colnames(X)[m], m)
   }
+  
+  if (N %% k != 0) {
+    stop("N must be an exact multiple of k so that all clusters have equal size.")
+  }
 
   A <- generate_clustered_networks(N = N,
                                    k = k,
@@ -68,10 +72,6 @@ data_generator = function(N = 2000,
                                    var_homophily_ergm = var_homophily_ergm,
                                    X = X)
 
-  if (N %% k != 0) {
-    stop("N must be an exact multiple of k so that all clusters have equal size.")
-  }
-  
   cluster_size <- N / k
   K <- c(rep(1 : k, cluster_size))
   K <- sort(K)
