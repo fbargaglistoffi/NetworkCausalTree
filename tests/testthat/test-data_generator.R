@@ -66,4 +66,6 @@ test_that("data_generator works with non-default N and no p", {
   expect_equal(length(result$p), 100)
 })
 
-
+test_that("data_generator errors when N not divisible by k", {
+  expect_error(data_generator(N = 101, k = 10))
+})
