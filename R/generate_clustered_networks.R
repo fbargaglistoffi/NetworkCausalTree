@@ -9,7 +9,7 @@
 #' @param X N x M Observed Covariates Matrix
 #' @param method_networks method to generate the k networks: "ergm" (Exponential Random Graph Models) ,
 #' "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
-#' Note: in this function, clusters have the same size, so N should be a multiple of k
+#' Note: in this function, clusters have the same size; if N is not a multiple of k, remainder units will be dropped with a warning.
 #' @param param_er If method "er", probability of the ER model
 #' @param var_homophily_ergm  Variable to account for homophily
 #' @param coef_ergm If method "ergm", coefficients of the ERGM model
@@ -27,11 +27,18 @@ generate_clustered_networks = function(k,
                                        coef_ergm
                                        ){
 
+  # Compute cluster size
+  cluster_size <- floor(N / k)
+  remainder <- N %% k
+  
+  if (remainder != 0) {
+    warning(paste0("N (", N, ") is not an exact multiple of k (", k, "). ",
+                   remainder, " unit(s) will be dropped."))
+    N <- cluster_size * k
+  }
+  
   # Initialize
   comba <- matrix(0, N, N)
-
-  # Compute cluster size
-  cluster_size <- N / k
 
   # Generate k networks
   for (i in 1:k) {
