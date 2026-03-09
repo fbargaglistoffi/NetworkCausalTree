@@ -15,7 +15,7 @@ EffTau1110(N, W, G, Y, p, Ne)
 
 \item{Y}{N x 1 vector, Observed Outcome}
 
-\item{p}{N x 1 vector,Probability to be assigned to the active individual intervention}
+\item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 
 \item{Ne}{N x 1 vector, Degree}
 }
