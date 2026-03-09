@@ -6,23 +6,26 @@
 #' while omitting rows characterized by equal elements.
 #' @param  x A vector
 #' @param  y A vector
-#' @param  include.equals Boolean (dafault: FALSE)
+#' @param  include.equals Boolean (default: FALSE)
 #'
 #' @return A data frame with all combinations of the elements of the vectors,
 #' with no rows characterized by equal elements
 #'
-#' @import dplyr
+#' @importFrom dplyr setdiff
 #'
 expand.grid.unique <- function(x, y, include.equals = FALSE){
   
+  # Removes duplicates from both vectors
   x <- unique(x)
   y <- unique(y)
   
+  # Helper function
   g <- function(i){
     z <- dplyr::setdiff(y, x[seq_len(i - include.equals)])
     if (length(z)) as.data.frame(cbind(x[i], z, deparse.level = 0))  # ← ensure data.frame
   }
   
+  # Apply helper function to all elements
   result <- do.call(rbind, lapply(seq_along(x), g))
   
   # Ensure final output is always a data.frame
@@ -30,4 +33,3 @@ expand.grid.unique <- function(x, y, include.equals = FALSE){
   
   return(result)
 }
-
