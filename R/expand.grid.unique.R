@@ -11,7 +11,7 @@
 #' @return A data frame with all combinations of the elements of the vectors,
 #' with no rows characterized by equal elements
 #'
-#' @import dplyr
+#' @importFrom dplyr setdiff
 #'
 expand.grid.unique <- function(x, y, include.equals = FALSE){
   
