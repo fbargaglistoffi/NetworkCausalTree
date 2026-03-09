@@ -18,7 +18,7 @@
 #'
 
 EffTau1000 = function(N, W, G, Y, p, Ne){
-tau1000 = 1 / N * (sum(Y[W==1 & G==0] / pi(which(W==1 & G==0), 1, 0, p, Ne)) -
+  tau1000 = 1 / N * (sum(Y[W==1 & G==0] / pi(which(W==1 & G==0), 1, 0, p, Ne)) -
                    sum(Y[W==0 & G==0] / pi(which(W==0 & G==0), 0, 0, p, Ne)))
-return(tau1000)
+  return(tau1000)
 }
