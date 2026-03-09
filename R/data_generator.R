@@ -8,16 +8,16 @@
 #' @param  M Number of binary regressors (default: 5).
 #' @param  k Number of clusters (default: 40).
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual
-#' intervention (default: rep(0.2,2000))
+#' intervention (default: rep(0.2, N))
 #' @param het TRUE if the treatment effects 1000 and 1101 are heterogeneous with
 #' respect to the first regressor (h with X1=0, -taui with X0=0), FALSE if
 #' constant (-h) (default: TRUE).
 #' @param h Absolute value of the treatment effects 1000 and 1101
 #' (default: 2).
-#' @param  method_networks Method to generate the m networks:
-#' "ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
-#' (Barabasi-Albert model) (default: "er").
-#' Note: in this function, clusters have the same size, so N should be a multiple of m
+#' @param  method_networks Method to generate the k within-cluster networks
+#' (block-diagonal subgraphs): "ergm" (Exponential Random Graph Models),
+#' "er" (Erdos Renyi), "sf" (Barabasi-Albert model) (default: "er").
+#' Note: in this function, clusters have the same size, so N should be a multiple of k
 #' @param  param_er Probability of the "er" model, if used (default: 0.2).
 #' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
 #' @param  var_homophily_ergm Variable to account for homophily in the "ergm"
@@ -25,14 +25,13 @@
 #' @param remove_isolates Logical; remove isolated nodes? (default TRUE)
 #'
 #' @return A list of synthetic data containing:
-#' - NxM covariates matrix (`X`).
-#' - Nx1 outcome vector (`Y`),
-#' - Nx1 individual intervention vector (`W`),
-#' - NxN adjacency matrix (`A`),
-#' - Nx1 neighborhood intervention vector (`G`),
-#' - Nx1 group membership vector (`K`),
-#' - Nx1 probability to be assigned to the active individual intervention vector
-#' (`p`),
+#' - NxM covariates matrix (`X`)
+#' - Nx1 outcome vector (`Y`)
+#' - Nx1 individual intervention vector (`W`)
+#' - NxN adjacency matrix (`A`)
+#' - Nx1 neighborhood intervention vector (`G`)
+#' - Nx1 group membership vector (`K`)
+#' - Nx1 probability to be assigned to the active individual intervention vector (`p`)
 #'
 #' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
 #'
@@ -41,17 +40,21 @@
 data_generator = function(N = 2000,
                           M = 5,
                           k = 40,
-                          p = rep(0.2,2000),
+                          p = rep(0.2, N),
                           het = TRUE,
                           h = 2,
                           method_networks = "er",
-                          param_er = 0.1,
+                          param_er = 0.2,
                           coef_ergm = NULL,
                           var_homophily_ergm = NULL,
                           remove_isolates = TRUE){
 
   if (length(p) != N) {
     stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
+  }
+  
+  if (N %% k != 0) {
+    stop("N must be an exact multiple of k to form equal-sized clusters when constructing the network (before optional isolate removal).")
   }
 
   X <- NULL
@@ -69,12 +72,9 @@ data_generator = function(N = 2000,
                                    var_homophily_ergm = var_homophily_ergm,
                                    X = X)
 
-  net <- igraph::graph_from_adjacency_matrix(A)
-
   cluster_size <- N / k
   K <- c(rep(1 : k, cluster_size))
   K <- sort(K)
-  levels(K) <- c(1 : k)
 
   W <- rbinom(N, 1, prob = p)
 

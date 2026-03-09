@@ -8,11 +8,11 @@ data_generator(
   N = 2000,
   M = 5,
   k = 40,
-  p = rep(0.2, 2000),
+  p = rep(0.2, N),
   het = TRUE,
   h = 2,
   method_networks = "er",
-  param_er = 0.1,
+  param_er = 0.2,
   coef_ergm = NULL,
   var_homophily_ergm = NULL,
   remove_isolates = TRUE
@@ -26,7 +26,7 @@ data_generator(
 \item{k}{Number of clusters (default: 40).}
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual
-intervention (default: rep(0.2,2000))}
+intervention (default: rep(0.2, N))}
 
 \item{het}{TRUE if the treatment effects 1000 and 1101 are heterogeneous with
 respect to the first regressor (h with X1=0, -taui with X0=0), FALSE if
@@ -35,10 +35,10 @@ constant (-h) (default: TRUE).}
 \item{h}{Absolute value of the treatment effects 1000 and 1101
 (default: 2).}
 
-\item{method_networks}{Method to generate the m networks:
-"ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
-(Barabasi-Albert model) (default: "er").
-Note: in this function, clusters have the same size, so N should be a multiple of m}
+\item{method_networks}{Method to generate the k within-cluster networks
+(block-diagonal subgraphs): "ergm" (Exponential Random Graph Models),
+"er" (Erdos Renyi), "sf" (Barabasi-Albert model) (default: "er").
+Note: in this function, clusters have the same size, so N should be a multiple of k}
 
 \item{param_er}{Probability of the "er" model, if used (default: 0.2).}
 
@@ -52,14 +52,13 @@ model (default: NULL).}
 \value{
 A list of synthetic data containing:
 \itemize{
-\item NxM covariates matrix (\code{X}).
-\item Nx1 outcome vector (\code{Y}),
-\item Nx1 individual intervention vector (\code{W}),
-\item NxN adjacency matrix (\code{A}),
-\item Nx1 neighborhood intervention vector (\code{G}),
-\item Nx1 group membership vector (\code{K}),
-\item Nx1 probability to be assigned to the active individual intervention vector
-(\code{p}),
+\item NxM covariates matrix (\code{X})
+\item Nx1 outcome vector (\code{Y})
+\item Nx1 individual intervention vector (\code{W})
+\item NxN adjacency matrix (\code{A})
+\item Nx1 neighborhood intervention vector (\code{G})
+\item Nx1 group membership vector (\code{K})
+\item Nx1 probability to be assigned to the active individual intervention vector (\code{p})
 }
 }
 \description{

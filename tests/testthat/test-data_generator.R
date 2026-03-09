@@ -60,3 +60,12 @@ test_that("data_generator handles homogeneous vs heterogeneous effects", {
 test_that("data_generator errors if p length mismatches N", {
   expect_error(data_generator(N = 20, p = rep(0.2, 10)))
 })
+
+test_that("data_generator works with non-default N and no p", {
+  result <- data_generator(N = 100, k = 10, remove_isolates = FALSE)
+  expect_equal(length(result$p), 100)
+})
+
+test_that("data_generator errors when N not divisible by k", {
+  expect_error(data_generator(N = 101, k = 10))
+})
