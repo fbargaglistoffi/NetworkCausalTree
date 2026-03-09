@@ -32,7 +32,7 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 \item{coef_ergm}{If method "ergm", coefficients of the ERGM model}
 }
 \value{
-: An adjacency matrix which describes a clustered network environment
+An adjacency matrix which describes a clustered network environment
 }
 \description{
 Generates a simulated clustered network environment
