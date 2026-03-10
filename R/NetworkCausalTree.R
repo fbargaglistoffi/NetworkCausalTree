@@ -21,7 +21,7 @@
 #' @param p N x 1 Probability to be assigned to the active individual
 #' intervention vector.
 #' @param ratio_disc Ratio of clusters to be assigned to the discovery set only.
-#' @param minsize Minimum number of observaztions for each level of the joint
+#' @param minsize Minimum number of observations for each level of the joint
 #' intervention to be required in the leafs
 #' @param depth Depth of the tree.
 #' @param method Method to compute the objective function: "singular" for NCT
@@ -42,7 +42,7 @@
 #' - `EFF1101_EST`: estimated 1101 effects in the partitions,
 #' - `EFF1110_EST`: estimated 1110 effects in the partitions,
 #' - `EFF0100_EST`: estimated 0100 effects in the partitions.
-#' Additional columns summary (only if output = "Estimation"):
+#' Additional columns summary (only if output = "estimation"):
 #' - `SETAU1000_EST`: estimated std. error of the 1000 effect in the partition,
 #' - `SETAU1101_EST`: estimated std. error of the 1101 effect in the partition,
 #' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
@@ -74,6 +74,7 @@ NetworkCausalTree <- function(X, Y, W,
 
   N <- length(W)
   k <- length(unique(K))
+  if (is.null(p)) p <- rep(0.2, N)
 
   alpha <- effect_weights[1]
   beta <- effect_weights[2]
@@ -164,8 +165,8 @@ NetworkCausalTree <- function(X, Y, W,
                                              G = G,
                                              Y = Y,
                                              X = X,
-                                             Ne = Ne,
                                              p = p,
+                                             Ne = Ne,
                                              Ne_list = Ne_list,
                                              minsize = minsize)
   

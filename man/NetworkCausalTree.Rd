@@ -49,7 +49,7 @@ intervention vector.}
 
 \item{depth}{Depth of the tree.}
 
-\item{minsize}{Minimum number of observaztions for each level of the joint
+\item{minsize}{Minimum number of observations for each level of the joint
 intervention to be required in the leafs}
 
 \item{method}{Method to compute the objective function: "singular" for NCT
@@ -73,7 +73,7 @@ Columns summary:
 \item \code{EFF1101_EST}: estimated 1101 effects in the partitions,
 \item \code{EFF1110_EST}: estimated 1110 effects in the partitions,
 \item \code{EFF0100_EST}: estimated 0100 effects in the partitions.
-Additional columns summary (only if output = "Estimation"):
+Additional columns summary (only if output = "estimation"):
 \item \code{SETAU1000_EST}: estimated std. error of the 1000 effect in the partition,
 \item \code{SETAU1101_EST}: estimated std. error of the 1101 effect in the partition,
 \item \code{SETAU1110_EST}: estimated std. error of the 1110 effect in the partition,

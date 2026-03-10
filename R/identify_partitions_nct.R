@@ -33,6 +33,7 @@
 #' the values of the Xs to identify the given partition, the column TERMINAL reports the
 #' 'role' of the node - parent or leaf -
 #'
+#'
 identify_partitions_nct <- function(method, alpha, beta, gamma,
                                     delta, depth, minsize,
                                     N, W, G, Y, X, p,
