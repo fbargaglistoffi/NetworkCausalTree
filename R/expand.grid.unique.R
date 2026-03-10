@@ -22,7 +22,7 @@ expand.grid.unique <- function(x, y, include.equals = FALSE){
   # Helper function
   g <- function(i){
     z <- dplyr::setdiff(y, x[seq_len(i - include.equals)])
-    if (length(z)) data.frame(x[i], z, deparse.level = 0, check.names = FALSE)  # ← ensure data.frame without matrix coercion
+    if (length(z)) data.frame(x[i], z)
   }
   
   # Apply helper function to all elements

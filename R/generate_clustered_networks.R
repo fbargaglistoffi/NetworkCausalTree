@@ -4,17 +4,17 @@
 #' @description
 #' Generates a simulated clustered network environment
 #'
-#' @param  k Number of clusters
-#' @param  N Number of units
+#' @param k Number of clusters
+#' @param N Number of units
 #' @param X N x M Observed Covariates Matrix
-#' @param  method_networks method to generate the k networks: "ergm" (Exponential Random Graph Models) ,
+#' @param method_networks method to generate the k networks: "ergm" (Exponential Random Graph Models) ,
 #' "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
-#' Note: in this function, clusters have the same size, so N should be a multiple of k
-#' @param  param_er If method "er", probability of the ER model
-#' @param  var_homophily_ergm  Variable to account for homophily
-#' @param  coef_ergm If method "ergm", coefficients of the ERGM model
+#' Note: in this function, clusters have the same size; if N is not a multiple of k, remainder units will be dropped with a warning.
+#' @param param_er If method "er", probability of the ER model
+#' @param var_homophily_ergm  Variable to account for homophily
+#' @param coef_ergm If method "ergm", coefficients of the ERGM model
 #'
-#' @return: An adjacency matrix which describes a clustered network environment
+#' @return An adjacency matrix which describes a clustered network environment
 #'
 #' @importFrom intergraph asNetwork asIgraph
 #'
@@ -27,15 +27,24 @@ generate_clustered_networks = function(k,
                                        coef_ergm
                                        ){
 
+  # Compute cluster size
+  cluster_size <- floor(N / k)
+  remainder <- N %% k
+  
+  if (remainder != 0) {
+    warning(paste0("N (", N, ") is not an exact multiple of k (", k, "). ",
+                   remainder, " unit(s) will be dropped."))
+    N <- cluster_size * k
+  }
+  
   # Initialize
   comba <- matrix(0, N, N)
 
-  # Compute cluster size
-  cluster_size <- N / k
-
   # Generate k networks
   for (i in 1:k) {
-
+    
+    idx <- (cluster_size * i - (cluster_size - 1)):(cluster_size * i)
+    
     # ERGM networks
     if (method_networks == "ergm") {
       test.net <- make_empty_graph(n = cluster_size,
@@ -46,21 +55,18 @@ generate_clustered_networks = function(k,
       homophily_vector <- X[,var_homophily_ergm]
       
       # Assign homophily attributes to nodes in this cluster
-      test.net%v%"homophily" =  homophily_vector[(cluster_size * i -
-                                                 (cluster_size - 1)) :
-                                                 (cluster_size * i) ]
+      test.net%v%"homophily" =  homophily_vector[idx]
       
       # Simulate an ERGM network
       g <- ergm::simulate_formula(test.net ~ nodematch("homophily") + edges,
                                   coef = coef_ergm)
       
       # Places the generated network into the correct block of the matrix
-      comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
-            (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- as.matrix(g)
+      comba[idx, idx] <- as.matrix(g)
     }
 
 
-    if (method_networks =="er" | method_networks == "sf") {
+    else if (method_networks =="er" | method_networks == "sf") {
 
       # Erdos Renyi networks
       if (method_networks == "er") {
@@ -77,8 +83,11 @@ generate_clustered_networks = function(k,
       
       # Places this cluster's adjacency matrix into the appropriate block 
       # of the full matrix
-      comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
-            (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- adj
+      comba[idx, idx] <- adj
+    }
+    
+    else {
+      stop(paste0("Unknown method_networks: '", method_networks, "'. Must be one of 'ergm', 'er', 'sf'."))
     }
   }
   

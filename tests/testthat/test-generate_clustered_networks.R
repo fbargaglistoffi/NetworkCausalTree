@@ -34,8 +34,14 @@ test_that("generate_clustered_networks produces valid adjacency matrices", {
   expect_true(is.matrix(A_sf))
   expect_equal(dim(A_sf), c(N, N))
   expect_true(all(A_sf %in% c(0, 1)))
-  
-  # ERGM network is available but not covered in the test suite because of
-  # computational reasons (as it uses the ergm package internally)
+})
+
+test_that("generate_clustered_networks errors on unknown method", {
+  expect_error(
+    generate_clustered_networks(k = 4, N = 20, method_networks = "foo",
+                                param_er = 0.2, var_homophily_ergm = NULL,
+                                coef_ergm = NULL, X = NULL),
+    "Unknown method_networks"
+  )
 })
 
