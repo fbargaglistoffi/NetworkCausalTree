@@ -52,8 +52,8 @@
 #' @return A plot representing the estimated Network causal tree.
 #' Each node reports - from the top to the bottom
 #'- i) the estimated effect 1000
-#'  ii) the estimated effect 0100
-#'  iii) the size of the sub population
+#'- ii) the estimated effect 0100
+#'- iii) the size of the sub population
 #'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
 #'
 #' @importFrom data.tree Node
