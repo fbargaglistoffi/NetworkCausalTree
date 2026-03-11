@@ -51,16 +51,15 @@
 #'
 #' @return A plot representing the estimated Network causal tree.
 #' Each node reports - from the top to the bottom
-#'- i) the estimated effect 10000
+#'- i) the estimated effect 1000
 #'  ii) the estimated effect 0100
-#'  iii) the size of the sub popuedgeson
+#'  iii) the size of the sub population
 #'  Colors provide an intuition on the strength of the effect specified in "effect_color_nodes".
 #'
 #' @importFrom data.tree Node
 #' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
 #' @importFrom graphics plot lines text legend par
 #' @importFrom grDevices colorRampPalette
-#' @importFrom utils read.table write.table
 #' @importFrom graphics plot.new
 #'
 #' @export
@@ -108,6 +107,7 @@ plot_NCT <- function(NCT,
   }
   
   options(warn = -1)
+  on.exit(options(warn = 0))
   
   NCT$NOBS <- NCT$NOBS_EST + NCT$NOBS_TR
   
@@ -131,22 +131,6 @@ plot_NCT <- function(NCT,
   NCT$FILTER <- gsub(pattern = "_bin", replacement ="",
                      x = as.character(NCT$FILTER))
   NCT$FILTER[which(NCT$FILTER!="NA")] <- paste0("NA & ", NCT$FILTER[which(NCT$FILTER!="NA")])
-  
-  if (
-    nrow(NCT) == 1 ||                             
-    all(is.na(NCT$FILTER)) ||                        
-    length(unique(NCT$FILTER[!is.na(NCT$FILTER)])) <= 1
-  ) {
-    
-    par(mar = margins)
-    plot.new()
-    title(title)
-    text(0.5, 0.5,
-         "Single Leaf Tree\n(No splits detected)",
-         cex = 1.2)
-    
-    return(invisible(NCT))
-  }
   
   tree_data <- data.tree::as.Node(NCT, mode = "table",
                                   pathName = "FILTER",
@@ -191,17 +175,11 @@ plot_NCT <- function(NCT,
   
   if (effect_color_nodes == "1000") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1000
-  }
-  
-  if (effect_color_nodes == "1101") {
+  } else if (effect_color_nodes == "1101") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1101
-  }
-  
-  if (effect_color_nodes == "0100") {
+  } else if (effect_color_nodes == "0100") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU0100
-  }
-  
-  if (effect_color_nodes == "1110") {
+  } else if (effect_color_nodes == "1110") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1110
   }
   
