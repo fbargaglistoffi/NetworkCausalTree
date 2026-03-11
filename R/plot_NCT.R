@@ -106,8 +106,9 @@ plot_NCT <- function(NCT,
     return(invisible(NCT))
   }
   
+  old_warn <- getOption("warn")
   options(warn = -1)
-  on.exit(options(warn = 0))
+  on.exit(options(warn = old_warn), add = TRUE)
   
   NCT$NOBS <- NCT$NOBS_EST + NCT$NOBS_TR
   
