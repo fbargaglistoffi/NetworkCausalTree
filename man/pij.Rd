@@ -4,7 +4,7 @@
 \alias{pij}
 \title{Joint Exposure Probabilities}
 \usage{
-pij(i, j, wi, wj, gi, gj, Ne, Ne_list, p)
+pij(i, j, wi, gi, wj, gj, Ne, Ne_list, p)
 }
 \arguments{
 \item{i}{Unit ID}
@@ -13,9 +13,9 @@ pij(i, j, wi, wj, gi, gj, Ne, Ne_list, p)
 
 \item{wi}{Individual Treatment level of unit i}
 
-\item{wj}{Individual Treatment level of unit j}
-
 \item{gi}{Neighborhood Treatment level of unit i}
+
+\item{wj}{Individual Treatment level of unit j}
 
 \item{gj}{Neighborhood Treatment level of unit j}
 
