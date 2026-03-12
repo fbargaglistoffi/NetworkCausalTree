@@ -12,13 +12,11 @@
 #' @return A numeric value representing the number of shared neighbors between
 #' unit i and j
 #'
-#' @importFrom dplyr intersect
-#'
 #'
 shared_neigh = function(i, j, Ne_list){
   
   # Count the number of shared neighbors
-  shared_neighbors <- length(dplyr::intersect(Ne_list[[i]], Ne_list[[j]]))
+  shared_neighbors <- length(intersect(Ne_list[[i]], Ne_list[[j]]))
   
   return(shared_neighbors)
 }
