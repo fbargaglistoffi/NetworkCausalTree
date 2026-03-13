@@ -4,11 +4,9 @@
 \alias{Vary}
 \title{Estimated Variance of the Average Potential Outcomes}
 \usage{
-Vary(N, w, g, Y, W, G, p, Ne, Ne_list)
+Vary(w, g, Y, W, G, p, Ne, Ne_list)
 }
 \arguments{
-\item{N}{Sample size}
-
 \item{w}{Individual Treatment level}
 
 \item{g}{Neighborhood Treatment level}
@@ -19,7 +17,7 @@ Vary(N, w, g, Y, W, G, p, Ne, Ne_list)
 
 \item{G}{N x 1 vector, Neighborhood Treatment}
 
-\item{p}{Probability to be assigned to the active individual intervention}
+\item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 
 \item{Ne}{N x 1 vector, Degree}
 
