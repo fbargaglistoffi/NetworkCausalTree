@@ -9,7 +9,7 @@ test_that("Vartau1110 runs without errors", {
   Ne <- rep(1, N)
   Ne_list <- list(2,1,4,3,6,5)
   
-  res <- Vartau1110(Y,W,G,p,Ne,Ne_list)
+  res <- Vartau1110(N,Y,W,G,p,Ne,Ne_list)
   
   expect_true(is.numeric(res) || is.na(res))
 })
