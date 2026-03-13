@@ -1,8 +1,8 @@
-#' @title
-#' Generation of the Network Causal Tree
+#' @title Generation of the Network Causal Tree
 #'
-#' @description
-#
+#' @description Sprouts the network causal tree, eventually including a fraction of the initial -discovery-
+#' sample.
+#' 
 #' @param method method to compute the Objective function: "singular" for NCT targeted to one single effect;
 #' "composite" for NCT targeted to multiple effects; "penalized" for a OF computed while
 #' considering a single effect only and including a penalization term related to the variance
@@ -23,40 +23,70 @@
 #' where each element i contains the IDs of the direct neighbors of unit i
 #' @param  population_effects 4 dimensional vector containing the estimated effects in the
 #' whole population
-#' @param minsize minimum number of observaztions for each level of the joint intervention
+#' @param minsize minimum number of observations for each level of the joint intervention
 #' to be required in the leafs
 #' @param depth depth of the tree
-#' @param A Adjacency matrix (internal use)
 #'
 #' @return A data frame describing the Network Causal Tree. Specifically,
 #' the data frame includes the NODE column identifying the node number, the OF variable
 #' including the value of the OF in the corresponding partition, the NOBS column
 #' including the number of obs in the given partition, the column FILTER including the
-#' valyes of the Xs to identify the given partition,, the column TERMINAL reports the
+#' values of the Xs to identify the given partition, the column TERMINAL reports the
 #' 'role' of the node - parent or leaf -.
 #'
-sprout_nct = function(method, sampled_clusters,
-                      alpha, beta, gamma, delta,
-                      depth, minsize, N, W, G, Y, X, K, p, Ne,
-                      population_effects, Ne_list){
+sprout_nct = function(method, alpha, beta, gamma, delta,
+                      N, sampled_clusters, W, G, Y, X, K = NULL, p,
+                      Ne, Ne_list, population_effects, minsize, depth){
   
+  if (is.null(K) || length(K) != N) {
+    K <- rep(1, N)
+  }
   
-  # Initialize
-  data <- data.frame(idunit = c(1:N), W = W, G = G,
-                     Y = Y, X = X, K = K)
+  # Initialize data frame
+  data <- data.frame(idunit = 1:N, W = W, G = G, Y = Y, K = K)
   
-  # Take only those observations that have been assigned to the discovery set
+  # Attach X
+  if (!is.null(X) && ncol(X) > 0) {
+    X <- as.data.frame(X)
+    if (!all(grepl("^X\\.", colnames(X)))) {
+      colnames(X) <- paste0("X.", seq_len(ncol(X)))
+    }
+    data <- cbind(data, X)
+  }
+  
+  # Take only those observations in the discovery set
   datasample <- data[which(K %in% sampled_clusters), ]
   datasample <- datasample[order(datasample$idunit), ]
   sampleid <- unique(datasample$idunit)
   
+  if (length(sampleid) == 0) {
+    return(data.frame(
+      NODE = 1,
+      OF = NA,
+      NOBS = 0,
+      FILTER = "",
+      TERMINAL = "LEAF"
+    ))
+  }
+  
   W = as.numeric(datasample$W)
   G = as.numeric(datasample$G)
   Y = as.numeric(datasample$Y)
-  X = as.matrix(datasample[, -c(1 : 4, dim(datasample)[2])])
-  colnames(X)=sub("X.","",colnames(X))
-  
-  # Identify partitions of the NCT on the discovery set
+
+  covar_cols <- grep("^X\\.", names(datasample))
+  if (length(covar_cols) == 0) {
+    return(data.frame(
+      NODE = 1,
+      OF = NA,
+      NOBS = nrow(datasample),
+      FILTER = "",
+      TERMINAL = "LEAF"
+    ))
+  }
+
+  X <- as.matrix(datasample[, covar_cols, drop = FALSE])
+
+  # Identify partitions
   tree_info <- identify_partitions_nct(method = method, alpha = alpha, beta = beta,
                                        gamma = gamma, delta = delta,
                                        N = length(sampleid), depth = depth,
