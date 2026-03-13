@@ -72,8 +72,8 @@ A data frame describing the Network Causal Tree. Specifically,
 the data frame includes the NODE column identifying the node number, the OF variable
 including the value of the OF in the corresponding partition, the NOBS column
 including the number of obs in the given partition, the column FILTER including the
-values of the Xs to identify the given partition, the column TERMINAL reports the
-'role' of the node - parent or leaf -.
+values of the Xs to identify the given partition, and the column TERMINAL reporting
+whether the node is a splitting node ("SPLIT") or a leaf ("LEAF").
 }
 \description{
 Sprouts the network causal tree, eventually including a fraction of the initial -discovery-
