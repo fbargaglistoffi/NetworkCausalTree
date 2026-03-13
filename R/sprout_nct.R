@@ -46,7 +46,20 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
   data <- data.frame(idunit = 1:N, W = W, G = G, Y = Y, K = K)
   
   # Attach X
-  if (!is.null(X) && ncol(X) > 0) {
+  if (!is.null(X) && NCOL(X) > 0) {
+    # Validate that X has N observations
+    if (is.null(dim(X))) {
+      # X is a vector
+      if (length(X) != N) {
+        stop("X must have length N (", N, "), but has length ", length(X), ".")
+      }
+    } else {
+      # X is a matrix/data.frame/array
+      if (nrow(X) != N) {
+        stop("X must have N rows (", N, "), but has ", nrow(X), " rows.")
+      }
+    }
+    
     X <- as.data.frame(X)
     if (!all(grepl("^X\\.", colnames(X)))) {
       colnames(X) <- paste0("X.", seq_len(ncol(X)))
