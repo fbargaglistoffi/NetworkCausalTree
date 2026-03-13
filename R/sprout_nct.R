@@ -31,15 +31,18 @@
 #' the data frame includes the NODE column identifying the node number, the OF variable
 #' including the value of the OF in the corresponding partition, the NOBS column
 #' including the number of obs in the given partition, the column FILTER including the
-#' values of the Xs to identify the given partition, the column TERMINAL reports the
-#' 'role' of the node - parent or leaf -.
+#' values of the Xs to identify the given partition, and the column TERMINAL reporting
+#' whether the node is a splitting node ("SPLIT") or a leaf ("LEAF").
 #'
 sprout_nct = function(method, alpha, beta, gamma, delta,
                       N, sampled_clusters, W, G, Y, X, K = NULL, p,
                       Ne, Ne_list, population_effects, minsize, depth){
   
-  if (is.null(K) || length(K) != N) {
+  if (is.null(K)) {
+    # If K is not provided, treat all units as belonging to a single cluster
     K <- rep(1, N)
+    } else if (length(K) != N) {
+    stop("K must be a vector of length N.")
   }
   
   # Initialize data frame
@@ -67,6 +70,10 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
     data <- cbind(data, X)
   }
   
+  if (is.null(sampled_clusters)) {
+    # By default, treat all clusters as part of the discovery set
+    sampled_clusters <- unique(K)
+  }
   # Take only those observations in the discovery set
   datasample <- data[which(K %in% sampled_clusters), ]
   datasample <- datasample[order(datasample$idunit), ]
@@ -75,10 +82,11 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
   if (length(sampleid) == 0) {
     return(data.frame(
       NODE = 1,
-      OF = NA,
+      OF = 0,
       NOBS = 0,
-      FILTER = "",
-      TERMINAL = "LEAF"
+      FILTER = NA,
+      TERMINAL = "LEAF",
+      stringsAsFactors = FALSE
     ))
   }
   
@@ -90,10 +98,11 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
   if (length(covar_cols) == 0) {
     return(data.frame(
       NODE = 1,
-      OF = NA,
+      OF = 0,
       NOBS = nrow(datasample),
-      FILTER = "",
-      TERMINAL = "LEAF"
+      FILTER = NA,
+      TERMINAL = "LEAF",
+      stringsAsFactors = FALSE
     ))
   }
 
