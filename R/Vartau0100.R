@@ -37,7 +37,7 @@ Vartau0100 = function(N, Y, W, G,
     var0100 = NA
   } else {
     var0100 = (1 / (N ^ (2))) * (vary01 + vary00 - 2 * covy01y00)
-    if (var0100 < 0) {
+    if (!is.na(var0100) && var0100 < 0) {
       warning("Estimated variance is negative; returning NA.")
       var0100 <- NA
     }
