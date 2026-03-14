@@ -27,7 +27,7 @@ A numeric value corresponding to the estimated variance of the effect
 of interest.
 }
 \description{
-Computes the estimated variance of the effect 1000. This effect
+Computes the estimated variance of the effect 1101. This effect
 compares individuals with the joint treatment exposure (w=1,g=1)
 with those with (w=0,g=1)
 }
