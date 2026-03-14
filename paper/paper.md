@@ -112,19 +112,28 @@ library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. To generate synthetic data, the user has to specify the sample size (`N`), the number of clusters (`M`), the number of covariates (`k`), the vector collecting individual treatment assignment probabilities (`p`), the parameter that specifies whether treatment heterogeneity is present in the data (`het`) (if this parameter is TRUE the function introduces treatment heterogeneity with respect to the first regressor in the dataset such that $\tau_{(1,0;0,0)}  = h$ if $x1=0$ and $\tau_{(1,0;0,0)}  = - h$ if $x1 = 1$ , the simulated size of the main treatment effect $\tau_{(1,0;0,0)}$ (`h`), the method employed to generate the cluster-specific networks (`method_networks`), and its required parameters---here, since networks are generated according to the Erdos-Renyi model (`method_networks = er`)---, parameters are specified using `param_er` the option.
+`data_generator_direct()` and `data_generator_direct_indirect()` are flexible synthetic dataset generators, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. Both return a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. `data_generator_direct()` generates outcomes with direct treatment effects only, while `data_generator_direct_indirect()` additionally includes spillover (indirect) effects in the outcome model. For `data_generator_direct_indirect()` with `het = TRUE`, both the direct effect $\tau_{(1,0;0,0)}$, and the spillover effect $\tau_{(0,1;0,0)}$ equal $h$ if $x1=0$ and $-h$ if $x1 = 1$.
 
-The `data_generator()` function returns as output a list of synthetic data including the covariates matrix (`X`), the outcome vector (`Y`), the individual intervention vector (`W`), the adjacency matrix (`A`), the neighborhood intervention vector (`G`), the group membership vector (`K`) and the vector describing the probability to be assigned to the active individual intervention vector (`p`).
+The `data_generator_direct()` and `data_generator_direct_indirect()` functions return as output a list of synthetic data including the covariates matrix (`X`), the outcome vector (`Y`), the individual intervention vector (`W`), the adjacency matrix (`A`), the neighborhood intervention vector (`G`), the group membership vector (`K`) and the vector describing the probability to be assigned to the active individual intervention vector (`p`).
 
 ``` r
-dataset <- data_generator(N = 4000, 
-                          M = 4,
-                          k = 80, 
-                          p = rep(0.2,4000), 
-                          het = TRUE, 
-                          h = 2, 
-                          method_networks = "er", 
-                          param_er = 0.1)
+dataset_direct <- data_generator_direct(N = 4000, 
+                                        M = 4,
+                                        k = 80, 
+                                        p = rep(0.2,4000), 
+                                        het = TRUE, 
+                                        h = 2, 
+                                        method_networks = "er", 
+                                        param_er = 0.1)
+                                        
+dataset_direct_indirect <- data_generator_direct_indirect(N = 4000, 
+                                                          M = 4,
+                                                          k = 80, 
+                                                          p = rep(0.2,4000), 
+                                                          het = TRUE, 
+                                                          h = 2, 
+                                                          method_networks = "er", 
+                                                          param_er = 0.1)
 ```
 
 We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package. To run the `NetworkCausalTree` function, the user has to input the following arguments: the data (`W`,`Y`,`X`,`M`) = $(W_{ik}, Y_{ik}, \mathbf{X_{ik}}, M_{ik})$, where $ik \in \mathcal{V}$; the vector collecting individual treatment assignment probabilities `p`, the global adjacency matrix `A` that includes the cluster specific matrices $\mathbf{A_{k}}$. Moreover, users must specify the weights vector $\omega(w,g;w',g')$, ruling the extent of which each causal estimands contribute to the objective function (`effect_weights`); the `ratio_disc` parameter, representing the ratio of clusters to be included in the discovery set only; two parameters ruling the stopping criteria of the tree (`depth` measures the maximum depth, while `minsize` specifies the minimum number of observations for each level of the joint treatment $(w,g)$ to be required in the leafs; the method to compute the objective function, that is, `method = "singular"` for NCT targeted to one single effect, `method = "composite"` for NCT targeted to multiple effects, `method = "penalized"` for a criterion function computed while considering a single effect only and including a penalization term related to the variance within the leafs; the desired `output` of the function ( if `output = "detection"` only point estimates are computed, if `output = "estimation"` both estimated effects and their standard errors are computed).
@@ -132,12 +141,12 @@ We propose here two examples of how to run the Network Causal Tree algorithm by 
 **Example 1.** Running Network Causal Tree while relying on a singular in-sample splitting criterion function, that assesses the heterogeneity of the main treatment effect ($\tau_{(1,0;0,0)}$) only
 
 ``` r
-result <- NetworkCausalTree(X = dataset[["X"]],
-                            Y = dataset[["Y"]],
-                            W = dataset[["W"]], 
-                            A = dataset[["A"]],
-                            K = dataset[["K"]],
-                            p = dataset[["p"]], 
+result <- NetworkCausalTree(X = dataset_direct[["X"]],
+                            Y = dataset_direct[["Y"]],
+                            W = dataset_direct[["W"]], 
+                            A = dataset_direct[["A"]],
+                            K = dataset_direct[["K"]],
+                            p = dataset_direct[["p"]], 
                             effect_weights = c(1,0,0,0),
                             ratio_disc = 0.5,
                             depth = 3,
@@ -149,12 +158,12 @@ result <- NetworkCausalTree(X = dataset[["X"]],
 **Example 2.** Running Network Causal Tree while relying on a composite in-sample splitting criterion function, which accounts for all the four estimands simultaneously
 
 ``` r
-result <- NetworkCausalTree(X = dataset[["X"]],
-                            Y = dataset[["Y"]],
-                            W = dataset[["W"]], 
-                            A = dataset[["A"]],
-                            K = dataset[["K"]],
-                            p = dataset[["p"]], 
+result <- NetworkCausalTree(X = dataset_direct_indirect[["X"]],
+                            Y = dataset_direct_indirect[["Y"]],
+                            W = dataset_direct_indirect[["W"]], 
+                            A = dataset_direct_indirect[["A"]],
+                            K = dataset_direct_indirect[["K"]],
+                            p = dataset_direct_indirect[["p"]], 
                             effect_weights = c(0.25,0.25,0.25,0.25),
                             ratio_disc = 0.5,
                             depth = 3,
@@ -169,7 +178,7 @@ For instance, Figure 1 shows the tree obtained from **Example 1**. The code used
 
 ``` r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
-cov_names <- colnames(dataset[["X"]])
+cov_names <- colnames(dataset_direct[["X"]])
 
 plot_NCT(NCT = result, 
          cov_names = cov_names,
@@ -182,7 +191,7 @@ Figure 2 shows the tree obtained from **Example 2**.
 
 ``` r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
-cov_names <- colnames(dataset[["X"]])
+cov_names <- colnames(dataset_direct_indirect[["X"]])
 
 plot_NCT(NCT = result, 
          cov_names = cov_names,
@@ -191,7 +200,7 @@ plot_NCT(NCT = result,
 
 ![Network Causal Tree targeted to all effects](images/nct2.png)
 
-In these examples, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator()` function, `h = 2` and `het = TRUE`)
+In these examples, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator_direct_indirect()` function, `h = 2` and `het = TRUE`). The spillover effect is similarly heterogeneous, with $\tau_{(0,1;0,0)} = 2$ for $x1 = 0$ and $\tau_{(0,1;0,0)} = -2$ for $x1 = 1$.
 
 Online documentation for the package can be found at [fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
 
