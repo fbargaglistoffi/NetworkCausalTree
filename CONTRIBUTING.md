@@ -7,7 +7,7 @@ Thank you for your interest in contributing to NetworkCausalTree! We welcome con
 NetworkCausalTree is implemented in R and follows standard R development conventions. Before contributing, please:
 
 1. Read our [Code of Conduct](CODE_OF_CONDUCT.md)
-2. Check the [GitHub Issues](https://github.com/charliewang123/NetworkCausalTree/issues) page for existing issues or feature requests
+2. Check the [GitHub Issues](https://github.com/fbargaglistoffi/NetworkCausalTree/issues) page for existing issues or feature requests
 3. Review the package documentation and vignettes to understand the current functionality
 
 ## Types of Contributions
@@ -18,7 +18,7 @@ We welcome various types of contributions:
 
 If you find a bug, please report it by:
 
-1. Opening a new issue on our [GitHub Issues](https://github.com/charliewang123/NetworkCausalTree/issues) page
+1. Opening a new issue on our [GitHub Issues](https://github.com/fbargaglistoffi/NetworkCausalTree/issues) page
 2. Including a clear title and description
 3. Providing a minimal reproducible example (reprex)
 4. Specifying your R version, operating system, and package version
@@ -42,7 +42,7 @@ Have an idea for a new feature? We'd love to hear it! Please:
 install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
 
 # Clone the repository
-git clone https://github.com/charliewang123/NetworkCausalTree.git
+git clone https://github.com/fbargaglistoffi/NetworkCausalTree.git
 cd NetworkCausalTree
 
 # Load the package for development
@@ -185,7 +185,7 @@ We are particularly interested in contributions related to:
 If you have questions or need support:
 
 1. Check the package vignettes and documentation first
-2. Search existing [GitHub Issues](https://github.com/charliewang123/NetworkCausalTree/issues)
+2. Search existing [GitHub Issues](https://github.com/fbargaglistoffi/NetworkCausalTree/issues)
 3. If your question hasn't been addressed, open a new issue with the "question" label
 
 ## Recognition
