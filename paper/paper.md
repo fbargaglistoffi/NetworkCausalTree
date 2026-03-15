@@ -101,8 +101,6 @@ These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025he
 
 ![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png)
 
-*Figure 1. Image of the Network Causal Tree algorithm.*
-
 # Usage
 
 `NetworkCausalTree` is available on [GitHub](https://github.com/fbargaglistoffi/NetworkCausalTree) and can be installed and loaded into the R session using:
