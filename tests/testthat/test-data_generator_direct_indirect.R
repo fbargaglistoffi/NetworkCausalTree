@@ -42,7 +42,7 @@ test_that("data_generator_direct_indirect runs and returns valid structure", {
   expect_true(all(rowSums(data$A) > 0))
 })
 
-test_that("data_generator handles homogeneous vs heterogeneous effects", {
+test_that("data_generator_direct_indirect handles homogeneous vs heterogeneous effects", {
   set.seed(100)
   N <- 80
   
@@ -54,18 +54,21 @@ test_that("data_generator handles homogeneous vs heterogeneous effects", {
   expect_type(data_het, "list")
   expect_type(data_hom, "list")
   
-  expect_false(sd(data_het$Y) == sd(data_hom$Y))
+  sd_het <- sd(data_het$Y)
+  sd_hom <- sd(data_hom$Y)
+  
+  expect_gt(abs(sd_het - sd_hom), 0.1)
 })
 
-test_that("data_generator errors if p length mismatches N", {
+test_that("data_generator_direct_indirect errors if p length mismatches N", {
   expect_error(data_generator_direct_indirect(N = 20, p = rep(0.2, 10)))
 })
 
-test_that("data_generator works with non-default N and no p", {
+test_that("data_generator_direct_indirect works with non-default N and no p", {
   result <- data_generator_direct_indirect(N = 100, k = 10, remove_isolates = FALSE)
   expect_equal(length(result$p), 100)
 })
 
-test_that("data_generator errors when N not divisible by k", {
+test_that("data_generator_direct_indirect errors when N not divisible by k", {
   expect_error(data_generator_direct_indirect(N = 101, k = 10))
 })
