@@ -1,8 +1,9 @@
 #' @title
-#' Synthetic data generator
+#' Synthetic data generator with direct effects
 #'
 #' @description
-#' Generates Network Causal Tree synthetic data.
+#' Generates Network Causal Tree synthetic data with direct treatment effects 
+#' in the outcome model.
 #'
 #' @param  N Sample size (default: 2000).
 #' @param  M Number of binary regressors (default: 5).
@@ -37,18 +38,18 @@
 #'
 #' @export
 
-data_generator = function(N = 2000,
-                          M = 5,
-                          k = 40,
-                          p = rep(0.2, N),
-                          het = TRUE,
-                          h = 2,
-                          method_networks = "er",
-                          param_er = 0.2,
-                          coef_ergm = NULL,
-                          var_homophily_ergm = NULL,
-                          remove_isolates = TRUE){
-
+data_generator_direct = function(N = 2000,
+                                 M = 5,
+                                 k = 40,
+                                 p = rep(0.2, N),
+                                 het = TRUE,
+                                 h = 2,
+                                 method_networks = "er",
+                                 param_er = 0.2,
+                                 coef_ergm = NULL,
+                                 var_homophily_ergm = NULL,
+                                 remove_isolates = TRUE){
+  
   if (length(p) != N) {
     stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
   }
@@ -56,14 +57,14 @@ data_generator = function(N = 2000,
   if (N %% k != 0) {
     stop("N must be an exact multiple of k to form equal-sized clusters when constructing the network (before optional isolate removal).")
   }
-
+  
   X <- NULL
   for (m in 1 : M) {
     x <- rbinom(N, 1, 0.5)
     X <- cbind(X, x)
     colnames(X)[m] <- paste0(colnames(X)[m], m)
   }
-
+  
   A <- generate_clustered_networks(N = N,
                                    k = k,
                                    method_networks = method_networks,
@@ -71,18 +72,18 @@ data_generator = function(N = 2000,
                                    coef_ergm = coef_ergm,
                                    var_homophily_ergm = var_homophily_ergm,
                                    X = X)
-
+  
   cluster_size <- N / k
   K <- c(rep(1 : k, cluster_size))
   K <- sort(K)
-
+  
   W <- rbinom(N, 1, prob = p)
-
+  
   Ne <- rowSums(A)
   Ne_treated <- as.vector(A %*% W)
   G = rep(1, N)
   G[Ne_treated == 0] <- 0
-
+  
   if(remove_isolates){
     W <- W[Ne > 0]
     G <- G[Ne > 0]
@@ -92,13 +93,13 @@ data_generator = function(N = 2000,
     N <- length(W)
     A <- A[Ne > 0, Ne > 0]
   }
-
+  
   if (het) {
     x1 <- X[,1]
     tau <- rep(0, N)
     tau[x1==0] <- h
     tau[x1==1] <- - h
-
+    
     y0 <- rnorm(N, sd = 0.01)
     y1 <- y0 + tau
     Y <- y0 * (1-W) + y1 * W
@@ -108,7 +109,7 @@ data_generator = function(N = 2000,
     y1 <- y0 + tau
     Y <- y0 * (1-W) +  y1 * W
   }
-
+  
   dataset <- list(X = X,
                   Y = Y,
                   W = W,

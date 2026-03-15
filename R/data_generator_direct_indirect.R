@@ -1,0 +1,123 @@
+#' @title
+#' Synthetic data generator with direct and indirect effects
+#'
+#' @description
+#' Generates Network Causal Tree synthetic data with both direct treatment
+#' and spillover (indirect) effects in the outcome model.
+#'
+#' @param  N Sample size (default: 2000).
+#' @param  M Number of binary regressors (default: 5).
+#' @param  k Number of clusters (default: 40).
+#' @param  p  N x 1 vector, Probability to be assigned to the active individual
+#' intervention (default: rep(0.2, N))
+#' @param het TRUE if the treatment and spillover effects are heterogeneous with
+#' respect to the first regressor (h with X1=0, -h with X1=1), FALSE if
+#' constant (default: TRUE).
+#' @param h Absolute value of the treatment and spillover effects
+#' (default: 2).
+#' @param  method_networks Method to generate the k within-cluster networks
+#' (block-diagonal subgraphs): "ergm" (Exponential Random Graph Models),
+#' "er" (Erdos Renyi), "sf" (Barabasi-Albert model) (default: "er").
+#' Note: in this function, clusters have the same size, so N should be a multiple of k
+#' @param  param_er Probability of the "er" model, if used (default: 0.2).
+#' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
+#' @param  var_homophily_ergm Variable to account for homophily in the "ergm"
+#' model (default: NULL).
+#' @param remove_isolates Logical; remove isolated nodes? (default TRUE)
+#'
+#' @return A list of synthetic data containing:
+#' - NxM covariates matrix (`X`)
+#' - Nx1 outcome vector (`Y`)
+#' - Nx1 individual intervention vector (`W`)
+#' - NxN adjacency matrix (`A`)
+#' - Nx1 neighborhood intervention vector (`G`)
+#' - Nx1 group membership vector (`K`)
+#' - Nx1 probability to be assigned to the active individual intervention vector (`p`)
+#'
+#' @importFrom igraph graph_from_data_frame V E make_empty_graph layout_as_tree "E<-" "V<-"
+#'
+#' @export
+
+data_generator_direct_indirect = function(N = 2000,
+                                          M = 5,
+                                          k = 40,
+                                          p = rep(0.2, N),
+                                          het = TRUE,
+                                          h = 2,
+                                          method_networks = "er",
+                                          param_er = 0.2,
+                                          coef_ergm = NULL,
+                                          var_homophily_ergm = NULL,
+                                          remove_isolates = TRUE){
+
+  if (length(p) != N) {
+    stop('The length of vector describing individual probabilities to be assigned to the intervention MUST be equal to N')
+  }
+  
+  if (N %% k != 0) {
+    stop("N must be an exact multiple of k to form equal-sized clusters when constructing the network (before optional isolate removal).")
+  }
+
+  X <- NULL
+  for (m in 1 : M) {
+    x <- rbinom(N, 1, 0.5)
+    X <- cbind(X, x)
+    colnames(X)[m] <- paste0(colnames(X)[m], m)
+  }
+
+  A <- generate_clustered_networks(N = N,
+                                   k = k,
+                                   method_networks = method_networks,
+                                   param_er = param_er,
+                                   coef_ergm = coef_ergm,
+                                   var_homophily_ergm = var_homophily_ergm,
+                                   X = X)
+
+  cluster_size <- N / k
+  K <- c(rep(1 : k, cluster_size))
+  K <- sort(K)
+
+  W <- rbinom(N, 1, prob = p)
+
+  Ne <- rowSums(A)
+  Ne_treated <- as.vector(A %*% W)
+  G = rep(1, N)
+  G[Ne_treated == 0] <- 0
+
+  if(remove_isolates){
+    W <- W[Ne > 0]
+    G <- G[Ne > 0]
+    K <- as.numeric(K[Ne > 0])
+    X <- X[Ne > 0, ]
+    p <- p[Ne > 0]
+    N <- length(W)
+    A <- A[Ne > 0, Ne > 0]
+  }
+
+  if (het) {
+    x1 <- X[,1]
+    tau <- rep(0, N)
+    tau[x1==0] <- h
+    tau[x1==1] <- -h
+    spill <- rep(0, N)
+    spill[x1==0] <- h
+    spill[x1==1] <- -h
+    y0 <- rnorm(N, sd = 0.01)
+    y1 <- y0 + tau
+    Y <- y0 * (1-W) + y1 * W + spill * G
+  } else {
+    tau <- rep(h, N)
+    y0 <- rnorm(N, sd = 0.01)
+    y1 <- y0 + tau
+    Y <- y0 * (1-W) +  y1 * W + h * G
+  }
+
+  dataset <- list(X = X,
+                  Y = Y,
+                  W = W,
+                  A = A,
+                  G = G,
+                  K = K,
+                  p = p)
+  return(dataset)
+}

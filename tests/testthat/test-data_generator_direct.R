@@ -1,4 +1,4 @@
-test_that("data_generator runs and returns valid structure", {
+test_that("data_generator_direct runs and returns valid structure", {
   set.seed(100)
   
   N <- 50
@@ -6,7 +6,7 @@ test_that("data_generator runs and returns valid structure", {
   k <- 5
   p <- rep(0.3, N)
   
-  data <- data_generator(
+  data <- data_generator_direct(
     N = N, M = M, k = k, p = p,
     method_networks = "er", param_er = 0.2
   )
@@ -42,30 +42,33 @@ test_that("data_generator runs and returns valid structure", {
   expect_true(all(rowSums(data$A) > 0))
 })
 
-test_that("data_generator handles homogeneous vs heterogeneous effects", {
+test_that("data_generator_direct handles homogeneous vs heterogeneous effects", {
   set.seed(100)
   N <- 80
   
   p <- rep(0.5, N)
   
-  data_het <- data_generator(N = N, p = p, het = TRUE)
-  data_hom <- data_generator(N = N, p = p, het = FALSE)
+  data_het <- data_generator_direct(N = N, p = p, het = TRUE)
+  data_hom <- data_generator_direct(N = N, p = p, het = FALSE)
 
   expect_type(data_het, "list")
   expect_type(data_hom, "list")
 
-  expect_false(sd(data_het$Y) == sd(data_hom$Y))
+  sd_het <- sd(data_het$Y)
+  sd_hom <- sd(data_hom$Y)
+  
+  expect_gt(abs(sd_het - sd_hom), 0.1)
 })
 
-test_that("data_generator errors if p length mismatches N", {
-  expect_error(data_generator(N = 20, p = rep(0.2, 10)))
+test_that("data_generator_direct errors if p length mismatches N", {
+  expect_error(data_generator_direct(N = 20, p = rep(0.2, 10)))
 })
 
-test_that("data_generator works with non-default N and no p", {
-  result <- data_generator(N = 100, k = 10, remove_isolates = FALSE)
+test_that("data_generator_direct works with non-default N and no p", {
+  result <- data_generator_direct(N = 100, k = 10, remove_isolates = FALSE)
   expect_equal(length(result$p), 100)
 })
 
-test_that("data_generator errors when N not divisible by k", {
-  expect_error(data_generator(N = 101, k = 10))
+test_that("data_generator_direct errors when N not divisible by k", {
+  expect_error(data_generator_direct(N = 101, k = 10))
 })
