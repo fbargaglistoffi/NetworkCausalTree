@@ -99,7 +99,7 @@ These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025he
 
 `NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate more than one causal estimand simultaneously: researchers rule the extent of which the four estimands contribute to the objective function used to partition the covariate space by assigning customized weights, included in the vector $\omega(w,g;w',g')$ . `NetworkCausalTree` procedure is divided into two steps: discovery and estimation. Each cluster is randomly assigned to either the discovery or the estimation set (using a procedure that is commonly referred to as *honest splitting*). In the discovery step, `NetworkCausalTree` builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves that are not sufficiently representative of the four exposure conditions. In the estimation step, `NetworkCausalTree` estimates the CACEs and their standard errors in each leaf. The steps of the `NetworkCausalTree` algorithm are illustrated in the Algorithm 1 table.
 
-![Image of the Network Causal Tree Algorithm.](images/NCT_algorithm.png)
+![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png)
 
 *Figure 1. Image of the Network Causal Tree algorithm.*
 
