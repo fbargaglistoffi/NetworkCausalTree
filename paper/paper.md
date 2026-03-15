@@ -200,7 +200,7 @@ plot_NCT(NCT = result,
 
 ![Network Causal Tree targeted to all effects](images/nct2.png)
 
-In these examples, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator_direct_indirect()` function, `h = 2` and `het = TRUE`). The spillover effect is similarly heterogeneous, with $\tau_{(0,1;0,0)} = 2$ for $x1 = 0$ and $\tau_{(0,1;0,0)} = -2$ for $x1 = 1$.
+In these examples, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator_direct_indirect()` function, `h = 2` and `het = TRUE`). The spillover effect is similarly heterogeneous, with $\tau_{(0,1;0,0)} = 2$ for $x1 = 0$ and $\tau_{(0,1;0,0)} = -2$ for $x1 = 1$.
 
 Online documentation for the package can be found at [fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
 
