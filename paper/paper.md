@@ -101,7 +101,7 @@ These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025he
 
 ![Image of the Network Causal Tree Algorithm.](images/NCT_algorithm.png)
 
-*Figure 1. Image of the Network Causal Tree algorithm. Adapted from Bargagli-Stoffi et al. (2025), "Heterogeneous Treatment and Spillover Effects under Network Interference."*
+*Figure 1. Image of the Network Causal Tree algorithm.*
 
 # Usage
 
