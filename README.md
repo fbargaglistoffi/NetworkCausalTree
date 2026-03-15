@@ -25,14 +25,14 @@ Data generated using Erdos Renyi networks.
 
 ```r
 ## Examples
-dataset <- data_generator_direct(N = 4000, 
-                                 M = 4,
-                                 k = 80, 
-                                 p = rep(0.2,4000), 
-                                 het = TRUE, 
-                                 h = 2, 
-                                 method_networks = "er", 
-                                 param_er = 0.1)
+dataset <- data_generator_direct_indirect(N = 4000, 
+                                          M = 4,
+                                          k = 80, 
+                                          p = rep(0.2,4000), 
+                                          het = TRUE, 
+                                          h = 2, 
+                                          method_networks = "er", 
+                                          param_er = 0.1)
 ```
 
 Singular splitting based on the main treatment effect only 
@@ -69,13 +69,13 @@ Data generated using Barabasi - Albert networks.
 ```r
 
 
-dataset <- data_generator_indirect(N = 4000,
-                                 M = 4,
-                                 k = 80,
-                                 p = rep(0.2,4000),
-                                 het = TRUE,
-                                 h = 3,
-                                 method_networks = "sf")
+dataset <- data_generator_direct_indirect(N = 4000,
+                                          M = 4,
+                                          k = 80,
+                                          p = rep(0.2,4000),
+                                          het = TRUE,
+                                          h = 3,
+                                          method_networks = "sf")
 
 ```
 
