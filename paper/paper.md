@@ -6,7 +6,7 @@ tags:
 - interference
 - heterogeneous effects
 - machine learning
-date: "01 January 2026"
+date: "15 March 2026"
 output: pdf_document
 bibliography: paper.bib
 corresponding:
@@ -174,7 +174,7 @@ result <- NetworkCausalTree(X = dataset_direct_indirect[["X"]],
 
 The results are included in a `data.frame` object which provides information about i) the nodes identified by the tree (`FILTER`), and their role in the tree - parent or leaf - (`TERMINAL`), ii) the number of units included in all nodes, both in the discovery set (`NOBS_TR`) and in the estimation set (`NOBS_EST`), iii) the estimated CACE's (`EFF(w,g;w',g')_EST`), with their corresponding standard errors (`SE(w,g;w',g')_EST`), in all nodes. The function `print()` displays these results and the `plot_NCT()` function visualizes the tree with the estimated effects in each leaf. In each node, we display, from top to bottom, the estimates of the main treatment effect, $\tau(1,0;0,0)$ and of the main spillover effect, $\tau(0,1;0,0)$, and the size of the selected subpopulations. The colors indicate the sign and magnitude of either the main treatment effect, $\tau(1,0;0,0)$, or the main spillover effect, $\tau(0,1;0,0)$. Blue nodes correspond to positive estimated treatment effects, while green nodes represent positive estimated spillover effects. The intensity of the color indicates the strength of the effect: darker shades correspond to stronger effects, and negative effects are shown in white.
 
-For instance, Figure 1 shows the tree obtained from **Example 1**. The code used to produce the plot is as follows:
+For instance, Figure 2 shows the tree obtained from **Example 1**. The code used to produce the plot is as follows:
 
 ``` r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
