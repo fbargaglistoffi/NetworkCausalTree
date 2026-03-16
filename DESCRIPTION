@@ -1,6 +1,6 @@
 Package: NetworkCausalTree
 Title: Network Causal Tree algorithm
-Version: 0.1.1
+Version: 1.0.0
 Authors@R: c(
     person("Falco Joannes", "Bargagli Stoffi", , "falco@ucla.edu", 
            role = "cre", comment = c(ORCID = "0000-0002-6131-8165")),
