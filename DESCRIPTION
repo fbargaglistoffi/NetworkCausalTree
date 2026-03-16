@@ -13,7 +13,7 @@ Authors@R: c(
     person("Forastiere", "Laura", , "laura.forastiere@yale.edu", role = "aut",
            comment = c(ORCID = "0000-0003-3721-9826"))
   )
-Maintainer: Falco J. Bargagli-Stoffi  <falco@ucla.edu>
+Maintainer: Falco J. Bargagli-Stoffi <falco@ucla.edu>
 Description: The NetworkCausalTree package introduces a machine learning method 
     that uses tree-based algorithms to assess the heterogeneity of treatment and 
     spillover effects in clustered network interference.
