@@ -185,7 +185,7 @@ plot_NCT(NCT = result,
 
 ![Network Causal Tree targeted to the main treatment effect](images/nct1.png)
 
-Figure 2 shows the tree obtained from **Example 2**.
+Figure 3 shows the tree obtained from **Example 2**.
 
 ``` r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
