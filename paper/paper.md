@@ -213,6 +213,10 @@ This package is implemented in R and follows standard R development conventions,
 
 Future extensions will include support for continuous exposures (e.g., multiple dosage levels of a vaccine), integration with random forest estimators for ensemble-based causal discovery (similar to how grf builds on causalTree), and diagnostic tools for sensitivity analysis under partial interference (e.g., assessing whether the CNI assumption is reasonable given the data).
 
+# AI usage disclosure
+
+AI-assisted tools were used in two capacities: (i) GitHub Copilot was used to assist with code review; (ii) a large language model was used  for copy-editing and proofreading of the paper text. Technical content, software design decisions, algorithmic choices, and methodological contributions were made by the human authors, who reviewed and validated AI-assisted outputs.
+
 # Acknowledgements
 
 This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
