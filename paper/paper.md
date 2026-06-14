@@ -110,7 +110,8 @@ library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-`data_generator_direct()` and `data_generator_direct_indirect()` are flexible synthetic dataset generators, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. Both return a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. `data_generator_direct()` generates outcomes with direct treatment effects only, while `data_generator_direct_indirect()` additionally includes spillover (indirect) effects in the outcome model. For `data_generator_direct_indirect()` with `het = TRUE`, both the direct effect $\tau_{(1,0;0,0)}$, and the spillover effect $\tau_{(0,1;0,0)}$ equal $h$ if $x1=0$ and $-h$ if $x1 = 1$.
+`data_generator_direct()` and `data_generator_direct_indirect()` are flexible synthetic dataset generators, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. Both accept key arguments `N` (sample size), `M` (number of binary covariates), `k` (number of clusters), `p` (vector of individual treatment assignment probabilities), `het` (whether treatment effects are heterogeneous), `h` (effect magnitude), and `method_networks` 
+(network generation model).  Both return a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. `data_generator_direct()` generates outcomes with direct treatment effects only, while `data_generator_direct_indirect()` additionally includes spillover (indirect) effects in the outcome model. For `data_generator_direct_indirect()` with `het = TRUE`, both the direct effect $\tau_{(1,0;0,0)}$, and the spillover effect $\tau_{(0,1;0,0)}$ equal $h$ if $x1=0$ and $-h$ if $x1 = 1$.
 
 The `data_generator_direct()` and `data_generator_direct_indirect()` functions return as output a list of synthetic data including the covariates matrix (`X`), the outcome vector (`Y`), the individual intervention vector (`W`), the adjacency matrix (`A`), the neighborhood intervention vector (`G`), the group membership vector (`K`) and the vector describing the probability to be assigned to the active individual intervention vector (`p`).
 
@@ -147,7 +148,7 @@ result <- NetworkCausalTree(X = dataset_direct[["X"]],
                             p = dataset_direct[["p"]], 
                             effect_weights = c(1,0,0,0),
                             ratio_disc = 0.5,
-                            depth = 3,
+                            depth = 2,
                             minsize = 5, 
                             method = "singular",
                             output = "estimation")
@@ -164,7 +165,7 @@ result <- NetworkCausalTree(X = dataset_direct_indirect[["X"]],
                             p = dataset_direct_indirect[["p"]], 
                             effect_weights = c(0.25,0.25,0.25,0.25),
                             ratio_disc = 0.5,
-                            depth = 3,
+                            depth = 2,
                             minsize = 5, 
                             method = "composite",
                             output = "estimation")
@@ -185,7 +186,7 @@ plot_NCT(NCT = result,
 
 ![Network Causal Tree targeted to the main treatment effect](images/nct1.png)
 
-Figure 2 shows the tree obtained from **Example 2**.
+Figure 3 shows the tree obtained from **Example 2**.
 
 ``` r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
@@ -211,6 +212,10 @@ All examples in this paper can be reproduced using the scripts provided in the `
 This package is implemented in R and follows standard R development conventions, ensuring compatibility across systems. The GitHub repository provides example scripts to facilitate reproducibility. Community engagement is encouraged through documented contribution guidelines ([`CONTRIBUTING.md`](https://github.com/fbargaglistoffi/NetworkCausalTree/blob/master/CONTRIBUTING.md)) and a code of conduct ([`CODE_OF_CONDUCT.md`](https://github.com/fbargaglistoffi/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md)). Users can report issues or request support through the GitHub Issues page.
 
 Future extensions will include support for continuous exposures (e.g., multiple dosage levels of a vaccine), integration with random forest estimators for ensemble-based causal discovery (similar to how grf builds on causalTree), and diagnostic tools for sensitivity analysis under partial interference (e.g., assessing whether the CNI assumption is reasonable given the data).
+
+# AI usage disclosure
+
+AI-assisted tools were used in two capacities: (i) GitHub Copilot was used to assist with code review; (ii) a large language model was used  for copy-editing and proofreading of the paper text. Technical content, software design decisions, algorithmic choices, and methodological contributions were made by the human authors, who reviewed and validated AI-assisted outputs.
 
 # Acknowledgements
 
