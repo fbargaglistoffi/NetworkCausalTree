@@ -157,17 +157,29 @@ NetworkCausalTree <- function(X, Y, W,
   tree$FILTER <- as.character(tree$FILTER)
   tree$FILTER[is.na(tree$FILTER)] <- "NA"
   
+  clusters_est <- setdiff(1:k, clusters_disc)
+  est_units <- which(K %in% clusters_est)
+  
+  A_est <- A[est_units, est_units]
+  Ne_est <- rowSums(A_est)
+  Ne_treated_est <- as.vector(A_est %*% W[est_units])
+  G_est <- rep(1, length(est_units))
+  G_est[Ne_treated_est == 0] <- 0
+  Ne_list_est <- lapply(seq_along(est_units), function(i) {
+    which(A_est[i, ] > 0)
+  })
+  
   # Compute estimates on the full tree
   tree_with_estimates <- compute_effects_nct(output = output,
                                              nct_partition = tree,
-                                             N = N,
-                                             W = W,
-                                             G = G,
-                                             Y = Y,
-                                             X = X,
-                                             p = p,
-                                             Ne = Ne,
-                                             Ne_list = Ne_list,
+                                             N = length(est_units),
+                                             W = W[est_units],
+                                             G = G_est,
+                                             Y = Y[est_units],
+                                             X = X[est_units, , drop = FALSE],
+                                             p = p[est_units],
+                                             Ne = Ne_est,
+                                             Ne_list = Ne_list_est,
                                              minsize = minsize)
   
   return(tree_with_estimates)
