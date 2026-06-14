@@ -22,7 +22,7 @@ set.seed(123)
 
 ### Example 1
 
-Data generated using Erdos Renyi networks.
+Data generated using Erdos-Renyi networks.
 
 ``` r
 ## Examples
@@ -62,7 +62,7 @@ plot_NCT(NCT = result,
 
 ### Example 2
 
-Data generated using Barabasi - Albert networks.
+Data generated using Barabasi-Albert networks.
 
 ``` r
 dataset_direct_indirect <- data_generator_direct_indirect(N = 4000,
