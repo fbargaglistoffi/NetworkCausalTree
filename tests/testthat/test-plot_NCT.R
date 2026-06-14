@@ -31,7 +31,8 @@ test_that("plot_NCT works in detection mode", {
     K = d$K,
     effect_weights = c(1,0,0,0),
     method = "singular", depth = 1, minsize = 20,
-    ratio_disc = 0.5
+    ratio_disc = 0.5,
+    output = "detection"
   )
   
   cov_names <- colnames(d$X)
