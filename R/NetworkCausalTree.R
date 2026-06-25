@@ -128,9 +128,7 @@ NetworkCausalTree <- function(X, Y, W,
   
   # Sample the clusters to be assigned to the discovery set
   nclusters_disc = round(k * ratio_disc)
-  clusters_disc <- sample(1 : k,
-                          size = nclusters_disc,
-                          replace = FALSE)
+  clusters_disc <- sample(unique(K), size = nclusters_disc, replace = FALSE)
   
   # Generate the tree on the discovery set
   tree <- sprout_nct(method = method,
@@ -157,7 +155,7 @@ NetworkCausalTree <- function(X, Y, W,
   tree$FILTER <- as.character(tree$FILTER)
   tree$FILTER[is.na(tree$FILTER)] <- "NA"
   
-  clusters_est <- setdiff(1:k, clusters_disc)
+  clusters_est <- setdiff(unique(K), clusters_disc)
   est_units <- which(K %in% clusters_est)
   
   A_est <- A[est_units, est_units]
