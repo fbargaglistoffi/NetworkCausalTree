@@ -17,30 +17,29 @@ authors:
   orcid: "0000-0002-6131-8165"
   equal-contrib: true
   affiliation: '1'
+  - name: Charlie Wang
+  orcid: "0009-0003-1672-0774"
+  affiliation: ‘2'
 - name: Costanza Tortù
   orcid: "0000-0003-2561-9726"
   equal-contrib: true
-  affiliation: '2'
+  affiliation: ‘3'
 - name: Riccardo Cadei
   orcid: "0000-0003-2416-8943"
-  affiliation: '3'
-- name: Charlie Wang
-  orcid: "0009-0003-1672-0774"
-  affiliation: '4'
+  affiliation: ‘4'
 - name: Laura Forastiere
   orcid: "0000-0003-3721-9826"
   affiliation: '5'
 affiliations:
-- name: Department of Biostatistics, UCLA School of Public Health
+- name: Department of Biostatistics, University of California, Los Angeles, USA
   index: 1
-- name: Bank of Italy and Sant'Anna School for Advanced Studies
+- name: Department of Statistics and Data Science, University of California, Los Angeles, USA
   index: 2
-- name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
+- name: Bank of Italy and Sant'Anna School for Advanced Studies, Italy
   index: 3
-- name: Department of Statistics and Data Science, University of California, Los Angeles,
-    USA
+- name:  Causal Learning and Artificial Intelligence Lab, Institute of Science and Technology Austria, Austria
   index: 4
-- name: Department of Biostatistics, Yale School of Public Health
+- name: Department of Biostatistics, Yale University, USA
   index: 5
 ---
 
