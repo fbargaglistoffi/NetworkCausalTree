@@ -6,7 +6,7 @@ tags:
 - interference
 - heterogeneous effects
 - machine learning
-date: "15 March 2026"
+date: "15 October 2026"
 output: pdf_document
 bibliography: paper.bib
 corresponding:
@@ -15,14 +15,12 @@ corresponding:
 authors:
 - name: "Falco J. Bargagli-Stoffi"
   orcid: "0000-0002-6131-8165"
-  equal-contrib: true
   affiliation: '1'
 - name: Charlie Wang
   orcid: "0009-0003-1672-0774"
   affiliation: '2'
 - name: Costanza Tortù
   orcid: "0000-0003-2561-9726"
-  equal-contrib: true
   affiliation: '3'
 - name: Riccardo Cadei
   orcid: "0000-0003-2416-8943"
