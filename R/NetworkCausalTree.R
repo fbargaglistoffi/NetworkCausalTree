@@ -100,9 +100,22 @@ NetworkCausalTree <- function(X, Y, W,
     stop('You have to specify the Adjacency Matrix A.')
   }
   
-  # Ratio of clusters assigned to discovery set needs to be within boundaries
-  if (ratio_disc <= 0 | ratio_disc > 1) {
-    stop('The ratio of clusters to be assigned to the discovery set must be above 0 and below 1')
+  if (ratio_disc <= 0 || ratio_disc >= 1) {
+    stop("ratio_disc must be strictly between 0 and 1.")
+  }
+  
+  if (k < 2) {
+    stop("At least two clusters are required for honest sample splitting.")
+  }
+  
+  nclusters_disc <- round(k * ratio_disc)
+  
+  if (nclusters_disc < 1) {
+    stop("ratio_disc is too low; no clusters are assigned to the discovery sample. Please use a higher ratio_disc.")
+  }
+  
+  if (nclusters_disc >= k) {
+    stop("ratio_disc is too high; no clusters remain for the estimation sample. Please use a lower ratio_disc.")
   }
   
   # Compute network - specific information (the degree Ne, the number of treated friends Ne_treated,
@@ -127,7 +140,6 @@ NetworkCausalTree <- function(X, Y, W,
                                                    Ne = Ne)
   
   # Sample the clusters to be assigned to the discovery set
-  nclusters_disc = round(k * ratio_disc)
   clusters_disc <- sample(unique(K), size = nclusters_disc, replace = FALSE)
   
   # Generate the tree on the discovery set
@@ -158,7 +170,7 @@ NetworkCausalTree <- function(X, Y, W,
   clusters_est <- setdiff(unique(K), clusters_disc)
   est_units <- which(K %in% clusters_est)
   
-  A_est <- A[est_units, est_units]
+  A_est <- A[est_units, est_units, drop = FALSE]
   Ne_est <- rowSums(A_est)
   Ne_treated_est <- as.vector(A_est %*% W[est_units])
   G_est <- rep(1, length(est_units))
