@@ -19,14 +19,14 @@ authors:
   affiliation: '1'
 - name: Charlie Wang
   orcid: "0009-0003-1672-0774"
-  affiliation: ‘2'
+  affiliation: '2'
 - name: Costanza Tortù
   orcid: "0000-0003-2561-9726"
   equal-contrib: true
-  affiliation: ‘3'
+  affiliation: '3'
 - name: Riccardo Cadei
   orcid: "0000-0003-2416-8943"
-  affiliation: ‘4'
+  affiliation: '4'
 - name: Laura Forastiere
   orcid: "0000-0003-3721-9826"
   affiliation: '5'
