@@ -170,7 +170,7 @@ NetworkCausalTree <- function(X, Y, W,
   clusters_est <- setdiff(unique(K), clusters_disc)
   est_units <- which(K %in% clusters_est)
   
-  A_est <- A[est_units, est_units]
+  A_est <- A[est_units, est_units, drop = FALSE]
   Ne_est <- rowSums(A_est)
   Ne_treated_est <- as.vector(A_est %*% W[est_units])
   G_est <- rep(1, length(est_units))
