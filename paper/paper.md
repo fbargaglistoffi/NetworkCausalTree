@@ -17,7 +17,7 @@ authors:
   orcid: "0000-0002-6131-8165"
   equal-contrib: true
   affiliation: '1'
-  - name: Charlie Wang
+- name: Charlie Wang
   orcid: "0009-0003-1672-0774"
   affiliation: ‘2'
 - name: Costanza Tortù
