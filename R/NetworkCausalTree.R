@@ -131,16 +131,20 @@ NetworkCausalTree <- function(X, Y, W,
     Ne_list[[i]] <- which(A[i,] > 0)
   }
   
-  # Compute the population effects
-  population_effects <- compute_population_effects(N = N,
-                                                   W = W,
-                                                   G = G,
-                                                   Y = Y,
-                                                   p = p,
-                                                   Ne = Ne)
-  
   # Sample the clusters to be assigned to the discovery set
   clusters_disc <- sample(unique(K), size = nclusters_disc, replace = FALSE)
+  disc_units <- which(K %in% clusters_disc)
+  
+  # Compute the population effects
+  population_effects <- compute_population_effects(
+    N = length(disc_units),
+    W = W[disc_units],
+    G = G[disc_units],
+    Y = Y[disc_units],
+    p = p[disc_units],
+    Ne = Ne[disc_units]
+  )
+  
   
   # Generate the tree on the discovery set
   tree <- sprout_nct(method = method,
