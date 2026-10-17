@@ -118,14 +118,14 @@ test_that("held-out estimation outcomes do not affect composite splitting", {
     k = 10,
     M = 2,
     p = rep(0.3, 500),
+    param_er = 0.04,
     remove_isolates = TRUE
   )
   
   ratio_disc <- 0.5
   k <- length(unique(d$K))
   nclusters_disc <- round(k * ratio_disc)
-  
-  # Reproduce discovery/estimation split
+
   set.seed(200)
   clusters_disc <- sample(
     unique(d$K),
@@ -135,12 +135,10 @@ test_that("held-out estimation outcomes do not affect composite splitting", {
   
   clusters_est <- setdiff(unique(d$K), clusters_disc)
   est_units <- which(d$K %in% clusters_est)
-  
-  # Change outcomes only in held-out estimation sample
+
   Y_modified <- d$Y
   Y_modified[est_units] <- Y_modified[est_units] + 10000
-  
-  # Original outcomes
+
   set.seed(200)
   fit_original <- NetworkCausalTree(
     Y = d$Y,
@@ -151,12 +149,11 @@ test_that("held-out estimation outcomes do not affect composite splitting", {
     p = d$p,
     effect_weights = c(0.5, 0.5, 0, 0),
     method = "composite",
-    depth = 2,
-    minsize = 20,
+    depth = 1,
+    minsize = 2,
     ratio_disc = ratio_disc
   )
-  
-  # Modified estimation outcomes
+
   set.seed(200)
   fit_modified <- NetworkCausalTree(
     Y = Y_modified,
@@ -167,14 +164,14 @@ test_that("held-out estimation outcomes do not affect composite splitting", {
     p = d$p,
     effect_weights = c(0.5, 0.5, 0, 0),
     method = "composite",
-    depth = 2,
-    minsize = 20,
+    depth = 1,
+    minsize = 2,
     ratio_disc = ratio_disc
   )
+
+  expect_gt(nrow(fit_original), 1)
   
-  # Discovery-stage tree must be unchanged
   expect_equal(fit_original$FILTER, fit_modified$FILTER)
   expect_equal(fit_original$NOBS_TR, fit_modified$NOBS_TR)
+  expect_equal(fit_original$OF, fit_modified$OF)
 })
-
-
