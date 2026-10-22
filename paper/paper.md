@@ -98,6 +98,22 @@ These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025he
 
 ![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png)
 
+# Software Design
+
+The implementation separates tree construction, leaf-specific causal effect estimation, and uncertainty quantification into distinct computational components. This modular structure allows the discovery and estimation stages to operate on separate sets of clusters and facilitates independent validation of the probability and variance calculations.
+
+The package supports both effect-specific and composite splitting criteria, allowing researchers to investigate heterogeneity in individual treatment effects, spillover effects, or both simultaneously.
+
+## Exposure probabilities and conservative inference
+
+The `NetworkCausalTree` package implements design-based estimation and inference under clustered network interference. The current implementation considers a binary network exposure, defined by whether an individual has at least one treated neighbor, and supports independent Bernoulli treatment assignment with potentially heterogeneous unit-level assignment probabilities.
+
+Marginal exposure probabilities are computed using the known assignment probabilities of the units belonging to each exposure-defining neighborhood. Joint exposure probabilities are calculated exactly by conditioning on individual treatment assignments and applying inclusion--exclusion over the relevant network neighborhoods. This approach accommodates direct connections, shared neighbors, and zero joint-exposure probabilities without requiring exhaustive enumeration of treatment assignments.
+
+For uncertainty quantification, the package implements design-based conservative variance estimation following the framework of @aronow2017estimating. The implementation incorporates the dependence induced by network interference and conservative variance and covariance corrections for exposure configurations with zero joint probability, based on Young's inequality.
+
+Importantly, when estimating leaf-specific causal effects, the original exposure-defining neighborhoods are preserved, while the set of focal units is restricted to the selected subpopulation.
+
 # Usage
 
 `NetworkCausalTree` is available on [GitHub](https://github.com/fbargaglistoffi/NetworkCausalTree) and can be installed and loaded into the R session using:
