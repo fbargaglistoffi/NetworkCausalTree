@@ -4,7 +4,7 @@
 \alias{Covy}
 \title{Estimated Covariance of Average Potential Outcomes}
 \usage{
-Covy(N, w1, g1, w2, g2, W, G, Y, p, Ne, Ne_list)
+Covy(N, w1, g1, w2, g2, W, G, Y, p, Ne, Ne_list, unit_ids = seq_along(W))
 }
 \arguments{
 \item{N}{Sample size}
@@ -29,6 +29,9 @@ Covy(N, w1, g1, w2, g2, W, G, Y, p, Ne, Ne_list)
 
 \item{Ne_list}{List of N elements - where N is the sample size -
 where each element i contains the IDs of the direct neighbors of unit i}
+
+\item{unit_ids}{Original network indices of the units included
+in the covariance calculation}
 }
 \value{
 A numeric value corresponding to the estimated covariance of the

@@ -4,21 +4,34 @@
 #' @description
 #' Computes the individual marginal probability to be exposed to a given
 #' level of the joint intervention.
+#' Assumes independent Bernoulli treatment assignment, potentially with
+#' heterogeneous unit-level assignment probabilities.
+#' Neighborhood exposure is defined as having at least one treated neighbor.
 #'
 #' @param  i Unit ID
 #' @param  w Individual Treatment level
 #' @param  g Neighborhood Treatment level
 #' @param  p N x 1 vector, Probability to be assigned to the active individual intervention
-#' @param  Ne N x 1 vector, Degree
+#' @param Ne_list List of N elements, where each element contains
+#' the IDs of the direct neighbors of the corresponding unit
 #'
 #' @return A numeric value bounded between 0 and 1 measuring
 #' the individual marginal probability to be exposed
 #' to the level (w,g) of the joint intervention
 
-pi <- function(i, w, g, p, Ne){
-  pi <- (p[i] ^ w) *
-        (1 - p[i]) ^ (1 - w) *
-        ((1 - (1 - p[i]) ^ Ne[i]) ^ g) *
-        ((1 - p[i]) ^ Ne[i]) ^ (1 - g)
-  return(pi)
+pi <- function(i, w, g, p, Ne_list) {
+  
+  vapply(i, function(ii) {
+    
+    neighbors <- Ne_list[[ii]]
+    
+    prob_g0 <- prod(1 - p[neighbors])
+    prob_g1 <- 1 - prob_g0
+    
+    prob_w <- (p[ii] ^ w) * ((1 - p[ii]) ^ (1 - w))
+    
+    prob_w *
+      (prob_g1 ^ g) *
+      (prob_g0 ^ (1 - g))
+  }, numeric(1))
 }

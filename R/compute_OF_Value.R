@@ -1,4 +1,3 @@
-#' @title
 #' Value of the Objective Function (OF)
 #'
 #' @description
@@ -23,12 +22,14 @@
 #' whole population
 #' @param total_variance - to be included if method = "penalized" - whole variance
 #' @param nleafs - to be included if method = "penalized" - number of leafs
+#' @param unit_ids Original network indices of the observations in W, G, and Y
 #'
 #' @return A numeric value corresponding to the computed  Objective Function
 #'
-compute_OF_Value = function(method, alpha, beta, gamma, delta,
-                   N, W, G, Y, p, Ne, Ne_list, population_effects,
-                   total_variance, nleafs){
+compute_OF_Value <- function(method, alpha, beta, gamma, delta,
+                             N, W, G, Y, p, Ne, Ne_list, population_effects,
+                             total_variance, nleafs,
+                             unit_ids = seq_along(W)) {
 
   # Initialize
   inof=NULL
@@ -46,39 +47,62 @@ compute_OF_Value = function(method, alpha, beta, gamma, delta,
       stop("population_effects contains zero: cannot normalize composite OF")
     }
 
-    inof <- alpha * (((EffTau1000(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
+    inof <- alpha * ((EffTau1000(N = N, W = W, G = G, Y = Y,
+                                 p = p, Ne_list = Ne_list,
+                                 unit_ids = unit_ids) ^ 2) /
                        (population_effects[1]) ^ 2) +
-            beta * (((EffTau1101(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
+            beta * ((EffTau1101(N = N, W = W, G = G, Y = Y,
+                                p = p, Ne_list = Ne_list,
+                                unit_ids = unit_ids) ^ 2) /
                       (population_effects[2]) ^ 2) +
-            gamma * (((EffTau1110(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
+            gamma * ((EffTau1110(N = N, W = W, G = G, Y = Y,
+                                 p = p, Ne_list = Ne_list,
+                                 unit_ids = unit_ids) ^ 2) /
                        (population_effects[3]) ^ 2) +
-            delta * (((EffTau0100(N = N, W = W, G = G,Y = Y,p = p,Ne = Ne)) ^ 2) /
+            delta * ((EffTau0100(N = N, W = W, G = G, Y = Y,
+                                 p = p, Ne_list = Ne_list,
+                                 unit_ids = unit_ids) ^ 2) /
                        (population_effects[4]) ^ 2)
   } else if (method == "penalized") {
 
-  inof <-  alpha * (((EffTau1000(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
+  inof <-  alpha * ((EffTau1000(N = N, W = W, G = G, Y = Y,
+                                p = p, Ne_list = Ne_list,
+                                unit_ids = unit_ids) ^ 2) -
                     2 / nleafs * sum(c(total_variance, Vartau1000(N = N, W = W, Y = Y,G  = G,
-                    p = p, Ne = Ne, Ne_list = Ne_list)))) +
-           beta *  (((EffTau1101(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
+                                                                  p = p, Ne = Ne, Ne_list = Ne_list,
+                                                                  unit_ids = unit_ids)))) +
+           beta *  ((EffTau1101(N = N, W = W, G = G, Y = Y,
+                                p = p, Ne_list = Ne_list,
+                                unit_ids = unit_ids) ^ 2) -
                     2 / nleafs *sum(c(total_variance, Vartau1101(N = N, W = W, Y = Y, G = G,
-                    p = p, Ne = Ne, Ne_list = Ne_list)))) +
-           gamma * (((EffTau1110( N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
+                                                                 p = p, Ne = Ne, Ne_list = Ne_list,
+                                                                 unit_ids = unit_ids)))) +
+           gamma * ((EffTau1110(N = N, W = W, G = G, Y = Y,
+                                p = p, Ne_list = Ne_list,
+                                unit_ids = unit_ids) ^ 2) -
                    2 / nleafs * sum(c(total_variance,Vartau1110(N = N, W = W, Y = Y, G = G,
-                   p = p, Ne = Ne, Ne_list = Ne_list))))+
-           delta * (((EffTau0100(N = N, W = W, G = G, Y = Y, p = p, Ne = Ne)) ^ 2) -
+                                                                p = p, Ne = Ne, Ne_list = Ne_list,
+                                                                unit_ids = unit_ids))))+
+           delta * ((EffTau0100(N = N, W = W, G = G, Y = Y,
+                                p = p, Ne_list = Ne_list,
+                                unit_ids = unit_ids) ^ 2) -
                    2 / nleafs * sum(c(total_variance,Vartau0100(N = N, W = W, Y = Y, G = G,
-                   p = p, Ne = Ne, Ne_list = Ne_list)))
-    )
+                                                                p = p, Ne = Ne, Ne_list = Ne_list,
+                                                                unit_ids = unit_ids))))
   } else if (method == "singular") {
 
-   inof <- alpha * ((EffTau1000( N = N, W = W, G = G,
-                                 Y = Y, p = p, Ne = Ne)) ^ 2) +
-           beta * ((EffTau1101( N = N, W = W, G = G,
-                                Y = Y, p = p, Ne = Ne)) ^ 2) +
-           gamma * ((EffTau1110( N = N, W = W, G = G,
-                                 Y = Y, p = p, Ne = Ne)) ^ 2) +
-           delta * ((EffTau0100( N = N, W = W, G = G,
-                                 Y = Y, p = p, Ne = Ne)) ^ 2)
+   inof <- alpha * (EffTau1000(N = N, W = W, G = G, Y = Y,
+                               p = p, Ne_list = Ne_list,
+                               unit_ids = unit_ids) ^ 2) +
+           beta * (EffTau1101(N = N, W = W, G = G, Y = Y,
+                              p = p, Ne_list = Ne_list,
+                              unit_ids = unit_ids) ^ 2) +
+           gamma * (EffTau1110(N = N, W = W, G = G, Y = Y,
+                               p = p, Ne_list = Ne_list,
+                               unit_ids = unit_ids) ^ 2) +
+           delta * (EffTau0100(N = N, W = W, G = G, Y = Y,
+                               p = p, Ne_list = Ne_list,
+                               unit_ids = unit_ids) ^ 2)
   }
   
   if (is.null(inof)){

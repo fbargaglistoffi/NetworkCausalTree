@@ -12,13 +12,21 @@
 #' @param  G N x 1 vector, Neighborhood Treatment
 #' @param  Y N x 1 vector, Observed Outcome
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual intervention
-#' @param  Ne N x 1 vector, Degree
+#' @param Ne_list List of direct neighbors for each unit in the exposure-defining network
+#' @param unit_ids Original network indices of the units included in the estimate
 #'
 #' @return A numeric value corresponding to the estimate of the effect
 #' of interest.
 #'
-EffTau0100 = function(N, W, G, Y, p, Ne){
-  tau0100 = 1 / N * (sum(Y[W==0 & G==1] / pi(which(W==0 & G==1), 0, 1, p, Ne)) -
-                     sum(Y[W==0 & G==0] / pi(which(W==0 & G==0), 0, 0, p, Ne)))
+EffTau0100 <- function(N, W, G, Y, p, Ne_list, unit_ids = seq_along(W)) {
+  
+  idx01 <- which(W == 0 & G == 1)
+  idx00 <- which(W == 0 & G == 0)
+  
+  tau0100 <- 1 / N * (
+    sum(Y[idx01] / pi(unit_ids[idx01], 0, 1, p, Ne_list)) -
+      sum(Y[idx00] / pi(unit_ids[idx00], 0, 0, p, Ne_list))
+  )
+  
   return(tau0100)
 }

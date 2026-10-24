@@ -135,16 +135,21 @@ NetworkCausalTree <- function(X, Y, W,
   clusters_disc <- sample(unique(K), size = nclusters_disc, replace = FALSE)
   disc_units <- which(K %in% clusters_disc)
   
+  Ne_list_disc <- lapply(disc_units, function(id) {
+    neigh <- intersect(Ne_list[[id]], disc_units)
+    match(neigh, disc_units)
+  })
+  
   # Compute the population effects
   population_effects <- compute_population_effects(
     N = length(disc_units),
     W = W[disc_units],
     G = G[disc_units],
     Y = Y[disc_units],
-    p = p[disc_units],
-    Ne = Ne[disc_units]
+    p = p,
+    Ne_list = Ne_list,
+    unit_ids = disc_units
   )
-  
   
   # Generate the tree on the discovery set
   tree <- sprout_nct(method = method,
@@ -176,12 +181,8 @@ NetworkCausalTree <- function(X, Y, W,
   
   A_est <- A[est_units, est_units, drop = FALSE]
   Ne_est <- rowSums(A_est)
-  Ne_treated_est <- as.vector(A_est %*% W[est_units])
-  G_est <- rep(1, length(est_units))
-  G_est[Ne_treated_est == 0] <- 0
-  Ne_list_est <- lapply(seq_along(est_units), function(i) {
-    which(A_est[i, ] > 0)
-  })
+  G_est <- G[est_units]
+  Ne_list_est <- Ne_list
   
   # Compute estimates on the full tree
   tree_with_estimates <- compute_effects_nct(output = output,
@@ -191,9 +192,10 @@ NetworkCausalTree <- function(X, Y, W,
                                              G = G_est,
                                              Y = Y[est_units],
                                              X = X[est_units, , drop = FALSE],
-                                             p = p[est_units],
-                                             Ne = Ne_est,
-                                             Ne_list = Ne_list_est,
+                                             p = p,
+                                             Ne = Ne,
+                                             Ne_list = Ne_list,
+                                             unit_ids = est_units,
                                              minsize = minsize)
   
   return(tree_with_estimates)

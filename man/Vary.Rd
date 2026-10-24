@@ -4,7 +4,7 @@
 \alias{Vary}
 \title{Estimated Variance of the Average Potential Outcomes}
 \usage{
-Vary(w, g, Y, W, G, p, Ne, Ne_list)
+Vary(w, g, Y, W, G, p, Ne, Ne_list, unit_ids = seq_along(W))
 }
 \arguments{
 \item{w}{Individual Treatment level}
@@ -23,6 +23,9 @@ Vary(w, g, Y, W, G, p, Ne, Ne_list)
 
 \item{Ne_list}{List of N elements - where N is the sample size -
 where each element i contains the IDs of the direct neighbors of unit i}
+
+\item{unit_ids}{Original network indices of the units included
+in the variance calculation}
 }
 \value{
 A numeric value corresponding to the estimated variance of the
