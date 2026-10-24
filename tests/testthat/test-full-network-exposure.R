@@ -519,5 +519,85 @@ test_that("Covy is conservative on a three-unit network", {
   expect_lte(expected_cov, true_cov + 1e-10)
 })
 
+test_that("pij detects structural zeros for identical neighborhoods", {
+  
+  Ne_list <- list(3, 3, c(1, 2))
+  p <- c(0.3, 0.6, 0.8)
+  
+  result <- pij(
+    i = 1, j = 2,
+    wi = 1, gi = 0,
+    wj = 0, gj = 1,
+    Ne_list = Ne_list, p = p
+  )
+  
+  expect_identical(result, 0)
+})
+
+test_that("pij preserves genuinely small positive probabilities", {
+  
+  Ne_list <- list(
+    c(3, 4),
+    3,
+    c(1, 2),
+    1
+  )
+  
+  p <- c(0.5, 0.5, 0.8, 1e-10)
+  
+  result <- pij(
+    i = 1, j = 2,
+    wi = 0, gi = 1,
+    wj = 0, gj = 0,
+    Ne_list = Ne_list, p = p
+  )
+  
+  expected <- 0.5 * 0.5 * (1 - 0.8) * 1e-10
+  
+  expect_gt(result, 0)
+  expect_equal(result, expected, tolerance = 1e-8)
+})
+
+test_that("Vary and Covy preserve neighbors outside the leaf", {
+  
+  Ne_list <- list(
+    3,
+    3,
+    c(1, 2)
+  )
+  
+  p <- c(0.5, 0.5, 0.5)
+  Ne <- lengths(Ne_list)
+  
+  W_full <- c(0, 1, 0)
+  G_full <- c(0, 0, 1)
+  Y_full <- c(2, 4, 6)
+  
+  unit_ids <- c(1, 2)
+  
+  W <- W_full[unit_ids]
+  G <- G_full[unit_ids]
+  Y <- Y_full[unit_ids]
+  
+  vary_result <- Vary(
+    w = 0, g = 0,
+    Y = Y, W = W, G = G,
+    p = p, Ne = Ne, Ne_list = Ne_list,
+    unit_ids = unit_ids
+  )
+  
+  covy_result <- Covy(
+    N = length(unit_ids),
+    w1 = 0, g1 = 0,
+    w2 = 1, g2 = 0,
+    W = W, G = G, Y = Y,
+    p = p, Ne = Ne, Ne_list = Ne_list,
+    unit_ids = unit_ids
+  )
+  
+  expect_equal(vary_result, 48)
+  expect_equal(covy_result, 24)
+})
+
 
 

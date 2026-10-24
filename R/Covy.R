@@ -79,6 +79,15 @@ Covy = function(N, w1, g1, w2, g2,
           next
         }
         
+        id_i <- unit_ids[i]
+        id_j <- unit_ids[j]
+        
+        if (shared_neigh(id_i, id_j, Ne_list = Ne_list) == 0 &&
+            !(id_j %in% Ne_list[[id_i]]) &&
+            !(id_i %in% Ne_list[[id_j]])) {
+          next
+        }
+        
         joint_prob <- pij(
           unit_ids[i], unit_ids[j],
           w1, g1, w2, g2,

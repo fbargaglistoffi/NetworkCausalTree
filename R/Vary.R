@@ -74,6 +74,15 @@ Vary = function(w, g, Y, W, G,
       i <- all_pairs[1, k]
       j <- all_pairs[2, k]
       
+      id_i <- unit_ids[i]
+      id_j <- unit_ids[j]
+      
+      if (shared_neigh(id_i, id_j, Ne_list = Ne_list) == 0 &&
+          !(id_j %in% Ne_list[[id_i]]) &&
+          !(id_i %in% Ne_list[[id_j]])) {
+        next
+      }
+      
       if (pij(unit_ids[i], unit_ids[j], w, g, w, g,
               Ne_list = Ne_list, p = p) == 0) {
         

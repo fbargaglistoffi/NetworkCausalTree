@@ -40,6 +40,13 @@ pij <- function(i, j, wi, gi, wj, gj, Ne_list, p){
   neighbors_i <- Ne_list[[i]][Ne_list[[i]] != j]
   neighbors_j <- Ne_list[[j]][Ne_list[[j]] != i]
   
+  if (setequal(neighbors_i, neighbors_j) &&
+      !(j %in% Ne_list[[i]]) &&
+      !(i %in% Ne_list[[j]]) &&
+      gi != gj) {
+    return(0)
+  }
+  
   all_neighbors <- unique(c(neighbors_i, neighbors_j))
   prob_g00 <- prod(1 - p[all_neighbors])
   
