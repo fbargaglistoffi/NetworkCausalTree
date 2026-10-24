@@ -14,33 +14,37 @@
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
 #' where each element i contains the IDs of the direct neighbors of unit i
+#' @param unit_ids Original network indices of the units included
+#' in the variance calculation
 #'
 #' @return A numeric value corresponding to the estimated variance of the effect
 #' of interest.
 #'
-Vartau0100 = function(N, Y, W, G, 
-                      p, Ne, Ne_list) {
+Vartau0100 <- function(N, Y, W, G,
+                       p, Ne, Ne_list, unit_ids = seq_along(W)) {
   
-  # Variance of the Average Potential Outcome Y(w,g)=Y(0,1)
   vary01 <- Vary(w = 0, g = 1, W = W, G = G,
-                 p = p, Ne = Ne, Ne_list = Ne_list, Y = Y)
+                 p = p, Ne = Ne, Ne_list = Ne_list,
+                 Y = Y, unit_ids = unit_ids)
   
-  # Variance of the Average Potential Outcome Y(w,g)=Y(0,0)
   vary00 <- Vary(w = 0, g = 0, W = W, G = G,
-                 p = p, Ne = Ne, Ne_list = Ne_list, Y = Y)
+                 p = p, Ne = Ne, Ne_list = Ne_list,
+                 Y = Y, unit_ids = unit_ids)
   
-  # Covariance of the Average Potential Outcomes Y(w,g)=Y(0,1) and Y(w,g)=Y(0,0) 
-  covy01y00 <- Covy(N = N, w1 = 0, g1 = 1, w2 = 0, g2 = 0, W = W, G = G, p = p,
-                    Ne = Ne, Ne_list = Ne_list, Y = Y)
+  covy01y00 <- Covy(N = N, w1 = 0, g1 = 1, w2 = 0, g2 = 0,
+                    W = W, G = G, p = p, Ne = Ne,
+                    Ne_list = Ne_list, Y = Y, unit_ids = unit_ids)
   
-  if (any(is.na(c(vary01, vary00)))) {
-    var0100 = NA
+  if (any(is.na(c(vary01, vary00, covy01y00)))) {
+    var0100 <- NA
   } else {
-    var0100 = (1 / (N ^ (2))) * (vary01 + vary00 - 2 * covy01y00)
+    var0100 <- (1 / (N^2)) * (vary01 + vary00 - 2 * covy01y00)
+    
     if (!is.na(var0100) && var0100 < 0) {
       warning("Estimated variance is negative; returning NA.")
       var0100 <- NA
     }
   }
+  
   return(var0100)
 }

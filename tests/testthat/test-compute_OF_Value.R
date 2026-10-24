@@ -16,8 +16,7 @@ test_that("compute_OF_Value works for singular case on tiny example", {
   
   N <- length(Y)
 
-  # not actually used but need for argument
-  pe <- compute_population_effects(N, W, G, Y, p, Ne)
+  pe <- compute_population_effects(N, W, G, Y, p, Ne_list)
 
   alpha <- 1
   beta <- 0
@@ -32,7 +31,7 @@ test_that("compute_OF_Value works for singular case on tiny example", {
     total_variance = NULL, nleafs = NULL
   )
   
-  expected <- (EffTau1000(N, W, G, Y, p, Ne))^2
+  expected <- (EffTau1000(N, W, G, Y, p, Ne_list))^2
   
   expect_equal(result, expected, tolerance = 1e-8)
 })

@@ -107,15 +107,16 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
   }
 
   X <- as.matrix(datasample[, covar_cols, drop = FALSE])
-
+  
   # Identify partitions
   tree_info <- identify_partitions_nct(method = method, alpha = alpha, beta = beta,
                                        gamma = gamma, delta = delta,
                                        N = length(sampleid), depth = depth,
                                        minsize = minsize,
                                        W = W, G = G,Y = Y, X = X,
-                                       p = p[sampleid], Ne = Ne[sampleid],
-                                       Ne_list = Ne_list[sampleid],
+                                       p = p, Ne = Ne,
+                                       Ne_list = Ne_list,
+                                       unit_ids = sampleid,
                                        population_effects = population_effects)
   
   return(tree_info)

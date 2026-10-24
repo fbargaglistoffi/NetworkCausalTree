@@ -4,7 +4,7 @@
 \alias{pij}
 \title{Joint Exposure Probabilities}
 \usage{
-pij(i, j, wi, gi, wj, gj, Ne, Ne_list, p)
+pij(i, j, wi, gi, wj, gj, Ne_list, p)
 }
 \arguments{
 \item{i}{Unit ID}
@@ -18,8 +18,6 @@ pij(i, j, wi, gi, wj, gj, Ne, Ne_list, p)
 \item{wj}{Individual Treatment level of unit j}
 
 \item{gj}{Neighborhood Treatment level of unit j}
-
-\item{Ne}{N x 1 vector, Degree}
 
 \item{Ne_list}{List of N elements - where N is the sample size -
 where each element i contains the IDs of the direct neighbors of unit i}
@@ -36,5 +34,10 @@ Computes the individual joint probability of a given pair of units (i and j)
 to be simultaneously exposed to certain levels of the joint intervention
 \itemize{
 \item (wi, gi) and (wj, gj), respectively -
+Assumes independent Bernoulli treatment assignment, potentially with
+heterogeneous unit-level assignment probabilities.
+Neighborhood exposure is defined as having at least one treated neighbor.
+Joint probabilities account for shared neighbors and direct connections
+between units.
 }
 }

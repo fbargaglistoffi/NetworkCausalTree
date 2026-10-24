@@ -4,7 +4,7 @@
 \alias{EffTau1000}
 \title{Estimated Effect 1000}
 \usage{
-EffTau1000(N, W, G, Y, p, Ne)
+EffTau1000(N, W, G, Y, p, Ne_list, unit_ids = seq_along(W))
 }
 \arguments{
 \item{N}{Sample size}
@@ -17,7 +17,9 @@ EffTau1000(N, W, G, Y, p, Ne)
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 
-\item{Ne}{N x 1 vector, Degree}
+\item{Ne_list}{List of direct neighbors for each unit in the exposure-defining network}
+
+\item{unit_ids}{Original network indices of the units included in the estimate}
 }
 \value{
 A numeric value corresponding to the estimate of the effect

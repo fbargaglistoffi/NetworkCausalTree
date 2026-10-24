@@ -20,7 +20,8 @@ identify_partitions_nct(
   p,
   Ne,
   Ne_list,
-  population_effects
+  population_effects,
+  unit_ids = seq_len(N)
 )
 }
 \arguments{
@@ -60,6 +61,8 @@ where each element i contains the IDs of the direct neighbors of unit i}
 
 \item{population_effects}{4 dimensional vector containing the estimated effects in the
 whole population}
+
+\item{unit_ids}{Original network indices of the observations in W, G, and Y}
 }
 \value{
 A data frame describing the Network Causal Tree. Specifically,

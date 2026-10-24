@@ -25,6 +25,7 @@
 #' @param minsize Minimum number of observations for each level of the joint intervention
 #' to be required in the leafs
 #' @param depth Depth of the tree
+#' @param unit_ids Original network indices of the observations in W, G, and Y
 #'
 #' @return A data frame describing the Network Causal Tree. Specifically,
 #' the data frame includes the NODE column identifying the node number, the OF variable
@@ -37,10 +38,11 @@
 identify_partitions_nct <- function(method, alpha, beta, gamma,
                                     delta, depth, minsize,
                                     N, W, G, Y, X, p,
-                                    Ne, Ne_list, population_effects) {
+                                    Ne, Ne_list, population_effects,
+                                    unit_ids = seq_len(N)) {
   
   # Initialize
-  data_tree <- data.frame(idunit = 1:N, W = W, G = G, Y = Y)
+  data_tree <- data.frame(idunit = unit_ids, W = W, G = G, Y = Y)
   
   X <- as.data.frame(X)
   
@@ -82,15 +84,16 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         tree_info[j, "TERMINAL"] <- "LEAF"
         next
       }
-
+      
       splitting <- compute_OF_Split(
         method = method, alpha = alpha, beta = beta,
         gamma = gamma, delta = delta,
         W = this_data$W,
         G = this_data$G, Y = this_data$Y,
         X = Xnode,
-        Ne = Ne[this_data$idunit], p = p[this_data$idunit],
-        Ne_list = Ne_list[this_data$idunit],
+        Ne = Ne, p = p,
+        Ne_list = Ne_list,
+        unit_ids = this_data$idunit,
         population_effects = population_effects,
         nleafs = nleafs, total_variance = total_variance
       )
@@ -153,20 +156,24 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
             
             variance_children = alpha*(Vartau1000(N = nrow(this_data), W = this_data$W,
                                                   Y = this_data$Y, G = this_data$G,
-                                                  p = p[this_data$idunit], Ne = Ne[this_data$idunit],
-                                                  Ne_list = Ne_list[this_data$idunit])) +
+                                                  p = p, Ne = Ne,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = this_data$idunit)) +
               beta*(Vartau1101(N = nrow(this_data), W = this_data$W,
                                Y = this_data$Y, G = this_data$G,
-                               p = p[this_data$idunit], Ne = Ne[this_data$idunit],
-                               Ne_list = Ne_list[this_data$idunit])) +
+                               p = p, Ne = Ne,
+                               Ne_list = Ne_list,
+                               unit_ids = this_data$idunit)) +
               gamma*(Vartau1110(N = nrow(this_data), W = this_data$W,
                                 Y = this_data$Y, G = this_data$G,
-                                p = p[this_data$idunit], Ne = Ne[this_data$idunit],
-                                Ne_list = Ne_list[this_data$idunit])) +
+                                p = p, Ne = Ne,
+                                Ne_list = Ne_list,
+                                unit_ids = this_data$idunit)) +
               delta*(Vartau0100(N = nrow(this_data), W = this_data$W,
                                 Y = this_data$Y, G = this_data$G,
-                                p = p[this_data$idunit], Ne = Ne[this_data$idunit],
-                                Ne_list = Ne_list[this_data$idunit]))
+                                p = p, Ne = Ne,
+                                Ne_list = Ne_list,
+                                unit_ids = this_data$idunit))
             
             total_variance = c(total_variance, variance_children)
             

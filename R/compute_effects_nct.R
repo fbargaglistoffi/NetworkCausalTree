@@ -18,6 +18,7 @@
 #' where each element i contains the IDs of the direct neighbors of unit i
 #' @param minsize minimum number of observations for each level of the joint intervention
 #' to be required in the leafs
+#' @param unit_ids Original network indices of the observations in W, G, and Y
 #'
 #' @return A data.frame describing the obtained Network Causal Trees.
 #' Each row represents a partition (of a specific tree) with 10/14 entries.
@@ -36,8 +37,9 @@
 #' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
-compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
-                             Ne, Ne_list, p, minsize){
+compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
+                                Ne, Ne_list, p, minsize,
+                                unit_ids = seq_len(N)) {
   
   if (is.null(X) || ncol(X) == 0) {
     X <- NULL
@@ -49,7 +51,7 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
     }
   }
   
-  data_est <- data.frame(idunit = 1:N, W = W, G = G, Y = Y)
+  data_est <- data.frame(idunit = unit_ids, W = W, G = G, Y = Y)
   if (!is.null(X)) data_est <- cbind(data_est, X)
   if (!is.null(X)) {
     colnames(data_est) <- c("idunit", "W", "G", "Y", colnames(X))
@@ -87,30 +89,42 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
     nct_partition$NOBS_EST[1]<-N
     
     nct_partition$EFFTAU1000[1] <- EffTau1000(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     nct_partition$EFFTAU1101[1] <- EffTau1101(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     nct_partition$EFFTAU1110[1] <- EffTau1110(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     nct_partition$EFFTAU0100[1] <- EffTau0100(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     
     nct_partition$SETAU1000[1] <- sqrt(Vartau1000(N = nrow(data_est), W = data_est$W,
-                                                  G = data_est$G, Y = data_est$Y, p = p[data_est$idunit],
-                                                  Ne = Ne[data_est$idunit], Ne_list = Ne_list))
+                                                  G = data_est$G, Y = data_est$Y, p = p,
+                                                  Ne = Ne,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = data_est$idunit))
     nct_partition$SETAU1101[1] <- sqrt(Vartau1101(N = nrow(data_est), W = data_est$W,
-                                                  G = data_est$G, Y = data_est$Y, p = p[data_est$idunit],
-                                                  Ne = Ne[data_est$idunit], Ne_list = Ne_list))
+                                                  G = data_est$G, Y = data_est$Y, p = p,
+                                                  Ne = Ne,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = data_est$idunit))
     nct_partition$SETAU1110[1] <- sqrt(Vartau1110(N = nrow(data_est), W = data_est$W,
-                                                  G = data_est$G, Y = data_est$Y, p = p[data_est$idunit],
-                                                  Ne = Ne[data_est$idunit], Ne_list = Ne_list))
+                                                  G = data_est$G, Y = data_est$Y, p = p,
+                                                  Ne = Ne,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = data_est$idunit))
     nct_partition$SETAU0100[1] <- sqrt(Vartau0100(N = nrow(data_est), W = data_est$W,
-                                                  G = data_est$G, Y = data_est$Y, p = p[data_est$idunit],
-                                                  Ne = Ne[data_est$idunit], Ne_list = Ne_list))
+                                                  G = data_est$G, Y = data_est$Y, p = p,
+                                                  Ne = Ne,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = data_est$idunit))
     
     # loop over all the nodes except root
     if (nrow(nct_partition) > 1) {
@@ -148,48 +162,49 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
         if (any(as.numeric(table(this_data$W, this_data$G)) < minsize)){
           warning('subpopulations not sufficiently represented')
         }
-        
-        Ne_sub <- Ne[old_ids]
-
-        Ne_listsub <- lapply(old_ids, function(id) {
-          neigh <- intersect(Ne_list[[id]], old_ids)  
-          match(neigh, old_ids)                    
-        })
 
         nct_partition$NOBS_EST[j] <- nrow(this_data)
         
         # computed estimated effects
         nct_partition$EFFTAU1000[j] <- EffTau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                  Y = this_data$Y, p = p[old_ids],
-                                                  Ne = Ne_sub)
+                                                  Y = this_data$Y, p = p,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = old_ids)
         nct_partition$EFFTAU1101[j] <- EffTau1101(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                  Y = this_data$Y, p = p[old_ids],
-                                                  Ne = Ne_sub)
+                                                  Y = this_data$Y, p = p,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = old_ids)
         nct_partition$EFFTAU1110[j] <- EffTau1110(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                  Y = this_data$Y, p = p[old_ids],
-                                                  Ne = Ne_sub)
+                                                  Y = this_data$Y, p = p,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = old_ids)
         nct_partition$EFFTAU0100[j] <- EffTau0100(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                  Y = this_data$Y, p = p[old_ids],
-                                                  Ne = Ne_sub)
+                                                  Y = this_data$Y, p = p,
+                                                  Ne_list = Ne_list,
+                                                  unit_ids = old_ids)
         
         
         # compute standard errors
         nct_partition$SETAU1000[j] <- sqrt(Vartau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                      Y = this_data$Y, p = p[old_ids],
-                                                      Ne = Ne_sub,
-                                                      Ne_list = Ne_listsub))
+                                                      Y = this_data$Y, p = p,
+                                                      Ne = Ne,
+                                                      Ne_list = Ne_list,
+                                                      unit_ids = old_ids))
         nct_partition$SETAU1101[j] <- sqrt(Vartau1101(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                      Y = this_data$Y, p = p[old_ids],
-                                                      Ne = Ne_sub,
-                                                      Ne_list = Ne_listsub))
+                                                      Y = this_data$Y, p = p,
+                                                      Ne = Ne,
+                                                      Ne_list = Ne_list,
+                                                      unit_ids = old_ids))
         nct_partition$SETAU1110[j] <- sqrt(Vartau1110(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                      Y = this_data$Y, p = p[old_ids],
-                                                      Ne = Ne_sub,
-                                                      Ne_list = Ne_listsub))
+                                                      Y = this_data$Y, p = p,
+                                                      Ne = Ne,
+                                                      Ne_list = Ne_list,
+                                                      unit_ids = old_ids))
         nct_partition$SETAU0100[j] <- sqrt(Vartau0100(N = nrow(this_data), W = this_data$W, G = this_data$G,
-                                                      Y = this_data$Y, p = p[old_ids],
-                                                      Ne = Ne_sub,
-                                                      Ne_list = Ne_listsub))
+                                                      Y = this_data$Y, p = p,
+                                                      Ne = Ne,
+                                                      Ne_list = Ne_list,
+                                                      unit_ids = old_ids))
       }
     }
     
@@ -215,17 +230,21 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
     # Compute the effects
     
     nct_partition$EFFTAU1000[1] <- EffTau1000(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     nct_partition$EFFTAU1101[1] <- EffTau1101(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     nct_partition$EFFTAU1110[1] <- EffTau1110(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     nct_partition$EFFTAU0100[1] <- EffTau0100(N = nrow(data_est), W = data_est$W, G = data_est$G,
-                                              Y = data_est$Y, p = p[data_est$idunit],
-                                              Ne = Ne[data_est$idunit])
+                                              Y = data_est$Y, p = p,
+                                              Ne_list = Ne_list,
+                                              unit_ids = data_est$idunit)
     
     if (nrow(nct_partition) > 1) {
       
@@ -260,21 +279,19 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
           warning('subpopulations not sufficiently represented')
         }
         
-        Ne_sub  <- Ne[old_ids]
-        
         nct_partition$NOBS_EST[j]<-nrow(this_data)
         nct_partition$EFFTAU1000[j] <- EffTau1000(N = nrow(this_data), W = this_data$W,
                                                   G = this_data$G, Y = this_data$Y,
-                                                  p = p[old_ids], Ne = Ne_sub)
+                                                  p = p, Ne_list = Ne_list, unit_ids = old_ids)
         nct_partition$EFFTAU1101[j] <- EffTau1101(N = nrow(this_data), W = this_data$W,
                                                   G = this_data$G, Y = this_data$Y,
-                                                  p = p[old_ids], Ne = Ne_sub)
+                                                  p = p, Ne_list = Ne_list, unit_ids = old_ids)
         nct_partition$EFFTAU1110[j] <- EffTau1110(N = nrow(this_data), W = this_data$W,
                                                   G = this_data$G, Y = this_data$Y,
-                                                  p = p[old_ids], Ne = Ne_sub)
+                                                  p = p, Ne_list = Ne_list, unit_ids = old_ids)
         nct_partition$EFFTAU0100[j] <- EffTau0100(N = nrow(this_data), W = this_data$W,
                                                   G = this_data$G, Y = this_data$Y,
-                                                  p = p[old_ids], Ne = Ne_sub)
+                                                  p = p, Ne_list = Ne_list, unit_ids = old_ids)
         
       } }
   }

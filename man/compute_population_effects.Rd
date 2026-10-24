@@ -4,7 +4,7 @@
 \alias{compute_population_effects}
 \title{Estimated Effects in the Whole Population}
 \usage{
-compute_population_effects(N, W, G, Y, p, Ne)
+compute_population_effects(N, W, G, Y, p, Ne_list, unit_ids = seq_along(W))
 }
 \arguments{
 \item{N}{Sample size}
@@ -17,7 +17,10 @@ compute_population_effects(N, W, G, Y, p, Ne)
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 
-\item{Ne}{N x 1 vector, Degree}
+\item{Ne_list}{List of N elements, where each element contains
+the IDs of the direct neighbors of that unit}
+
+\item{unit_ids}{Original network indices of the observations in W, G, and Y}
 }
 \value{
 A numeric vector made up by four elements, representing the

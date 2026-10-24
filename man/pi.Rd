@@ -4,7 +4,7 @@
 \alias{pi}
 \title{Individual Marginal Exposure Probabilities}
 \usage{
-pi(i, w, g, p, Ne)
+pi(i, w, g, p, Ne_list)
 }
 \arguments{
 \item{i}{Unit ID}
@@ -15,7 +15,8 @@ pi(i, w, g, p, Ne)
 
 \item{p}{N x 1 vector, Probability to be assigned to the active individual intervention}
 
-\item{Ne}{N x 1 vector, Degree}
+\item{Ne_list}{List of N elements, where each element contains
+the IDs of the direct neighbors of the corresponding unit}
 }
 \value{
 A numeric value bounded between 0 and 1 measuring
@@ -25,4 +26,7 @@ to the level (w,g) of the joint intervention
 \description{
 Computes the individual marginal probability to be exposed to a given
 level of the joint intervention.
+Assumes independent Bernoulli treatment assignment, potentially with
+heterogeneous unit-level assignment probabilities.
+Neighborhood exposure is defined as having at least one treated neighbor.
 }

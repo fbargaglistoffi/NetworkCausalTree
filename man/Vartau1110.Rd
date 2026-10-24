@@ -4,7 +4,7 @@
 \alias{Vartau1110}
 \title{Estimated Variance for the effect 1110}
 \usage{
-Vartau1110(N, Y, W, G, p, Ne, Ne_list)
+Vartau1110(N, Y, W, G, p, Ne, Ne_list, unit_ids = seq_along(W))
 }
 \arguments{
 \item{N}{Sample size}
@@ -21,6 +21,9 @@ Vartau1110(N, Y, W, G, p, Ne, Ne_list)
 
 \item{Ne_list}{List of N elements - where N is the sample size -
 where each element i contains the IDs of the direct neighbors of unit i}
+
+\item{unit_ids}{Original network indices of the units included
+in the variance calculation}
 }
 \value{
 A numeric value corresponding to the estimated variance of the effect
