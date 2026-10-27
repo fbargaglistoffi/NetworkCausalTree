@@ -599,5 +599,45 @@ test_that("Vary and Covy preserve neighbors outside the leaf", {
   expect_equal(covy_result, 24)
 })
 
+test_that("pij preserves extremely small positive probabilities", {
+  Ne_list <- list(c(3, 4), 3, c(1, 2), 1)
+  p <- c(0.5, 0.5, 0.8, 1e-14)
+  
+  result <- pij(
+    i = 1, j = 2,
+    wi = 0, gi = 1,
+    wj = 0, gj = 0,
+    Ne_list = Ne_list, p = p
+  )
+  
+  expected <- 0.5 * 0.5 * (1 - 0.8) * 1e-14
+  
+  expect_gt(result, 0)
+  expect_equal(result, expected, tolerance = 1e-12)
+})
 
-
+test_that("Vary accounts for shared neighbors outside the leaf", {
+  
+  Ne_list <- list(3, 3, c(1, 2))
+  Ne <- lengths(Ne_list)
+  p <- rep(0.5, 3)
+  
+  W_full <- c(0, 0, 0)
+  G_full <- c(0, 0, 0)
+  Y_full <- c(2, 4, 6)
+  
+  unit_ids <- c(1, 2)
+  
+  result <- Vary(
+    w = 0, g = 0,
+    W = W_full[unit_ids],
+    G = G_full[unit_ids],
+    Y = Y_full[unit_ids],
+    p = p,
+    Ne = Ne,
+    Ne_list = Ne_list,
+    unit_ids = unit_ids
+  )
+  
+  expect_equal(result, 368)
+})

@@ -72,11 +72,44 @@ pij <- function(i, j, wi, gi, wj, gj, Ne_list, p){
   if (gi == 0 && gj == 0) {
     prob_g <- prob_g00
   } else if (gi == 0 && gj == 1) {
-    prob_g <- prob_gi0 - prob_g00
+    extra_j <- setdiff(neighbors_j, neighbors_i)
+    if (i %in% Ne_list[[j]] && wi == 1) {
+      prob_g <- prob_gi0
+    } else {
+      prob_g <- prob_gi0 *
+        (1 - prod(1 - p[extra_j]))
+    }
   } else if (gi == 1 && gj == 0) {
-    prob_g <- prob_gj0 - prob_g00
+    extra_i <- setdiff(neighbors_i, neighbors_j)
+    
+    if (j %in% Ne_list[[i]] && wj == 1) {
+      prob_g <- prob_gj0
+    } else {
+      prob_g <- prob_gj0 *
+        (1 - prod(1 - p[extra_i]))
+    }
   } else {
-    prob_g <- 1 - prob_gi0 - prob_gj0 + prob_g00
+    common <- intersect(neighbors_i, neighbors_j)
+    only_i <- setdiff(neighbors_i, neighbors_j)
+    only_j <- setdiff(neighbors_j, neighbors_i)
+    
+    q_common <- prod(1 - p[common])
+    q_i <- prod(1 - p[only_i])
+    q_j <- prod(1 - p[only_j])
+    
+    i_has_treated_j <- j %in% Ne_list[[i]] && wj == 1
+    j_has_treated_i <- i %in% Ne_list[[j]] && wi == 1
+    
+    if (i_has_treated_j && j_has_treated_i) {
+      prob_g <- 1
+    } else if (i_has_treated_j) {
+      prob_g <- 1 - q_common * q_j
+    } else if (j_has_treated_i) {
+      prob_g <- 1 - q_common * q_i
+    } else {
+      prob_g <- (1 - q_common) +
+        q_common * (1 - q_i) * (1 - q_j)
+    }
   }
   
   pij_val <- prob_w * prob_g

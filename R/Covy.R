@@ -30,10 +30,30 @@ Covy = function(N, w1, g1, w2, g2,
   
   if (length(W) > 0) {
     
-    pairs <- expand.grid(
-      i = which(W == w1 & G == g1),
-      j = which(W == w2 & G == g2)
-    )
+    idx1 <- which(W == w1 & G == g1)
+    idx2 <- which(W == w2 & G == g2)
+    
+    pair_list <- list()
+    
+    for (i in idx1) {
+      id_i <- unit_ids[i]
+      
+      direct <- Ne_list[[id_i]]
+      indirect <- unique(unlist(Ne_list[direct], use.names = FALSE))
+      
+      candidates <- unique(c(direct, indirect))
+      j_candidates <- idx2[unit_ids[idx2] %in% candidates]
+      
+      for (j in j_candidates) {
+        pair_list[[length(pair_list) + 1L]] <- c(i, j)
+      }
+    }
+    
+    pairs <- if (length(pair_list) > 0) {
+      as.data.frame(t(do.call(cbind, pair_list)))
+    } else {
+      data.frame(V1 = integer(0), V2 = integer(0))
+    }
   
   variab = numeric(nrow(pairs))
     
@@ -64,7 +84,19 @@ Covy = function(N, w1, g1, w2, g2,
     zero_correction <- 0
     
     for (i in seq_along(W)) {
-      for (j in seq_along(W)) {
+      id_i <- unit_ids[i]
+      
+      direct <- Ne_list[[id_i]]
+      indirect <- unique(unlist(Ne_list[direct], use.names = FALSE))
+      candidates <- unique(c(direct, indirect))
+      
+      # Include the diagonal pair and dependent units in the leaf
+      j_candidates <- unique(c(
+        i,
+        which(unit_ids %in% candidates)
+      ))
+      
+      for (j in j_candidates) {
         if (i == j) {
           if (W[i] == w1 && G[i] == g1) {
             zero_correction <- zero_correction +

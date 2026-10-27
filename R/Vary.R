@@ -28,8 +28,28 @@ Vary = function(w, g, Y, W, G,
     
     idx <- which(W == w & G == g)
     
-    pairs <- expand.grid(i = idx, j = idx)
-    pairs <- pairs[pairs$i != pairs$j, , drop = FALSE]
+    pair_list <- list()
+    
+    for (i in idx) {
+      id_i <- unit_ids[i]
+      
+      direct <- Ne_list[[id_i]]
+      indirect <- unique(unlist(Ne_list[direct], use.names = FALSE))
+      
+      candidates <- unique(c(direct, indirect))
+      j_candidates <- idx[unit_ids[idx] %in% candidates]
+      j_candidates <- j_candidates[j_candidates != i]
+      
+      for (j in j_candidates) {
+        pair_list[[length(pair_list) + 1L]] <- c(i, j)
+      }
+    }
+    
+    pairs <- if (length(pair_list) > 0) {
+      as.data.frame(t(do.call(cbind, pair_list)))
+    } else {
+      data.frame(V1 = integer(0), V2 = integer(0))
+    }
     
     second_element = numeric(nrow(pairs))
     
@@ -64,8 +84,27 @@ Vary = function(w, g, Y, W, G,
     
     zero_correction <- 0
     
-    all_pairs <- if (length(W) >= 2) {
-      utils::combn(seq_along(W), 2)
+    pair_list <- list()
+    
+    for (i in seq_along(W)) {
+      id_i <- unit_ids[i]
+      
+      direct <- Ne_list[[id_i]]
+      
+      indirect <- unique(unlist(Ne_list[direct], use.names = FALSE))
+      
+      candidates <- unique(c(direct, indirect))
+      
+      j_candidates <- which(unit_ids %in% candidates)
+      j_candidates <- j_candidates[j_candidates > i]
+      
+      for (j in j_candidates) {
+        pair_list[[length(pair_list) + 1L]] <- c(i, j)
+      }
+    }
+    
+    all_pairs <- if (length(pair_list) > 0) {
+      do.call(cbind, pair_list)
     } else {
       matrix(integer(0), nrow = 2)
     }
