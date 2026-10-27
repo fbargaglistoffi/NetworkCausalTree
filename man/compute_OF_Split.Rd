@@ -19,7 +19,8 @@ compute_OF_Split(
   Ne_list,
   population_effects,
   total_variance,
-  nleafs
+  nleafs,
+  unit_ids = seq_along(W)
 )
 }
 \arguments{
@@ -60,6 +61,8 @@ whole population}
 \item{nleafs}{\itemize{
 \item to be included if method = "penalized" - number of leafs
 }}
+
+\item{unit_ids}{Original network indices of the observations in W, G, and Y}
 }
 \value{
 A numeric vector made up by three elements: the first one identifies the

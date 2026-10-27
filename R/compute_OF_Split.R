@@ -23,14 +23,16 @@
 #' whole population
 #' @param total_variance - to be included if method = "penalized" - whole variance
 #' @param nleafs - to be included if method = "penalized" - number of leafs
+#' @param unit_ids Original network indices of the observations in W, G, and Y
 #'
 #' @return A numeric vector made up by three elements: the first one identifies the
 #' value of the  Objective Function is max , the second one reports the value of the variable that maximizes the  Objective Function,
 #' the third one reports the corresponding variable
 #'
-compute_OF_Split = function(method, alpha, beta, gamma, delta,
-                            W, G, Y, X, p, Ne, Ne_list,
-                            population_effects, total_variance, nleafs){
+compute_OF_Split <- function(method, alpha, beta, gamma, delta,
+                             W, G, Y, X, p, Ne, Ne_list,
+                             population_effects, total_variance, nleafs,
+                             unit_ids = seq_along(W)) {
   
   # Initialize
   of<- c()
@@ -61,6 +63,9 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
       idx_left  <- !is.na(x) & x <  sp
       idx_right <- !is.na(x) & x >= sp
       
+      left_ids <- unit_ids[idx_left]
+      right_ids <- unit_ids[idx_right]
+      
       left_table  <- table(factor(W[idx_left],  levels = c(0,1)), factor(G[idx_left],  levels = c(0,1)))
       right_table <- table(factor(W[idx_right], levels = c(0,1)), factor(G[idx_right], levels = c(0,1)))
       
@@ -72,12 +77,12 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
       ofx[i] <- 1/2 * (
         compute_OF_Value(method, alpha, beta, gamma, delta,
                          N = sum(idx_left), W = W[idx_left], G = G[idx_left], Y = Y[idx_left],
-                         Ne = Ne[idx_left], p = p[idx_left], Ne_list = Ne_list[idx_left],
+                         Ne = Ne, p = p, Ne_list = Ne_list, unit_ids = left_ids,
                          population_effects = population_effects,
                          nleafs = nleafs, total_variance = total_variance) +
           compute_OF_Value(method, alpha, beta, gamma, delta,
                            N = sum(idx_right), W = W[idx_right], G = G[idx_right], Y = Y[idx_right],
-                           Ne = Ne[idx_right], p = p[idx_right], Ne_list = Ne_list[idx_right],
+                           Ne = Ne, p = p, Ne_list = Ne_list, unit_ids = right_ids,
                            population_effects = population_effects,
                            nleafs = nleafs, total_variance = total_variance)
       )

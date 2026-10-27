@@ -18,50 +18,129 @@
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
 #' where each element i contains the IDs of the direct neighbors of unit i
+#' @param unit_ids Original network indices of the units included
+#' in the covariance calculation
 #'
 #' @return A numeric value corresponding to the estimated covariance of the
 #' average potential outcome under the level w1,g1 and w2,g2 of the joint intervention
 
-Covy = function(N, w1, g1, w2, g2, 
-                W, G, Y, p, 
-                Ne, Ne_list) {
+Covy = function(N, w1, g1, w2, g2,
+                W, G, Y, p,
+                Ne, Ne_list, unit_ids = seq_along(W)) {
   
-  if (length(which(W == w1 & G == g1)) > 1 & 
-      length(which(W == w2 & G == g2)) > 1) {
+  if (length(W) > 0) {
     
-  pairs <- expand.grid.unique(which(W == w1 & G == g1),
-                              which(W == w2 & G == g2),
-                              include.equals = FALSE)
-  
-  # Initialize
-  variab = numeric(nrow(pairs))
+    idx1 <- which(W == w1 & G == g1)
+    idx2 <- which(W == w2 & G == g2)
     
-    for (k in 1:nrow(pairs)) {
+    pair_list <- list()
+    
+    for (i in idx1) {
+      id_i <- unit_ids[i]
       
-      # Get ID of i-th and k-th pair
-      i=pairs[k,1]
-      j=pairs[k,2]
+      direct <- Ne_list[[id_i]]
+      indirect <- unique(unlist(Ne_list[direct], use.names = FALSE))
       
-      # Check for shared neighbors
-      if (shared_neigh(i, j, Ne_list = Ne_list) > 0) {
-        
-        # Calculate variance component
-        pij_val <- pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p)
-        variab[k] = (1 / pij_val *
-                              (Y[i] / pi(i, w1, g1, p, Ne)) * 
-                              (Y[j] / pi(j, w2, g2, p, Ne))) *
-                     (pij_val - pi(i, w1, g1, p, Ne) * pi(j, w2, g2, p, Ne))
+      candidates <- unique(c(direct, indirect))
+      j_candidates <- idx2[unit_ids[idx2] %in% candidates]
+      
+      for (j in j_candidates) {
+        pair_list[[length(pair_list) + 1L]] <- c(i, j)
       }
     }
     
-    # Calculate variance adjustment
-    second_element <- sum(((Y[which(W == w1 & G == g1)]) ^ 2) / (2 * 
-                                                                   pi(which(W == w1 & G == g1), w1, g1, p, Ne))) +
-      sum(((Y[which(W == w2 & G == g2)]) ^ 2) / (2 * 
-                                                   pi(which(W == w2 & G == g2), w2, g2, p, Ne))) 
+    pairs <- if (length(pair_list) > 0) {
+      as.data.frame(t(do.call(cbind, pair_list)))
+    } else {
+      data.frame(V1 = integer(0), V2 = integer(0))
+    }
+  
+  variab = numeric(nrow(pairs))
     
-    # Final covariance calculation
-    covy = sum(variab) - second_element
+  for (k in seq_len(nrow(pairs))) {
+      
+      i <- pairs[k, 1]
+      j <- pairs[k, 2]
+      
+      id_i <- unit_ids[i]
+      id_j <- unit_ids[j]
+      
+      if (shared_neigh(id_i, id_j, Ne_list = Ne_list) > 0 ||
+          id_j %in% Ne_list[[id_i]] ||
+          id_i %in% Ne_list[[id_j]]) {
+        
+        pij_val <- pij(id_i, id_j, w1, g1, w2, g2, Ne_list = Ne_list, p = p)
+        if (pij_val == 0) {
+          next
+        }
+        pi_i <- pi(id_i, w1, g1, p, Ne_list)
+        pi_j <- pi(id_j, w2, g2, p, Ne_list)
+        
+        variab[k] <- ((pij_val - pi_i * pi_j) / pij_val) *
+          (Y[i] / pi_i) * (Y[j] / pi_j)
+      }
+    }
+  
+    zero_correction <- 0
+    
+    for (i in seq_along(W)) {
+      id_i <- unit_ids[i]
+      
+      direct <- Ne_list[[id_i]]
+      indirect <- unique(unlist(Ne_list[direct], use.names = FALSE))
+      candidates <- unique(c(direct, indirect))
+      
+      # Include the diagonal pair and dependent units in the leaf
+      j_candidates <- unique(c(
+        i,
+        which(unit_ids %in% candidates)
+      ))
+      
+      for (j in j_candidates) {
+        if (i == j) {
+          if (W[i] == w1 && G[i] == g1) {
+            zero_correction <- zero_correction +
+              Y[i]^2 / (2 * pi(unit_ids[i], w1, g1, p, Ne_list))
+          }
+          
+          if (W[j] == w2 && G[j] == g2) {
+            zero_correction <- zero_correction +
+              Y[j]^2 / (2 * pi(unit_ids[j], w2, g2, p, Ne_list))
+          }
+          
+          next
+        }
+        
+        id_i <- unit_ids[i]
+        id_j <- unit_ids[j]
+        
+        if (shared_neigh(id_i, id_j, Ne_list = Ne_list) == 0 &&
+            !(id_j %in% Ne_list[[id_i]]) &&
+            !(id_i %in% Ne_list[[id_j]])) {
+          next
+        }
+        
+        joint_prob <- pij(
+          unit_ids[i], unit_ids[j],
+          w1, g1, w2, g2,
+          Ne_list = Ne_list, p = p
+        )
+        
+        if (joint_prob == 0) {
+          if (W[i] == w1 && G[i] == g1) {
+            zero_correction <- zero_correction +
+              Y[i]^2 / (2 * pi(unit_ids[i], w1, g1, p, Ne_list))
+          }
+          
+          if (W[j] == w2 && G[j] == g2) {
+            zero_correction <- zero_correction +
+              Y[j]^2 / (2 * pi(unit_ids[j], w2, g2, p, Ne_list))
+          }
+        }
+      }
+    }
+    
+    covy <- sum(variab) - zero_correction
     
     } else {covy=NA}
   

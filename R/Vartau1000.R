@@ -14,33 +14,37 @@
 #' @param  Ne N x 1 vector, Degree
 #' @param  Ne_list List of N elements - where N is the sample size -
 #' where each element i contains the IDs of the direct neighbors of unit i
+#' @param unit_ids Original network indices of the units included
+#' in the variance calculation
 #'
 #' @return A numeric value corresponding to the estimated variance of the effect
 #' of interest.
 #'
-Vartau1000 = function(N, Y, W, G, 
-                      p, Ne, Ne_list) {
+Vartau1000 <- function(N, Y, W, G,
+                       p, Ne, Ne_list, unit_ids = seq_along(W)) {
   
-  # Variance of the Average Potential Outcome Y(w,g)=Y(1,0)
-  vary10 <- Vary(w = 1, g = 0, W = W, G = G, p = p,
-                 Ne = Ne, Ne_list = Ne_list,Y = Y)
+  vary10 <- Vary(w = 1, g = 0, W = W, G = G,
+                 p = p, Ne = Ne, Ne_list = Ne_list,
+                 Y = Y, unit_ids = unit_ids)
   
-  # Variance of the Average Potential Outcome Y(w,g)=Y(0,0)    
-  vary00 <- Vary(w = 0, g = 0, W = W, G = G, p = p,
-                 Ne = Ne, Ne_list = Ne_list,Y = Y)
+  vary00 <- Vary(w = 0, g = 0, W = W, G = G,
+                 p = p, Ne = Ne, Ne_list = Ne_list,
+                 Y = Y, unit_ids = unit_ids)
   
-  # Covariance of the Average Potential Outcomes Y(w,g)=Y(1,0) and Y(w,g)=Y(0,0) 
-  covy10y00 <- Covy(N = N, w1 = 1, g1 = 0, w2 = 0, g2 = 0, W = W, G = G, p = p,
-                    Ne = Ne, Ne_list = Ne_list, Y = Y)
+  covy10y00 <- Covy(N = N, w1 = 1, g1 = 0, w2 = 0, g2 = 0,
+                    W = W, G = G, p = p, Ne = Ne,
+                    Ne_list = Ne_list, Y = Y, unit_ids = unit_ids)
   
-  if (any(is.na(c(vary10, vary00)))) {
-    var1000 = NA
+  if (any(is.na(c(vary10, vary00, covy10y00)))) {
+    var1000 <- NA
   } else {
-    var1000 = (1 / (N ^ 2)) * (vary10 + vary00 - 2 * covy10y00)
+    var1000 <- (1 / (N^2)) * (vary10 + vary00 - 2 * covy10y00)
+    
     if (!is.na(var1000) && var1000 < 0) {
       warning("Estimated variance is negative; returning NA.")
       var1000 <- NA
     }
   }
+  
   return(var1000)
 }

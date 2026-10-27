@@ -23,8 +23,8 @@ test_that("compute_effects_nct runs on tiny tree and returns valid output", {
   output <- "estimation"
   minsize <- 1
   
-  result <- expect_warning(
-    compute_effects_nct(
+  expect_warning(
+    result <- compute_effects_nct(
       output = output,
       nct_partition = nct_partition,
       N = N,
