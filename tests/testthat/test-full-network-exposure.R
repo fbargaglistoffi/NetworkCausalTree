@@ -647,10 +647,13 @@ test_that("very small probabilities survive in marginal and joint exposure calcu
   p <- c(0.5, 0.5, 0.8, 1e-18)
   Ne_list <- list(c(3, 4), 3, c(1, 2), 1)
 
-  # Unit 1 is exposed by unit 4 with tiny positive probability.
-  marg <- pi(i = 4, w = 0, g = 1, p = p, Ne_list = Ne_list)
+  # Marginal exposure with a single very-low-probability neighbor.
+  p_marg <- c(0.5, 1e-18)
+  Ne_marg <- list(2, 1)
+  marg <- pi(i = 1, w = 0, g = 1, p = p_marg, Ne_list = Ne_marg)
   expect_gt(marg, 0)
-  expect_equal(marg / ((1 - p[4]) * p[1]), 1, tolerance = 1e-12)
+  expect_equal(marg / ((1 - p_marg[1]) * p_marg[2]),
+               1, tolerance = 1e-12)
 
   joint <- pij(
     i = 1, j = 2,
