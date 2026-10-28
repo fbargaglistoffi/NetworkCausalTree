@@ -641,3 +641,66 @@ test_that("Vary accounts for shared neighbors outside the leaf", {
   
   expect_equal(result, 368)
 })
+
+
+test_that("very small probabilities survive in marginal and joint exposure calculations", {
+  p <- c(0.5, 0.5, 0.8, 1e-18)
+  Ne_list <- list(c(3, 4), 3, c(1, 2), 1)
+
+  # Unit 1 is exposed by unit 4 with tiny positive probability.
+  marg <- pi(i = 4, w = 0, g = 1, p = p, Ne_list = Ne_list)
+  expect_gt(marg, 0)
+  expect_equal(marg / ((1 - p[4]) * p[1]), 1, tolerance = 1e-12)
+
+  joint <- pij(
+    i = 1, j = 2,
+    wi = 0, gi = 1,
+    wj = 0, gj = 0,
+    Ne_list = Ne_list, p = p
+  )
+  expected <- (1 - p[1]) * (1 - p[2]) * (1 - p[3]) * p[4]
+  expect_gt(joint, 0)
+  expect_equal(joint / expected, 1, tolerance = 1e-12)
+
+  # Nested neighborhoods make the reverse exposure combination impossible.
+  zero_joint <- pij(
+    i = 1, j = 2,
+    wi = 0, gi = 0,
+    wj = 0, gj = 1,
+    Ne_list = Ne_list, p = p
+  )
+  expect_identical(zero_joint, 0)
+})
+
+test_that("NetworkCausalTree rejects malformed or directed adjacency matrices", {
+  A <- matrix(0, nrow = 4, ncol = 4)
+  A[1, 2] <- A[2, 1] <- 1
+  A[3, 4] <- A[4, 3] <- 1
+
+  run_tree <- function(adjacency) {
+    NetworkCausalTree(
+      X = matrix(c(0, 1, 0, 1), ncol = 1),
+      Y = c(1, 2, 3, 4),
+      W = c(0, 1, 0, 1),
+      K = c(1, 1, 2, 2),
+      A = adjacency,
+      p = rep(0.5, 4),
+      ratio_disc = 0.5,
+      minsize = 1
+    )
+  }
+
+  expect_error(run_tree(A[-1, , drop = FALSE]), "N x N")
+
+  A_directed <- A
+  A_directed[1, 2] <- 0
+  expect_error(run_tree(A_directed), "symmetric")
+
+  A_loop <- A
+  A_loop[1, 1] <- 1
+  expect_error(run_tree(A_loop), "zero diagonal")
+
+  A_missing <- A
+  A_missing[1, 2] <- NA_real_
+  expect_error(run_tree(A_missing), "missing values")
+})
