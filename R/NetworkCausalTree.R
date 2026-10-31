@@ -99,6 +99,24 @@ NetworkCausalTree <- function(X, Y, W,
   if (is.null(A)) {
     stop('You have to specify the Adjacency Matrix A.')
   }
+
+  # The network exposure and pairwise-dependence routines assume a
+  # simple, undirected adjacency matrix on the N study units.
+  if (!identical(dim(A), c(N, N))) {
+    stop("A must be an N x N adjacency matrix.")
+  }
+
+  if (anyNA(A)) {
+    stop("A cannot contain missing values.")
+  }
+
+  if (!isTRUE(all(A == t(A)))) {
+    stop("A must be symmetric (undirected network).")
+  }
+
+  if (any(diag(A) != 0)) {
+    stop("A must have a zero diagonal (no self-loops).")
+  }
   
   if (ratio_disc <= 0 || ratio_disc >= 1) {
     stop("ratio_disc must be strictly between 0 and 1.")

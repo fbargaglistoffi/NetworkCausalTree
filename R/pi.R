@@ -26,7 +26,7 @@ pi <- function(i, w, g, p, Ne_list) {
     neighbors <- Ne_list[[ii]]
     
     prob_g0 <- prod(1 - p[neighbors])
-    prob_g1 <- 1 - prob_g0
+    prob_g1 <- prob_any_treated(neighbors, p)
     
     prob_w <- (p[ii] ^ w) * ((1 - p[ii]) ^ (1 - w))
     
@@ -34,4 +34,9 @@ pi <- function(i, w, g, p, Ne_list) {
       (prob_g1 ^ g) *
       (prob_g0 ^ (1 - g))
   }, numeric(1))
+}
+
+# Numerically stable probability that at least one neighbor is treated.
+prob_any_treated <- function(neighbors, p) {
+  -expm1(sum(log1p(-p[neighbors])))
 }
