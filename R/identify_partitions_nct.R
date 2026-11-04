@@ -26,6 +26,8 @@
 #' to be required in the leafs
 #' @param depth Depth of the tree
 #' @param unit_ids Original network indices of the observations in W, G, and Y
+#' @param N_tr Total number of observations in the discovery sample
+#' @param N_est Total number of observations in the estimation sample
 #'
 #' @return A data frame describing the Network Causal Tree. Specifically,
 #' the data frame includes the NODE column identifying the node number, the OF variable
@@ -39,9 +41,9 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                     delta, depth, minsize,
                                     N, W, G, Y, X, p,
                                     Ne, Ne_list, population_effects,
-                                    unit_ids = seq_len(N)) {
+                                    unit_ids = seq_len(N),
+                                    N_tr = N, N_est = NULL) {
   
-  # Initialize
   data_tree <- data.frame(idunit = unit_ids, W = W, G = G, Y = Y)
   
   X <- as.data.frame(X)
@@ -58,9 +60,79 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   data_tree <- cbind(data_tree, X)
   
   do_splits <- TRUE
-  total_variance = NULL
+  leaf_variances <- list()
   
-  # Create output dataset
+  current_total_variance <- function() {
+    sum(unlist(leaf_variances, use.names = FALSE))
+  }
+  
+  node_variance <- function(node_data) {
+    n <- nrow(node_data)
+    
+    if (alpha > 0) {
+      return(Vartau1000(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      ))
+    }
+    
+    if (beta > 0) {
+      return(Vartau1101(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      ))
+    }
+    
+    if (gamma > 0) {
+      return(Vartau1110(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      ))
+    }
+    
+    if (delta > 0) {
+      return(Vartau0100(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      ))
+    }
+    
+    stop("No treatment effect selected.")
+  }
+  
+  node_variance <- function(node_data) {
+    n <- nrow(node_data)
+    
+    alpha * Vartau1000(
+      N = n, W = node_data$W, G = node_data$G,
+      Y = node_data$Y, p = p, Ne = Ne,
+      Ne_list = Ne_list, unit_ids = node_data$idunit
+    ) +
+      beta * Vartau1101(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      ) +
+      gamma * Vartau1110(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      ) +
+      delta * Vartau0100(
+        N = n, W = node_data$W, G = node_data$G,
+        Y = node_data$Y, p = p, Ne = Ne,
+        Ne_list = Ne_list, unit_ids = node_data$idunit
+      )
+  }
+  
+  if (method == "penalized") {
+    leaf_variances[["1"]] <- node_variance(data_tree)
+  }
+  
   tree_info <- data.frame(NODE = 1, OF = 0, NOBS = nrow(data_tree),
                           FILTER = NA, TERMINAL = "SPLIT",
                           stringsAsFactors = FALSE)
@@ -95,7 +167,10 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         Ne_list = Ne_list,
         unit_ids = this_data$idunit,
         population_effects = population_effects,
-        nleafs = nleafs, total_variance = total_variance
+        nleafs = nleafs,
+        total_variance = if (method == "penalized") current_total_variance() else NULL,
+        N_tr = N_tr,
+        N_est = N_est
       )
 
       tmp_filter <- NULL
@@ -127,6 +202,17 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                              nrow(subset(x = x, subset = eval(parse(text = i))))} ,
                            x = this_data)
         
+        child_right <- with(this_data, eval(parse(text = tmp_filter[1])))
+        child_left <- with(this_data, eval(parse(text = tmp_filter[2])))
+        
+        valid_partition <- !anyNA(child_right) &&
+          !anyNA(child_left) &&
+          all(xor(child_right, child_left))
+        
+        if (!valid_partition) {
+          split_here <- rep(FALSE, 2)
+        }
+        
         for (child_idx in 1:2) {
           if (split_here[child_idx]) {
             child_data <- subset(this_data, eval(parse(text = tmp_filter[child_idx])))
@@ -144,7 +230,11 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
           split_here <- rep(FALSE, 2)
         }
         
-        if (any(split_here)) {
+        if (method == "penalized" && maxof <= 0) {
+          split_here <- rep(FALSE, 2)
+        }
+        
+        if (all(split_here)) {
           children <- data.frame(NODE = c(mn + 1, mn + 2),
                                  OF = c(rep(maxof,2)),
                                  NOBS = tmp_nobs,
@@ -152,31 +242,18 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                  TERMINAL = rep("SPLIT", 2),
                                  row.names = NULL) [split_here,]
           
-          if (method=="penalized") {
+          if (method == "penalized") {
             
-            variance_children = alpha*(Vartau1000(N = nrow(this_data), W = this_data$W,
-                                                  Y = this_data$Y, G = this_data$G,
-                                                  p = p, Ne = Ne,
-                                                  Ne_list = Ne_list,
-                                                  unit_ids = this_data$idunit)) +
-              beta*(Vartau1101(N = nrow(this_data), W = this_data$W,
-                               Y = this_data$Y, G = this_data$G,
-                               p = p, Ne = Ne,
-                               Ne_list = Ne_list,
-                               unit_ids = this_data$idunit)) +
-              gamma*(Vartau1110(N = nrow(this_data), W = this_data$W,
-                                Y = this_data$Y, G = this_data$G,
-                                p = p, Ne = Ne,
-                                Ne_list = Ne_list,
-                                unit_ids = this_data$idunit)) +
-              delta*(Vartau0100(N = nrow(this_data), W = this_data$W,
-                                Y = this_data$Y, G = this_data$G,
-                                p = p, Ne = Ne,
-                                Ne_list = Ne_list,
-                                unit_ids = this_data$idunit))
+            right_data <- subset(this_data, eval(parse(text = tmp_filter[1])))
+            left_data <- subset(this_data, eval(parse(text = tmp_filter[2])))
             
-            total_variance = c(total_variance, variance_children)
+            v_right <- node_variance(right_data)
+            v_left <- node_variance(left_data)
             
+            leaf_variances[[as.character(tree_info$NODE[j])]] <- NULL
+            
+            leaf_variances[[as.character(mn + 1)]] <- v_right
+            leaf_variances[[as.character(mn + 2)]] <- v_left
           }
           
           tree_info <- rbind(tree_info, children)

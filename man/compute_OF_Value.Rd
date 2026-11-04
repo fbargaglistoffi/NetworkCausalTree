@@ -20,7 +20,9 @@ compute_OF_Value(
   population_effects,
   total_variance,
   nleafs,
-  unit_ids = seq_along(W)
+  unit_ids = seq_along(W),
+  N_tr = N,
+  N_est = NULL
 )
 }
 \arguments{
@@ -54,15 +56,18 @@ where each element i contains the IDs of the direct neighbors of unit i}
 \item{population_effects}{4 dimensional vector containing the estimated effects in the
 whole population}
 
-\item{total_variance}{\itemize{
-\item to be included if method = "penalized" - whole variance
-}}
+\item{total_variance}{Sum of variance contributions from other terminal
+leaves, excluding the current node, for the penalized objective}
 
 \item{nleafs}{\itemize{
 \item to be included if method = "penalized" - number of leafs
 }}
 
 \item{unit_ids}{Original network indices of the observations in W, G, and Y}
+
+\item{N_tr}{Total number of observations in the discovery sample}
+
+\item{N_est}{Total number of observations in the estimation sample}
 }
 \value{
 A numeric value corresponding to the computed  Objective Function

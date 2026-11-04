@@ -21,7 +21,9 @@ identify_partitions_nct(
   Ne,
   Ne_list,
   population_effects,
-  unit_ids = seq_len(N)
+  unit_ids = seq_len(N),
+  N_tr = N,
+  N_est = NULL
 )
 }
 \arguments{
@@ -63,6 +65,10 @@ where each element i contains the IDs of the direct neighbors of unit i}
 whole population}
 
 \item{unit_ids}{Original network indices of the observations in W, G, and Y}
+
+\item{N_tr}{Total number of observations in the discovery sample}
+
+\item{N_est}{Total number of observations in the estimation sample}
 }
 \value{
 A data frame describing the Network Causal Tree. Specifically,

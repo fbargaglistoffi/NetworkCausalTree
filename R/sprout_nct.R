@@ -26,6 +26,8 @@
 #' @param minsize minimum number of observations for each level of the joint intervention
 #' to be required in the leafs
 #' @param depth depth of the tree
+#' @param N_tr Total number of observations in the discovery sample
+#' @param N_est Total number of observations in the estimation sample
 #'
 #' @return A data frame describing the Network Causal Tree. Specifically,
 #' the data frame includes the NODE column identifying the node number, the OF variable
@@ -36,7 +38,8 @@
 #'
 sprout_nct = function(method, alpha, beta, gamma, delta,
                       N, sampled_clusters, W, G, Y, X, K = NULL, p,
-                      Ne, Ne_list, population_effects, minsize, depth){
+                      Ne, Ne_list, population_effects, minsize, depth,
+                      N_tr, N_est){
   
   if (is.null(K)) {
     # If K is not provided, treat all units as belonging to a single cluster
@@ -117,7 +120,9 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
                                        p = p, Ne = Ne,
                                        Ne_list = Ne_list,
                                        unit_ids = sampleid,
-                                       population_effects = population_effects)
+                                       population_effects = population_effects,
+                                       N_tr = N_tr,
+                                       N_est = N_est)
   
   return(tree_info)
 }
