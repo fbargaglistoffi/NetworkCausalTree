@@ -104,31 +104,6 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
     stop("No treatment effect selected.")
   }
   
-  node_variance <- function(node_data) {
-    n <- nrow(node_data)
-    
-    alpha * Vartau1000(
-      N = n, W = node_data$W, G = node_data$G,
-      Y = node_data$Y, p = p, Ne = Ne,
-      Ne_list = Ne_list, unit_ids = node_data$idunit
-    ) +
-      beta * Vartau1101(
-        N = n, W = node_data$W, G = node_data$G,
-        Y = node_data$Y, p = p, Ne = Ne,
-        Ne_list = Ne_list, unit_ids = node_data$idunit
-      ) +
-      gamma * Vartau1110(
-        N = n, W = node_data$W, G = node_data$G,
-        Y = node_data$Y, p = p, Ne = Ne,
-        Ne_list = Ne_list, unit_ids = node_data$idunit
-      ) +
-      delta * Vartau0100(
-        N = n, W = node_data$W, G = node_data$G,
-        Y = node_data$Y, p = p, Ne = Ne,
-        Ne_list = Ne_list, unit_ids = node_data$idunit
-      )
-  }
-  
   if (method == "penalized") {
     leaf_variances[["1"]] <- node_variance(data_tree)
   }

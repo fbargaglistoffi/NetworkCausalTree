@@ -37,6 +37,11 @@ compute_OF_Split <- function(method, alpha, beta, gamma, delta,
                              unit_ids = seq_along(W),
                              N_tr = length(W), N_est = NULL) {
   
+  if (method == "penalized" &&
+      (is.null(N_est) || N_tr <= 0 || N_est <= 0)) {
+    stop("Penalized splitting requires positive N_tr and N_est.")
+  }
+  
   # Initialize
   of<- c()
   name <-c()
@@ -193,7 +198,7 @@ compute_OF_Split <- function(method, alpha, beta, gamma, delta,
     }
       
     
-    valid_idx <- !is.na(ofx)
+    valid_idx <- is.finite(ofx)
     if (sum(valid_idx) == 0) next
     
     ofx <- ofx[valid_idx]

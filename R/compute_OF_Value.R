@@ -118,7 +118,8 @@ compute_OF_Value <- function(method, alpha, beta, gamma, delta,
       total_variance <- 0
     }
     
-    inof <- reward - penalty_coeff * (total_variance + variance)
+    inof <- (N / N_tr) * reward -
+      penalty_coeff * (total_variance + variance)
     
   } else if (method == "singular") {
 

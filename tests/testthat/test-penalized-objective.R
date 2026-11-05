@@ -112,23 +112,113 @@ test_that("penalized tree rejects a non-improving split", {
   
   N <- 8
   
+  W <- c(0, 0, 1, 1, 0, 1, 0, 1)
+  
+  Ne_list <- lapply(seq_len(N), function(i) {
+    if (i %% 2 == 1) i + 1 else i - 1
+  })
+  
+  G <- as.integer(vapply(
+    Ne_list,
+    function(ids) any(W[ids] == 1),
+    logical(1)
+  ))
+  
   tree <- identify_partitions_nct(
     method = "penalized",
     alpha = 1, beta = 0, gamma = 0, delta = 0,
     depth = 2, minsize = 1,
     N = N,
-    W = rep(c(0, 0, 1, 1), 2),
-    G = rep(c(0, 1, 0, 1), 2),
+    W = W,
+    G = G,
     Y = seq_len(N),
     X = data.frame(X.1 = rep(c(0, 1), each = 4)),
     p = rep(0.5, N),
-    Ne = rep(0, N),
-    Ne_list = replicate(N, integer(0), simplify = FALSE),
+    Ne = lengths(Ne_list),
+    Ne_list = Ne_list,
     population_effects = rep(1, 4),
     N_tr = 8, N_est = 8
   )
   
   expect_equal(nrow(tree), 1)
   expect_equal(tree$TERMINAL[1], "LEAF")
+})
+
+test_that("penalized tree replaces parent variance across multiple leaves", {
+  
+  N <- 32
+  observed_variances <- list()
+  
+  testthat::local_mocked_bindings(
+    Vartau1000 = function(N, ...) N^2,
+    
+    compute_OF_Split = function(unit_ids, total_variance, ...) {
+      
+      observed_variances[[length(observed_variances) + 1]] <<-
+        list(ids = unit_ids, variance = total_variance)
+      
+      if (length(unit_ids) == 32) {
+        return(c(of = 1, split = 1, var = "X.1"))
+      }
+      
+      if (identical(unit_ids, 1:16)) {
+        return(c(of = 1, split = 1, var = "X.2"))
+      }
+      
+      c(of = -1, split = 1, var = "X.1")
+    },
+    
+    .package = "NetworkCausalTree"
+  )
+  
+  expect_equal(
+    NetworkCausalTree:::Vartau1000(N = 32),
+    1024
+  )
+  
+  W <- rep(c(0, 0, 1, 1, 0, 1, 0, 1), 4)
+  
+  Ne_list <- lapply(seq_len(N), function(i) {
+    if (i %% 2 == 1) i + 1 else i - 1
+  })
+  
+  Ne <- lengths(Ne_list)
+  
+  G <- as.integer(vapply(
+    Ne_list,
+    function(ids) any(W[ids] == 1),
+    logical(1)
+  ))
+  
+  tree <- identify_partitions_nct(
+    method = "penalized",
+    alpha = 1, beta = 0, gamma = 0, delta = 0,
+    depth = 2, minsize = 1,
+    N = N,
+    W = W,
+    G = G,
+    Y = seq_len(N),
+    X = data.frame(
+      X.1 = rep(c(0, 1), each = 16),
+      X.2 = c(rep(c(0, 1), each = 8), rep(0, 16))
+    ),
+    p = rep(0.5, N),
+    Ne = Ne,
+    Ne_list = Ne_list,
+    population_effects = rep(1, 4),
+    N_tr = 32, N_est = 32
+  )
+  
+  expect_equal(observed_variances[[1]]$variance, 32^2)
+  
+  expect_equal(observed_variances[[2]]$variance, 16^2 + 16^2)
+  expect_equal(observed_variances[[3]]$variance, 16^2 + 16^2)
+  
+  expect_equal(observed_variances[[4]]$variance,
+               16^2 + 8^2 + 8^2)
+  expect_equal(observed_variances[[5]]$variance,
+               16^2 + 8^2 + 8^2)
+  
+  expect_equal(nrow(tree), 5)
 })
 
