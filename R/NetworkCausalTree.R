@@ -152,6 +152,8 @@ NetworkCausalTree <- function(X, Y, W,
   # Sample the clusters to be assigned to the discovery set
   clusters_disc <- sample(unique(K), size = nclusters_disc, replace = FALSE)
   disc_units <- which(K %in% clusters_disc)
+  N_tr <- length(disc_units)
+  N_est <- N - N_tr
   
   Ne_list_disc <- lapply(disc_units, function(id) {
     neigh <- intersect(Ne_list[[id]], disc_units)
@@ -187,7 +189,9 @@ NetworkCausalTree <- function(X, Y, W,
                      Ne = Ne,
                      p = p,
                      population_effects = population_effects,
-                     Ne_list = Ne_list)
+                     Ne_list = Ne_list,
+                     N_tr = N_tr,
+                     N_est = N_est)
   
   
   # Replace NA in FILTER with "NA"

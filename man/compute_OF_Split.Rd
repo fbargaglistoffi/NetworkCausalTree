@@ -20,7 +20,9 @@ compute_OF_Split(
   population_effects,
   total_variance,
   nleafs,
-  unit_ids = seq_along(W)
+  unit_ids = seq_along(W),
+  N_tr = length(W),
+  N_est = NULL
 )
 }
 \arguments{
@@ -63,6 +65,10 @@ whole population}
 }}
 
 \item{unit_ids}{Original network indices of the observations in W, G, and Y}
+
+\item{N_tr}{Total number of observations in the discovery sample}
+
+\item{N_est}{Total number of observations in the estimation sample}
 }
 \value{
 A numeric vector made up by three elements: the first one identifies the

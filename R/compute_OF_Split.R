@@ -24,6 +24,8 @@
 #' @param total_variance - to be included if method = "penalized" - whole variance
 #' @param nleafs - to be included if method = "penalized" - number of leafs
 #' @param unit_ids Original network indices of the observations in W, G, and Y
+#' @param N_tr Total number of observations in the discovery sample
+#' @param N_est Total number of observations in the estimation sample
 #'
 #' @return A numeric vector made up by three elements: the first one identifies the
 #' value of the  Objective Function is max , the second one reports the value of the variable that maximizes the  Objective Function,
@@ -32,12 +34,33 @@
 compute_OF_Split <- function(method, alpha, beta, gamma, delta,
                              W, G, Y, X, p, Ne, Ne_list,
                              population_effects, total_variance, nleafs,
-                             unit_ids = seq_along(W)) {
+                             unit_ids = seq_along(W),
+                             N_tr = length(W), N_est = NULL) {
+  
+  if (method == "penalized" &&
+      (is.null(N_est) || N_tr <= 0 || N_est <= 0)) {
+    stop("Penalized splitting requires positive N_tr and N_est.")
+  }
   
   # Initialize
   of<- c()
   name <-c()
   values<-c()
+  
+  if (method == "penalized") {
+    parent_reward <- compute_OF_Value(
+      method = "singular",
+      alpha = alpha, beta = beta,
+      gamma = gamma, delta = delta,
+      N = length(W),
+      W = W, G = G, Y = Y,
+      p = p, Ne = Ne, Ne_list = Ne_list,
+      unit_ids = unit_ids,
+      population_effects = population_effects,
+      total_variance = NULL,
+      nleafs = nleafs
+    )
+  }
   
   # Loop over all the predictors, identify all the unique splits for each variable,
   # and compute the corresponding value of OF
@@ -63,6 +86,11 @@ compute_OF_Split <- function(method, alpha, beta, gamma, delta,
       idx_left  <- !is.na(x) & x <  sp
       idx_right <- !is.na(x) & x >= sp
       
+      if (!all(xor(idx_left, idx_right))) {
+        ofx[i] <- NA
+        next
+      }
+      
       left_ids <- unit_ids[idx_left]
       right_ids <- unit_ids[idx_right]
       
@@ -74,21 +102,103 @@ compute_OF_Split <- function(method, alpha, beta, gamma, delta,
         next
       }
       
-      ofx[i] <- 1/2 * (
+      n_left <- sum(idx_left)
+      n_right <- sum(idx_right)
+      n_total <- n_left + n_right
+      
+      if (method == "penalized") {
+        
+        left_reward <- compute_OF_Value(
+          method = "singular",
+          alpha = alpha, beta = beta, gamma = gamma, delta = delta,
+          N = n_left, W = W[idx_left], G = G[idx_left],
+          Y = Y[idx_left], p = p, Ne = Ne, Ne_list = Ne_list,
+          unit_ids = left_ids,
+          population_effects = population_effects,
+          total_variance = NULL, nleafs = nleafs
+        )
+        
+        right_reward <- compute_OF_Value(
+          method = "singular",
+          alpha = alpha, beta = beta, gamma = gamma, delta = delta,
+          N = n_right, W = W[idx_right], G = G[idx_right],
+          Y = Y[idx_right], p = p, Ne = Ne, Ne_list = Ne_list,
+          unit_ids = right_ids,
+          population_effects = population_effects,
+          total_variance = NULL, nleafs = nleafs
+        )
+        
+        reward_change <- (n_left / n_total) * left_reward +
+          (n_right / n_total) * right_reward - parent_reward
+        
+        reward_change <- (n_total / N_tr) * reward_change
+        
+      }
+      
+      if (method == "penalized") {
+        weighted_variance <- function(ids) {
+          n <- length(ids)
+          
+          args <- list(
+            N = n,
+            W = W[ids],
+            G = G[ids],
+            Y = Y[ids],
+            p = p,
+            Ne = Ne,
+            Ne_list = Ne_list,
+            unit_ids = unit_ids[ids]
+          )
+          
+          if (alpha > 0) {
+            return(do.call(Vartau1000, args))
+          }
+          if (beta > 0) {
+            return(do.call(Vartau1101, args))
+          }
+          if (gamma > 0) {
+            return(do.call(Vartau1110, args))
+          }
+          if (delta > 0) {
+            return(do.call(Vartau0100, args))
+          }
+          
+          stop("No treatment effect selected.")
+        }
+        
+        variance_change <- weighted_variance(which(idx_left)) +
+          weighted_variance(which(idx_right)) -
+          weighted_variance(seq_along(W))
+        penalty_coeff <- 1 / N_tr + 1 / N_est
+        
+        ofx[i] <- reward_change - penalty_coeff * variance_change
+        
+      } else {
+      ofx[i] <- (n_left / n_total) *
         compute_OF_Value(method, alpha, beta, gamma, delta,
-                         N = sum(idx_left), W = W[idx_left], G = G[idx_left], Y = Y[idx_left],
-                         Ne = Ne, p = p, Ne_list = Ne_list, unit_ids = left_ids,
+                         N = n_left, W = W[idx_left], G = G[idx_left],
+                         Y = Y[idx_left],
+                         Ne = Ne, p = p, Ne_list = Ne_list,
+                         unit_ids = left_ids,
                          population_effects = population_effects,
-                         nleafs = nleafs, total_variance = total_variance) +
-          compute_OF_Value(method, alpha, beta, gamma, delta,
-                           N = sum(idx_right), W = W[idx_right], G = G[idx_right], Y = Y[idx_right],
-                           Ne = Ne, p = p, Ne_list = Ne_list, unit_ids = right_ids,
-                           population_effects = population_effects,
-                           nleafs = nleafs, total_variance = total_variance)
-      )
+                         nleafs = nleafs, total_variance = total_variance,
+                         N_tr = N_tr,
+                         N_est = N_est) +
+        (n_right / n_total) *
+        compute_OF_Value(method, alpha, beta, gamma, delta,
+                         N = n_right, W = W[idx_right], G = G[idx_right],
+                         Y = Y[idx_right],
+                         Ne = Ne, p = p, Ne_list = Ne_list,
+                         unit_ids = right_ids,
+                         population_effects = population_effects,
+                         nleafs = nleafs, total_variance = total_variance,
+                         N_tr = N_tr,
+                         N_est = N_est)
+      }
     }
+      
     
-    valid_idx <- !is.na(ofx)
+    valid_idx <- is.finite(ofx)
     if (sum(valid_idx) == 0) next
     
     ofx <- ofx[valid_idx]

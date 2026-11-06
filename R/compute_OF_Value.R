@@ -20,16 +20,20 @@
 #' where each element i contains the IDs of the direct neighbors of unit i
 #' @param population_effects 4 dimensional vector containing the estimated effects in the
 #' whole population
-#' @param total_variance - to be included if method = "penalized" - whole variance
+#' @param total_variance Sum of variance contributions from other terminal
+#' leaves, excluding the current node, for the penalized objective
 #' @param nleafs - to be included if method = "penalized" - number of leafs
 #' @param unit_ids Original network indices of the observations in W, G, and Y
+#' @param N_tr Total number of observations in the discovery sample
+#' @param N_est Total number of observations in the estimation sample
 #'
 #' @return A numeric value corresponding to the computed  Objective Function
 #'
 compute_OF_Value <- function(method, alpha, beta, gamma, delta,
                              N, W, G, Y, p, Ne, Ne_list, population_effects,
                              total_variance, nleafs,
-                             unit_ids = seq_along(W)) {
+                             unit_ids = seq_along(W),
+                             N_tr = N, N_est = NULL) {
 
   # Initialize
   inof=NULL
@@ -64,31 +68,59 @@ compute_OF_Value <- function(method, alpha, beta, gamma, delta,
                                  unit_ids = unit_ids) ^ 2) /
                        (population_effects[4]) ^ 2)
   } else if (method == "penalized") {
+    
+    if (is.null(N_est) || N_tr <= 0 || N_est <= 0) {
+      stop("Penalized objective requires positive N_tr and N_est.")
+    }
+    
+    penalty_coeff <- 1 / N_tr + 1 / N_est
 
-  inof <-  alpha * ((EffTau1000(N = N, W = W, G = G, Y = Y,
-                                p = p, Ne_list = Ne_list,
-                                unit_ids = unit_ids) ^ 2) -
-                    2 / nleafs * sum(c(total_variance, Vartau1000(N = N, W = W, Y = Y,G  = G,
-                                                                  p = p, Ne = Ne, Ne_list = Ne_list,
-                                                                  unit_ids = unit_ids)))) +
-           beta *  ((EffTau1101(N = N, W = W, G = G, Y = Y,
-                                p = p, Ne_list = Ne_list,
-                                unit_ids = unit_ids) ^ 2) -
-                    2 / nleafs *sum(c(total_variance, Vartau1101(N = N, W = W, Y = Y, G = G,
-                                                                 p = p, Ne = Ne, Ne_list = Ne_list,
-                                                                 unit_ids = unit_ids)))) +
-           gamma * ((EffTau1110(N = N, W = W, G = G, Y = Y,
-                                p = p, Ne_list = Ne_list,
-                                unit_ids = unit_ids) ^ 2) -
-                   2 / nleafs * sum(c(total_variance,Vartau1110(N = N, W = W, Y = Y, G = G,
-                                                                p = p, Ne = Ne, Ne_list = Ne_list,
-                                                                unit_ids = unit_ids))))+
-           delta * ((EffTau0100(N = N, W = W, G = G, Y = Y,
-                                p = p, Ne_list = Ne_list,
-                                unit_ids = unit_ids) ^ 2) -
-                   2 / nleafs * sum(c(total_variance,Vartau0100(N = N, W = W, Y = Y, G = G,
-                                                                p = p, Ne = Ne, Ne_list = Ne_list,
-                                                                unit_ids = unit_ids))))
+    reward <- compute_OF_Value(
+      method = "singular",
+      alpha = alpha, beta = beta,
+      gamma = gamma, delta = delta,
+      N = N, W = W, G = G, Y = Y,
+      p = p, Ne = Ne, Ne_list = Ne_list,
+      population_effects = population_effects,
+      total_variance = NULL, nleafs = nleafs,
+      unit_ids = unit_ids
+    )
+    
+    if (alpha > 0) {
+      variance <- Vartau1000(
+        N = N, W = W, G = G, Y = Y,
+        p = p, Ne = Ne, Ne_list = Ne_list,
+        unit_ids = unit_ids
+      )
+    } else if (beta > 0) {
+      variance <- Vartau1101(
+        N = N, W = W, G = G, Y = Y,
+        p = p, Ne = Ne, Ne_list = Ne_list,
+        unit_ids = unit_ids
+      )
+    } else if (gamma > 0) {
+      variance <- Vartau1110(
+        N = N, W = W, G = G, Y = Y,
+        p = p, Ne = Ne, Ne_list = Ne_list,
+        unit_ids = unit_ids
+      )
+    } else if (delta > 0) {
+      variance <- Vartau0100(
+        N = N, W = W, G = G, Y = Y,
+        p = p, Ne = Ne, Ne_list = Ne_list,
+        unit_ids = unit_ids
+      )
+    } else {
+      stop("Penalized objective requires a selected treatment effect.")
+    }
+    
+    if (is.null(total_variance)) {
+      total_variance <- 0
+    }
+    
+    inof <- (N / N_tr) * reward -
+      penalty_coeff * (total_variance + variance)
+    
   } else if (method == "singular") {
 
    inof <- alpha * (EffTau1000(N = N, W = W, G = G, Y = Y,

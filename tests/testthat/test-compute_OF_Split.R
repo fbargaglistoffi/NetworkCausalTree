@@ -28,3 +28,51 @@ test_that("compute_OF_Split runs on tiny data and returns valid structure", {
   expect_true(result[2] %in% X)
   expect_true(is.character(result[3]) && nchar(result[3]) > 0)
 })
+
+test_that("compute_OF_Split uses sample-size-weighted objectives", {
+  
+  n <- 12
+  X <- matrix(c(rep(0, 8), rep(1, 4)), ncol = 1)
+  colnames(X) <- "X.1"
+  
+  W <- c(0, 0, 1, 1, 0, 0, 1, 1,
+         0, 1, 0, 1)
+  G <- c(0, 1, 0, 1, 0, 1, 0, 1,
+         0, 0, 1, 1)
+  Y <- seq_len(n)
+  
+  p <- rep(0.5, n)
+  Ne_list <- replicate(n, integer(0), simplify = FALSE)
+  Ne <- lengths(Ne_list)
+  
+  result <- compute_OF_Split(
+    method = "singular",
+    alpha = 1, beta = 0, gamma = 0, delta = 0,
+    W = W, G = G, Y = Y, X = X,
+    p = p, Ne = Ne, Ne_list = Ne_list,
+    population_effects = rep(1, 4),
+    total_variance = 1, nleafs = 2
+  )
+  
+  left_of <- compute_OF_Value(
+    "singular", 1, 0, 0, 0,
+    N = 8, W = W[1:8], G = G[1:8], Y = Y[1:8],
+    p = p, Ne = Ne, Ne_list = Ne_list,
+    unit_ids = 1:8,
+    population_effects = rep(1, 4),
+    total_variance = 1, nleafs = 2
+  )
+  
+  right_of <- compute_OF_Value(
+    "singular", 1, 0, 0, 0,
+    N = 4, W = W[9:12], G = G[9:12], Y = Y[9:12],
+    p = p, Ne = Ne, Ne_list = Ne_list,
+    unit_ids = 9:12,
+    population_effects = rep(1, 4),
+    total_variance = 1, nleafs = 2
+  )
+  
+  expected <- (8 / 12) * left_of + (4 / 12) * right_of
+  
+  expect_equal(as.numeric(result["of"]), expected)
+})

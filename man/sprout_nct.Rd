@@ -22,7 +22,9 @@ sprout_nct(
   Ne_list,
   population_effects,
   minsize,
-  depth
+  depth,
+  N_tr,
+  N_est
 )
 }
 \arguments{
@@ -66,6 +68,10 @@ whole population}
 to be required in the leafs}
 
 \item{depth}{depth of the tree}
+
+\item{N_tr}{Total number of observations in the discovery sample}
+
+\item{N_est}{Total number of observations in the estimation sample}
 }
 \value{
 A data frame describing the Network Causal Tree. Specifically,
