@@ -1,3 +1,4 @@
+
 ---
 title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover
   effects under network interference'
@@ -6,7 +7,7 @@ tags:
 - interference
 - heterogeneous effects
 - machine learning
-date: "15 October 2026"
+date: "15 November 2026"
 output: pdf_document
 bibliography: paper.bib
 corresponding:
@@ -35,7 +36,7 @@ affiliations:
   index: 2
 - name: Bank of Italy and Sant'Anna School for Advanced Studies, Italy
   index: 3
-- name:  Causal Learning and Artificial Intelligence Lab, Institute of Science and Technology Austria, Austria
+- name: Causal Learning and Artificial Intelligence Lab, Institute of Science and Technology Austria, Austria
   index: 4
 - name: Department of Biostatistics, Yale University, USA
   index: 5
@@ -47,7 +48,7 @@ Interference occurs when treatment assigned to one unit influences the outcomes 
 
 To integrate the aforementioned two topics in the field of causal inference, @bargagli2025heterogeneous introduces a novel machine learning algorithm, named Network Causal Tree (NCT), that explores the heterogeneity of treatment and spillover effects concerning individual, neighborhood, and network characteristics within randomized settings. Evaluating the heterogeneity of treatment and spillover effect is crucial for identifying both those sub-populations who are responsive to the treatment they received and those who are highly susceptible to the treatment received by other units. Heterogeneity exploration is performed via an interpretable decision tree algorithm. Decision trees provide high levels of interpretability by offering transparent insights into the relationships in the data that are learned by the model [@murdoch2019definitions]. By recursively partitioning the data via decision rules, decision trees transform complex data patterns into an intelligible series of *if-then* decision rules. NCT is designed to operate within clustered neighborhood interference (CNI), where units are partitioned into distinct clusters, spillover mechanisms exclusively take place within clusters based on the links of a cluster-specific network and units are assumed to receive an indirect exposure to the intervention if they have at least one treated peer within their immediate neighbors. The estimation of conditional effects is carried out using an extended version of the Horvitz-Thompson estimator [@aronow2017estimating], tailored to accommodate clustered network interference. `NetworkCausalTree` is an R Package providing a flexible implementation of the Network Causal Tree algorithm.
 
-This paper introduces the `NetworkCausalTree` R package, the first open-source implementation of a decision-tree method for estimating heterogeneous treatment and spillover effects under clustered network interference. All analyses and figures in this paper can be reproduced using the scripts and example data provided in the package’s GitHub repository.
+This paper introduces the `NetworkCausalTree` R package, the first open-source implementation of a decision-tree method for estimating heterogeneous treatment and spillover effects under clustered network interference. Building on the NCT methodology introduced by @bargagli2025heterogeneous, the package provides a refined implementation featuring honest cluster-level sample splitting, improved splitting and stopping criteria, exact exposure-probability calculations under heterogeneous independent Bernoulli assignment, and conservative design-based variance estimation. These components are supported by numerical validation and automated software tests.
 
 # Statement of need
 
@@ -75,7 +76,7 @@ To account for the current lack of existing methods for a data-driven discovery 
 
 # Algorithm
 
-The NCT algorithm is designed to detect and estimate heterogeneous treatment and spillover effects in randomized settings under CNI. Under CNI, spillover is confined to units within the same cluster, and an individual's outcome is influenced by the treatment status of directly connected units in the cluster-specific network. Potential outcomes $Y_{ik}(w,g)$---where $k\in \mathcal{K}=[1, \ldots, K]$ is the cluster indicator, and $i=1,\ldots, n_k$ is the unit indicator in each cluster $k$---are indexed with respect to the individual treatment $W_{ik} = w$ and to the neighborhood treatment $G_{ik} = g$, which is defined as a binary variable that equals 1 if the unit $ik$ has at least one treated neighbor, 0 otherwise. For each observation $ik$ in the sample $\mathcal{V}$ we observe the cluster indicator $M_{ik}$ and a vector of individual or network characteristics $\mathbf{X_{ik}}$. The adjacency matrix describing interactions between units within a given cluster $k$ is denoted with $\mathbf{A_{k}}$. Estimands of interest $\tau_{(w,g;w',g')}$ encompass two treatment and two spillover effects, comparing average potential outcomes under varying individual or neighborhood treatment statuses, while keeping the other constant. For the subset of units with covariate vectors $\mathbf{x} \in \mathcal{X}$ that are mapped in the leaf $l(\mathbf{x})$, we define the leaf-specific conditional average causal effect (CACE) comparing the treatment status $(w,g)$ and the one $(w',g')$ as follows:
+The NCT algorithm is designed to detect and estimate heterogeneous treatment and spillover effects in randomized settings under CNI. Under CNI, spillover is confined to units within the same cluster, and an individual's outcome is influenced by the treatment status of directly connected units in the cluster-specific network. Potential outcomes $Y_{ik}(w,g)$---where $k\in \mathcal{K}=[1, \ldots, K]$ is the cluster indicator, and $i=1,\ldots, n_k$ is the unit indicator in each cluster $k$---are indexed with respect to the individual treatment $W_{ik} = w$ and to the neighborhood treatment $G_{ik} = g$, which is defined as a binary variable that equals 1 if the unit $ik$ has at least one treated neighbor, 0 otherwise. For each observation $ik$ in the sample $\mathcal{V}$ we observe the cluster indicator $K_{ik}$ and a vector of individual or network characteristics $\mathbf{X_{ik}}$. The adjacency matrix describing interactions between units within a given cluster $k$ is denoted with $\mathbf{A_{k}}$. Estimands of interest $\tau_{(w,g;w',g')}$ encompass two treatment and two spillover effects, comparing average potential outcomes under varying individual or neighborhood treatment statuses, while keeping the other constant. For the subset of units with covariate vectors $\mathbf{x} \in \mathcal{X}$ that are mapped in the leaf $l(\mathbf{x})$, we define the leaf-specific conditional average causal effect (CACE) comparing the treatment status $(w,g)$ and the one $(w',g')$ as follows:
 
 $$
 \tau_{(w,g;w',g')}(l(\mathbf{x})) =
@@ -96,23 +97,49 @@ These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025he
 
 `NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate more than one causal estimand simultaneously: researchers rule the extent of which the four estimands contribute to the objective function used to partition the covariate space by assigning customized weights, included in the vector $\omega(w,g;w',g')$ . `NetworkCausalTree` procedure is divided into two steps: discovery and estimation. Each cluster is randomly assigned to either the discovery or the estimation set (using a procedure that is commonly referred to as *honest splitting*). In the discovery step, `NetworkCausalTree` builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves that are not sufficiently representative of the four exposure conditions. In the estimation step, `NetworkCausalTree` estimates the CACEs and their standard errors in each leaf. The steps of the `NetworkCausalTree` algorithm are illustrated in the Algorithm 1 table.
 
+The current implementation further refines the splitting procedure. In particular, the normalization constants used in the composite splitting criterion are estimated exclusively on the discovery sample, preserving the separation between tree construction and estimation. Candidate splits are evaluated using sample-size-weighted contributions from the two child nodes, and a split is accepted only when both children satisfy the minimum-size requirements and form a complete partition of the parent node.
+
+For the variance-penalized splitting criterion (`method = "penalized"`), the software evaluates the improvement in the overall partition objective. For a parent node $P$ and candidate children $L$ and $R$, the change in the objective is
+
+$$
+\Delta Q^H =
+\frac{
+n_L\widehat{\tau}_L^2+
+n_R\widehat{\tau}_R^2-
+n_P\widehat{\tau}_P^2
+}{N^{tr}}
+-
+\left(
+\frac{1}{N^{tr}}+\frac{1}{N^{est}}
+\right)
+\left(
+\widehat{V}_L+
+\widehat{V}_R-
+\widehat{V}_P
+\right),
+$$
+
+where $N^{tr}$ and $N^{est}$ denote the total discovery and estimation sample sizes, respectively. The variance contribution of the parent is replaced by those of its children, while contributions from other terminal leaves remain unchanged. A penalized split is accepted only if it improves the objective and satisfies the usual stopping criteria.
+
 ![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png)
 
 # Software Design
 
 The implementation separates tree construction, leaf-specific causal effect estimation, and uncertainty quantification into distinct computational components. This modular structure allows the discovery and estimation stages to operate on separate sets of clusters and facilitates independent validation of the probability and variance calculations.
 
-The package supports both effect-specific and composite splitting criteria, allowing researchers to investigate heterogeneity in individual treatment effects, spillover effects, or both simultaneously.
+The package supports effect-specific, composite, and variance-penalized splitting criteria, allowing researchers to investigate heterogeneity in individual treatment effects, spillover effects, or both simultaneously. The revised splitting procedure uses sample-size-weighted objectives and ensures that accepted splits preserve the partition structure of the tree. The variance-penalized option additionally accounts for the change in estimated uncertainty associated with a candidate split.
 
 ## Exposure probabilities and conservative inference
 
 The `NetworkCausalTree` package implements design-based estimation and inference under clustered network interference. The current implementation considers a binary network exposure, defined by whether an individual has at least one treated neighbor, and supports independent Bernoulli treatment assignment with potentially heterogeneous unit-level assignment probabilities.
 
-Marginal exposure probabilities are computed using the known assignment probabilities of the units belonging to each exposure-defining neighborhood. Joint exposure probabilities are calculated exactly by conditioning on individual treatment assignments and applying inclusion--exclusion over the relevant network neighborhoods. This approach accommodates direct connections, shared neighbors, and zero joint-exposure probabilities without requiring exhaustive enumeration of treatment assignments.
+Marginal exposure probabilities are computed using the known assignment probabilities of the units belonging to each exposure-defining neighborhood. Joint exposure probabilities are calculated exactly by conditioning on individual treatment assignments and applying inclusion--exclusion over the relevant network neighborhoods. This approach accommodates direct connections, shared neighbors, and zero joint-exposure probabilities without requiring exhaustive enumeration of treatment assignments. Numerically stable calculations are used to distinguish genuinely small positive probabilities from structurally impossible exposure configurations.
 
 For uncertainty quantification, the package implements design-based conservative variance estimation following the framework of @aronow2017estimating. The implementation incorporates the dependence induced by network interference and conservative variance and covariance corrections for exposure configurations with zero joint probability, based on Young's inequality.
 
 Importantly, when estimating leaf-specific causal effects, the original exposure-defining neighborhoods are preserved, while the set of focal units is restricted to the selected subpopulation.
+
+These design choices involve several trade-offs. Honest sample splitting avoids reusing discovery outcomes for final estimation but reduces the sample size available to each stage. Exact marginal and joint exposure probabilities accommodate heterogeneous assignment probabilities and network dependence, although they can be computationally more demanding than simplified approximations. Similarly, conservative variance estimation supports inference when some joint exposure probabilities are zero, potentially at the cost of wider uncertainty estimates. The modular implementation allows these components to be tested independently and facilitates future methodological extensions.
 
 # Usage
 
@@ -123,46 +150,46 @@ library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-`data_generator_direct()` and `data_generator_direct_indirect()` are flexible synthetic dataset generators, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. Both accept key arguments `N` (sample size), `M` (number of binary covariates), `k` (number of clusters), `p` (vector of individual treatment assignment probabilities), `het` (whether treatment effects are heterogeneous), `h` (effect magnitude), and `method_networks` 
-(network generation model).  Both return a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. `data_generator_direct()` generates outcomes with direct treatment effects only, while `data_generator_direct_indirect()` additionally includes spillover (indirect) effects in the outcome model. For `data_generator_direct_indirect()` with `het = TRUE`, both the direct effect $\tau_{(1,0;0,0)}$, and the spillover effect $\tau_{(0,1;0,0)}$ equal $h$ if $x1=0$ and $-h$ if $x1 = 1$.
+`data_generator_direct()` and `data_generator_direct_indirect()` are flexible synthetic dataset generators, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. Both accept key arguments `N` (sample size), `M` (number of binary covariates), `k` (number of clusters), `p` (vector of individual treatment assignment probabilities), `het` (whether treatment effects are heterogeneous), `h` (effect magnitude), and `method_networks`
+(network generation model). Both return a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. `data_generator_direct()` generates outcomes with direct treatment effects only, while `data_generator_direct_indirect()` additionally includes spillover (indirect) effects in the outcome model. For `data_generator_direct_indirect()` with `het = TRUE`, both the direct effect $\tau_{(1,0;0,0)}$, and the spillover effect $\tau_{(0,1;0,0)}$ equal $h$ if $x1=0$ and $-h$ if $x1 = 1$.
 
 The `data_generator_direct()` and `data_generator_direct_indirect()` functions return as output a list of synthetic data including the covariates matrix (`X`), the outcome vector (`Y`), the individual intervention vector (`W`), the adjacency matrix (`A`), the neighborhood intervention vector (`G`), the group membership vector (`K`) and the vector describing the probability to be assigned to the active individual intervention vector (`p`).
 
 ``` r
-dataset_direct <- data_generator_direct(N = 4000, 
+dataset_direct <- data_generator_direct(N = 4000,
                                         M = 4,
-                                        k = 80, 
-                                        p = rep(0.2,4000), 
-                                        het = TRUE, 
-                                        h = 2, 
-                                        method_networks = "er", 
+                                        k = 80,
+                                        p = rep(0.2,4000),
+                                        het = TRUE,
+                                        h = 2,
+                                        method_networks = "er",
                                         param_er = 0.1)
-                                        
-dataset_direct_indirect <- data_generator_direct_indirect(N = 4000, 
+
+dataset_direct_indirect <- data_generator_direct_indirect(N = 4000,
                                                           M = 4,
-                                                          k = 80, 
-                                                          p = rep(0.2,4000), 
-                                                          het = TRUE, 
-                                                          h = 2, 
-                                                          method_networks = "er", 
+                                                          k = 80,
+                                                          p = rep(0.2,4000),
+                                                          het = TRUE,
+                                                          h = 2,
+                                                          method_networks = "er",
                                                           param_er = 0.1)
 ```
 
-We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package. To run the `NetworkCausalTree` function, the user has to input the following arguments: the data (`W`,`Y`,`X`,`M`) = $(W_{ik}, Y_{ik}, \mathbf{X_{ik}}, M_{ik})$, where $ik \in \mathcal{V}$; the vector collecting individual treatment assignment probabilities `p`, the global adjacency matrix `A` that includes the cluster specific matrices $\mathbf{A_{k}}$. Moreover, users must specify the weights vector $\omega(w,g;w',g')$, ruling the extent of which each causal estimands contribute to the objective function (`effect_weights`); the `ratio_disc` parameter, representing the ratio of clusters to be included in the discovery set only; two parameters ruling the stopping criteria of the tree (`depth` measures the maximum depth, while `minsize` specifies the minimum number of observations for each level of the joint treatment $(w,g)$ to be required in the leafs; the method to compute the objective function, that is, `method = "singular"` for NCT targeted to one single effect, `method = "composite"` for NCT targeted to multiple effects, `method = "penalized"` for a criterion function computed while considering a single effect only and including a penalization term related to the variance within the leafs; the desired `output` of the function ( if `output = "detection"` only point estimates are computed, if `output = "estimation"` both estimated effects and their standard errors are computed).
+We propose here two examples of how to run the Network Causal Tree algorithm by the `NetworkCausalTree` package. To run the `NetworkCausalTree` function, the user has to input the following arguments: the data (`W`,`Y`,`X`,`K`) = $(W_{ik}, Y_{ik}, \mathbf{X_{ik}}, K_{ik})$, where $ik \in \mathcal{V}$; the vector collecting individual treatment assignment probabilities `p`, the global adjacency matrix `A` that includes the cluster specific matrices $\mathbf{A_{k}}$. Moreover, users must specify the weights vector $\omega(w,g;w',g')$, ruling the extent of which each causal estimands contribute to the objective function (`effect_weights`); the `ratio_disc` parameter, representing the ratio of clusters to be included in the discovery set only; two parameters ruling the stopping criteria of the tree (`depth` measures the maximum depth, while `minsize` specifies the minimum number of observations for each level of the joint treatment $(w,g)$ to be required in the leafs; the method to compute the objective function, that is, `method = "singular"` for NCT targeted to one single effect, `method = "composite"` for NCT targeted to multiple effects, `method = "penalized"` for a criterion function computed while considering a single effect only and including a penalization term related to the variance within the leafs; the desired `output` of the function ( if `output = "detection"` only point estimates are computed, if `output = "estimation"` both estimated effects and their standard errors are computed).
 
 **Example 1.** Running Network Causal Tree while relying on a singular in-sample splitting criterion function, that assesses the heterogeneity of the main treatment effect ($\tau_{(1,0;0,0)}$) only
 
 ``` r
 result <- NetworkCausalTree(X = dataset_direct[["X"]],
                             Y = dataset_direct[["Y"]],
-                            W = dataset_direct[["W"]], 
+                            W = dataset_direct[["W"]],
                             A = dataset_direct[["A"]],
                             K = dataset_direct[["K"]],
-                            p = dataset_direct[["p"]], 
+                            p = dataset_direct[["p"]],
                             effect_weights = c(1,0,0,0),
                             ratio_disc = 0.5,
                             depth = 2,
-                            minsize = 5, 
+                            minsize = 5,
                             method = "singular",
                             output = "estimation")
 ```
@@ -172,14 +199,14 @@ result <- NetworkCausalTree(X = dataset_direct[["X"]],
 ``` r
 result <- NetworkCausalTree(X = dataset_direct_indirect[["X"]],
                             Y = dataset_direct_indirect[["Y"]],
-                            W = dataset_direct_indirect[["W"]], 
+                            W = dataset_direct_indirect[["W"]],
                             A = dataset_direct_indirect[["A"]],
                             K = dataset_direct_indirect[["K"]],
-                            p = dataset_direct_indirect[["p"]], 
+                            p = dataset_direct_indirect[["p"]],
                             effect_weights = c(0.25,0.25,0.25,0.25),
                             ratio_disc = 0.5,
                             depth = 2,
-                            minsize = 5, 
+                            minsize = 5,
                             method = "composite",
                             output = "estimation")
 ```
@@ -192,7 +219,7 @@ For instance, Figure 2 shows the tree obtained from **Example 1**. The code used
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset_direct[["X"]])
 
-plot_NCT(NCT = result, 
+plot_NCT(NCT = result,
          cov_names = cov_names,
          title = title)
 ```
@@ -205,7 +232,7 @@ Figure 3 shows the tree obtained from **Example 2**.
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
 cov_names <- colnames(dataset_direct_indirect[["X"]])
 
-plot_NCT(NCT = result, 
+plot_NCT(NCT = result,
          cov_names = cov_names,
          title = title)
 ```
@@ -218,7 +245,7 @@ Online documentation for the package can be found at [fbargaglistoffi/NetworkCau
 
 # Reproducibility and dependencies
 
-All examples in this paper can be reproduced using the scripts provided in the `tests/examples/` directory of the package’s GitHub repository. The package relies solely on standard R libraries, which are automatically installed and loaded upon installation of `NetworkCausalTree`. Numerical stability and reproducibility have been validated through extensive simulation studies and example analyses across multiple systems. **The package passes all standard R CMD check tests without errors or warnings, confirming full compliance with CRAN submission standards.**
+The package includes a `testthat` suite, executed as part of `R CMD check`, covering sample-splitting invariants, exposure probabilities, conservative variance estimation, splitting objectives, and stopping rules. Numerical checks compare selected exposure-probability and variance calculations against exact randomization-based results on small networks. GitHub Actions checks the package on Linux, macOS, and Windows. The latest tested revision completed these checks without test failures or warnings, with a remaining note concerning non-standard top-level repository files. The usage examples above provide the main workflow for applying the software.
 
 # Implementation and future work
 
@@ -228,7 +255,7 @@ Future extensions will include support for continuous exposures (e.g., multiple 
 
 # AI usage disclosure
 
-AI-assisted tools were used in two capacities: (i) GitHub Copilot was used to assist with code review; (ii) a large language model was used  for copy-editing and proofreading of the paper text. Technical content, software design decisions, algorithmic choices, and methodological contributions were made by the human authors, who reviewed and validated AI-assisted outputs.
+AI-assisted tools, including GitHub Copilot and a large language model, were used to support code review, suggestions for code and test revisions, and copy-editing of the manuscript. Technical content, methodological decisions, and software design choices remain the responsibility of the human authors, who reviewed and validated AI-assisted outputs.
 
 # Acknowledgements
 
