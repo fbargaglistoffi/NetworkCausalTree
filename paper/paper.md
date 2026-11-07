@@ -255,7 +255,7 @@ Future extensions will include support for continuous exposures (e.g., multiple 
 
 # AI usage disclosure
 
-AI-assisted tools, including GitHub Copilot and a large language model, were used to support code review, suggestions for code and test revisions, and copy-editing of the manuscript. Technical content, methodological decisions, and software design choices remain the responsibility of the human authors, who reviewed and validated AI-assisted outputs.
+AI-assisted tools, including GitHub Copilot and a large language model, were used to support code review, suggestions for code and test revisions, and copy-editing of the manuscript. Technical content, methodological decisions, and software design choices pertain to the human authors.
 
 # Acknowledgements
 
