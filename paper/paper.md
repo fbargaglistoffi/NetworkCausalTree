@@ -257,6 +257,6 @@ AI-assisted tools, including GitHub Copilot and a large language model, were use
 
 # Acknowledgements
 
-This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
+FBS acknowledges funding from Amazon Web Services (AWS) grant on ``AI/ML for Identifying Social Determinants of Health'' and from the Society of Hellman Fellows.
 
 # References
