@@ -119,7 +119,7 @@ $$
 
 where $N^{tr}$ and $N^{est}$ denote the total discovery and estimation sample sizes, respectively. The variance contribution of the parent is replaced by those of its children, while contributions from other terminal leaves remain unchanged. A penalized split is accepted only if it improves the objective and satisfies the usual stopping criteria.
 
-![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png)
+![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png) 
 
 # Software Design
 
