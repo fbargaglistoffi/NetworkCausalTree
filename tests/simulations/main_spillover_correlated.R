@@ -59,6 +59,16 @@ system.time({
     .packages = c("NetworkCausalTree", "MASS", "dplyr", "stringr")
   ) %dopar% {
 
+    first_split_uses <- function(filters, variable) {
+      if (length(filters) < 2 || is.na(filters[2])) return(FALSE)
+
+      stringr::str_detect(
+        filters[2],
+        paste0("\\b", gsub(".", "\\\\.", variable, fixed = TRUE), "\\b")
+      )
+    }
+
+
     ## Load Packages and Functions
     library(NetworkCausalTree)
     library(MASS)
@@ -242,16 +252,13 @@ system.time({
       SNCT$RULE.NUM[which(rule.sel=="X.1 >= 1 & X.2 >= 1" | rule.sel=="X.2 >= 1 & X.1 >= 1")] <- 2
 
       # Variables Importance
-      vi.x1[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.2")[2]
-      vi.X[1, which(seq==i)] <-  cbind(str_detect(SNCT$FILTER, "X.3")[2] |
-                                         str_detect(SNCT$FILTER, "X.4")[2] |
-                                         str_detect(SNCT$FILTER, "X.5")[2] |
-                                         str_detect(SNCT$FILTER, "X.6")[2] |
-                                         str_detect(SNCT$FILTER, "X.7")[2] |
-                                         str_detect(SNCT$FILTER, "X.8")[2] |
-                                         str_detect(SNCT$FILTER, "X.9")[2] |
-                                         str_detect(SNCT$FILTER, "X.10")[2])
+      vi.x1[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.1")
+      vi.x2[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.2")
+      vi.X[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 3:10),
+        function(x) first_split_uses(SNCT$FILTER, x),
+        logical(1)
+      ))
 
       if (correct==2){
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -344,16 +351,13 @@ system.time({
 
 
       # Variables Importance
-      vi.x1.main[1, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.main[1, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.2")[2]
-      vi.X.main[1, which(seq==i)] <-  cbind(str_detect(SNCT_main$FILTER, "X.3")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.5")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.7")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.9")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.10")[2])
+      vi.x1.main[1, which(seq == i)] <- first_split_uses(SNCT_main$FILTER, "X.1")
+      vi.x2.main[1, which(seq == i)] <- first_split_uses(SNCT_main$FILTER, "X.2")
+      vi.X.main[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 3:10),
+        function(x) first_split_uses(SNCT_main$FILTER, x),
+        logical(1)
+      ))
 
       if (correct.main==2){
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -447,16 +451,13 @@ system.time({
 
 
       # Variables Importance
-      vi.x1.spil[1, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.spil[1, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.2")[2]
-      vi.X.spil[1, which(seq==i)] <-  cbind(str_detect(SNCT_spil$FILTER, "X.3")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.5")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.7")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.9")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.10")[2])
+      vi.x1.spil[1, which(seq == i)] <- first_split_uses(SNCT_spil$FILTER, "X.1")
+      vi.x2.spil[1, which(seq == i)] <- first_split_uses(SNCT_spil$FILTER, "X.2")
+      vi.X.spil[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 3:10),
+        function(x) first_split_uses(SNCT_spil$FILTER, x),
+        logical(1)
+      ))
 
       if (correct.spil==2){
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -544,22 +545,22 @@ system.time({
 ###############
 
 # Extract the Results
-correct_rules <- na.omit(matrix[[1]])
-tau_est_1000 <- na.omit(matrix[[2]])
-eta_est_0100 <- na.omit(matrix[[3]])
-se_tau_est_1000 <- na.omit(matrix[[4]])
-se_eta_est_0100 <- na.omit(matrix[[5]])
-vi_x1 <- na.omit(matrix[[6]])
-vi_x2 <- na.omit(matrix[[7]])
-vi_X <- na.omit(matrix[[8]])
+correct_rules <- matrix[[1]]
+tau_est_1000 <- matrix[[2]]
+eta_est_0100 <- matrix[[3]]
+se_tau_est_1000 <- matrix[[4]]
+se_eta_est_0100 <- matrix[[5]]
+vi_x1 <- matrix[[6]]
+vi_x2 <- matrix[[7]]
+vi_X <- matrix[[8]]
 
 # Correct Rules
 avg_correct_rules <- colMeans(correct_rules)
 
 # Variable Importance
-vi_x1 <- colMeans(vi_x1)
-vi_x2 <- colMeans(vi_x2)
-vi_X <- colMeans(vi_X)
+vi_x1 <- colMeans(vi_x1, na.rm = TRUE)
+vi_x2 <- colMeans(vi_x2, na.rm = TRUE)
+vi_X <- colMeans(vi_X, na.rm = TRUE)
 
 # Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
@@ -673,16 +674,16 @@ write.csv(results_nctree, file = "two_main_spillover_effects_composite_corr_0.25
 ##########################
 
 # Extract Rules
-correct_rules_main <- na.omit(matrix[[9]]) # number of times treatment tree gets the correct rules for treatment
-correct_rules_composite <- na.omit(matrix[[25]]) # number of times composite tree gets the correct rules for treatment
-correct_rules_spil <- na.omit(matrix[[28]]) # number of times spillover tree gets the correct rules for treatment
-tau_est_1000 <- na.omit(matrix[[10]])
-eta_est_0100 <- na.omit(matrix[[11]])
-se_tau_est_1000 <- na.omit(matrix[[12]])
-se_eta_est_0100 <- na.omit(matrix[[13]])
-vi_x1_main <- na.omit(matrix[[14]])
-vi_x2_main <- na.omit(matrix[[15]])
-vi_X_main <- na.omit(matrix[[16]])
+correct_rules_main <- matrix[[9]] # number of times treatment tree gets the correct rules for treatment
+correct_rules_composite <- matrix[[25]] # number of times composite tree gets the correct rules for treatment
+correct_rules_spil <- matrix[[28]] # number of times spillover tree gets the correct rules for treatment
+tau_est_1000 <- matrix[[10]]
+eta_est_0100 <- matrix[[11]]
+se_tau_est_1000 <- matrix[[12]]
+se_eta_est_0100 <- matrix[[13]]
+vi_x1_main <- matrix[[14]]
+vi_x2_main <- matrix[[15]]
+vi_X_main <- matrix[[16]]
 
 # Correct Rules
 avg_correct_rules_main <- colMeans(correct_rules_main)
@@ -690,9 +691,9 @@ avg_correct_rules_composite <- colMeans(correct_rules_composite)
 avg_correct_rules_spil <- colMeans(correct_rules_spil)
 
 # Variable Importance
-vi_x1_main <- colMeans(vi_x1_main)
-vi_x2_main <- colMeans(vi_x2_main)
-vi_X_main <- colMeans(vi_X_main)
+vi_x1_main <- colMeans(vi_x1_main, na.rm = TRUE)
+vi_x2_main <- colMeans(vi_x2_main, na.rm = TRUE)
+vi_X_main <- colMeans(vi_X_main, na.rm = TRUE)
 
 # Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
@@ -807,16 +808,16 @@ write.csv(results_nctree, file = "two_main_spillover_effects_singular_main_corr_
 ##########################
 
 # Extract Rules
-correct_rules_spil <- na.omit(matrix[[17]]) # number of times spillover tree gets the correct rules for spillover
-correct_rules_composite <- na.omit(matrix[[26]]) # number of times composite tree gets the correct rules for spillover
-correct_rules_main <- na.omit(matrix[[27]]) # number of times treatment tree gets the correct rules for spillover
-tau_est_1000 <- na.omit(matrix[[18]])
-eta_est_0100 <- na.omit(matrix[[19]])
-se_tau_est_1000 <- na.omit(matrix[[20]])
-se_eta_est_0100 <- na.omit(matrix[[21]])
-vi_x1_spil <- na.omit(matrix[[22]])
-vi_x2_spil <- na.omit(matrix[[23]])
-vi_X_spil <- na.omit(matrix[[24]])
+correct_rules_spil <- matrix[[17]] # number of times spillover tree gets the correct rules for spillover
+correct_rules_composite <- matrix[[26]] # number of times composite tree gets the correct rules for spillover
+correct_rules_main <- matrix[[27]] # number of times treatment tree gets the correct rules for spillover
+tau_est_1000 <- matrix[[18]]
+eta_est_0100 <- matrix[[19]]
+se_tau_est_1000 <- matrix[[20]]
+se_eta_est_0100 <- matrix[[21]]
+vi_x1_spil <- matrix[[22]]
+vi_x2_spil <- matrix[[23]]
+vi_X_spil <- matrix[[24]]
 
 # Correct Rules
 avg_correct_rules_main <- colMeans(correct_rules_main)
@@ -824,9 +825,9 @@ avg_correct_rules_composite <- colMeans(correct_rules_composite)
 avg_correct_rules_spil <- colMeans(correct_rules_spil)
 
 # Variable Importance
-vi_x1_spil <- colMeans(vi_x1_spil)
-vi_x2_spil <- colMeans(vi_x2_spil)
-vi_X_spil <- colMeans(vi_X_spil)
+vi_x1_spil <- colMeans(vi_x1_spil, na.rm = TRUE)
+vi_x2_spil <- colMeans(vi_x2_spil, na.rm = TRUE)
+vi_X_spil <- colMeans(vi_X_spil, na.rm = TRUE)
 
 # Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
@@ -984,6 +985,16 @@ system.time({
     .multicombine = TRUE,
     .packages = c("NetworkCausalTree", "MASS", "dplyr", "stringr")
   ) %dopar% {
+
+    first_split_uses <- function(filters, variable) {
+      if (length(filters) < 2 || is.na(filters[2])) return(FALSE)
+
+      stringr::str_detect(
+        filters[2],
+        paste0("\\b", gsub(".", "\\\\.", variable, fixed = TRUE), "\\b")
+      )
+    }
+
 
     ## Load Packages and Functions
     library(NetworkCausalTree)
@@ -1165,16 +1176,13 @@ system.time({
       SNCT$RULE.NUM[which(rule.sel=="X.1 >= 1 & X.2 >= 1" | rule.sel=="X.2 >= 1 & X.1 >= 1")] <- 2
 
       # Variables Importance
-      vi.x1[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.2")[2]
-      vi.X[1, which(seq==i)] <-  cbind(str_detect(SNCT$FILTER, "X.3")[2] |
-                                         str_detect(SNCT$FILTER, "X.4")[2] |
-                                         str_detect(SNCT$FILTER, "X.5")[2] |
-                                         str_detect(SNCT$FILTER, "X.6")[2] |
-                                         str_detect(SNCT$FILTER, "X.7")[2] |
-                                         str_detect(SNCT$FILTER, "X.8")[2] |
-                                         str_detect(SNCT$FILTER, "X.9")[2] |
-                                         str_detect(SNCT$FILTER, "X.10")[2])
+      vi.x1[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.1")
+      vi.x2[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.2")
+      vi.X[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 3:10),
+        function(x) first_split_uses(SNCT$FILTER, x),
+        logical(1)
+      ))
 
       if (correct==2){
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -1267,16 +1275,13 @@ system.time({
 
 
       # Variables Importance
-      vi.x1.main[1, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.main[1, which(seq==i)] <- str_detect(SNCT_main$FILTER, "X.2")[2]
-      vi.X.main[1, which(seq==i)] <-  cbind(str_detect(SNCT_main$FILTER, "X.3")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.5")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.7")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.9")[2] |
-                                              str_detect(SNCT_main$FILTER, "X.10")[2])
+      vi.x1.main[1, which(seq == i)] <- first_split_uses(SNCT_main$FILTER, "X.1")
+      vi.x2.main[1, which(seq == i)] <- first_split_uses(SNCT_main$FILTER, "X.2")
+      vi.X.main[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 3:10),
+        function(x) first_split_uses(SNCT_main$FILTER, x),
+        logical(1)
+      ))
 
       if (correct.main==2){
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -1370,16 +1375,13 @@ system.time({
 
 
       # Variables Importance
-      vi.x1.spil[1, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2.spil[1, which(seq==i)] <- str_detect(SNCT_spil$FILTER, "X.2")[2]
-      vi.X.spil[1, which(seq==i)] <-  cbind(str_detect(SNCT_spil$FILTER, "X.3")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.4")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.5")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.6")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.7")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.8")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.9")[2] |
-                                              str_detect(SNCT_spil$FILTER, "X.10")[2])
+      vi.x1.spil[1, which(seq == i)] <- first_split_uses(SNCT_spil$FILTER, "X.1")
+      vi.x2.spil[1, which(seq == i)] <- first_split_uses(SNCT_spil$FILTER, "X.2")
+      vi.X.spil[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 3:10),
+        function(x) first_split_uses(SNCT_spil$FILTER, x),
+        logical(1)
+      ))
 
       if (correct.spil==2){
         # tau1000_1 & tau0100_1 & tau1000_1 & tau_0100_2
@@ -1467,22 +1469,22 @@ system.time({
 ###############
 
 # Extract the Results
-correct_rules <- na.omit(matrix[[1]])
-tau_est_1000 <- na.omit(matrix[[2]])
-eta_est_0100 <- na.omit(matrix[[3]])
-se_tau_est_1000 <- na.omit(matrix[[4]])
-se_eta_est_0100 <- na.omit(matrix[[5]])
-vi_x1 <- na.omit(matrix[[6]])
-vi_x2 <- na.omit(matrix[[7]])
-vi_X <- na.omit(matrix[[8]])
+correct_rules <- matrix[[1]]
+tau_est_1000 <- matrix[[2]]
+eta_est_0100 <- matrix[[3]]
+se_tau_est_1000 <- matrix[[4]]
+se_eta_est_0100 <- matrix[[5]]
+vi_x1 <- matrix[[6]]
+vi_x2 <- matrix[[7]]
+vi_X <- matrix[[8]]
 
 # Correct Rules
 avg_correct_rules <- colMeans(correct_rules)
 
 # Variable Importance
-vi_x1 <- colMeans(vi_x1)
-vi_x2 <- colMeans(vi_x2)
-vi_X <- colMeans(vi_X)
+vi_x1 <- colMeans(vi_x1, na.rm = TRUE)
+vi_x2 <- colMeans(vi_x2, na.rm = TRUE)
+vi_X <- colMeans(vi_X, na.rm = TRUE)
 
 # Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
@@ -1596,16 +1598,16 @@ write.csv(results_nctree, file = "two_main_spillover_effects_composite_corr_0.50
 ##########################
 
 # Extract Rules
-correct_rules_main <- na.omit(matrix[[9]]) # number of times treatment tree gets the correct rules for treatment
-correct_rules_composite <- na.omit(matrix[[25]]) # number of times composite tree gets the correct rules for treatment
-correct_rules_spil <- na.omit(matrix[[28]]) # number of times spillover tree gets the correct rules for treatment
-tau_est_1000 <- na.omit(matrix[[10]])
-eta_est_0100 <- na.omit(matrix[[11]])
-se_tau_est_1000 <- na.omit(matrix[[12]])
-se_eta_est_0100 <- na.omit(matrix[[13]])
-vi_x1_main <- na.omit(matrix[[14]])
-vi_x2_main <- na.omit(matrix[[15]])
-vi_X_main <- na.omit(matrix[[16]])
+correct_rules_main <- matrix[[9]] # number of times treatment tree gets the correct rules for treatment
+correct_rules_composite <- matrix[[25]] # number of times composite tree gets the correct rules for treatment
+correct_rules_spil <- matrix[[28]] # number of times spillover tree gets the correct rules for treatment
+tau_est_1000 <- matrix[[10]]
+eta_est_0100 <- matrix[[11]]
+se_tau_est_1000 <- matrix[[12]]
+se_eta_est_0100 <- matrix[[13]]
+vi_x1_main <- matrix[[14]]
+vi_x2_main <- matrix[[15]]
+vi_X_main <- matrix[[16]]
 
 # Correct Rules
 avg_correct_rules_main <- colMeans(correct_rules_main)
@@ -1613,9 +1615,9 @@ avg_correct_rules_composite <- colMeans(correct_rules_composite)
 avg_correct_rules_spil <- colMeans(correct_rules_spil)
 
 # Variable Importance
-vi_x1_main <- colMeans(vi_x1_main)
-vi_x2_main <- colMeans(vi_x2_main)
-vi_X_main <- colMeans(vi_X_main)
+vi_x1_main <- colMeans(vi_x1_main, na.rm = TRUE)
+vi_x2_main <- colMeans(vi_x2_main, na.rm = TRUE)
+vi_X_main <- colMeans(vi_X_main, na.rm = TRUE)
 
 # Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
@@ -1730,16 +1732,16 @@ write.csv(results_nctree, file = "two_main_spillover_effects_singular_main_corr_
 ##########################
 
 # Extract Rules
-correct_rules_spil <- na.omit(matrix[[17]]) # number of times spillover tree gets the correct rules for spillover
-correct_rules_composite <- na.omit(matrix[[26]]) # number of times composite tree gets the correct rules for spillover
-correct_rules_main <- na.omit(matrix[[27]]) # number of times treatment tree gets the correct rules for spillover
-tau_est_1000 <- na.omit(matrix[[18]])
-eta_est_0100 <- na.omit(matrix[[19]])
-se_tau_est_1000 <- na.omit(matrix[[20]])
-se_eta_est_0100 <- na.omit(matrix[[21]])
-vi_x1_spil <- na.omit(matrix[[22]])
-vi_x2_spil <- na.omit(matrix[[23]])
-vi_X_spil <- na.omit(matrix[[24]])
+correct_rules_spil <- matrix[[17]] # number of times spillover tree gets the correct rules for spillover
+correct_rules_composite <- matrix[[26]] # number of times composite tree gets the correct rules for spillover
+correct_rules_main <- matrix[[27]] # number of times treatment tree gets the correct rules for spillover
+tau_est_1000 <- matrix[[18]]
+eta_est_0100 <- matrix[[19]]
+se_tau_est_1000 <- matrix[[20]]
+se_eta_est_0100 <- matrix[[21]]
+vi_x1_spil <- matrix[[22]]
+vi_x2_spil <- matrix[[23]]
+vi_X_spil <- matrix[[24]]
 
 # Correct Rules
 avg_correct_rules_main <- colMeans(correct_rules_main)
@@ -1747,9 +1749,9 @@ avg_correct_rules_composite <- colMeans(correct_rules_composite)
 avg_correct_rules_spil <- colMeans(correct_rules_spil)
 
 # Variable Importance
-vi_x1_spil <- colMeans(vi_x1_spil)
-vi_x2_spil <- colMeans(vi_x2_spil)
-vi_X_spil <- colMeans(vi_X_spil)
+vi_x1_spil <- colMeans(vi_x1_spil, na.rm = TRUE)
+vi_x2_spil <- colMeans(vi_x2_spil, na.rm = TRUE)
+vi_X_spil <- colMeans(vi_X_spil, na.rm = TRUE)
 
 # Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA

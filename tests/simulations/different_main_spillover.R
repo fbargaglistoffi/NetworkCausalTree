@@ -11,6 +11,15 @@ library(randomizr)
 library(MLmetrics)
 library(dplyr)
 
+first_split_uses <- function(filters, variable) {
+  if (length(filters) < 2 || is.na(filters[2])) return(FALSE)
+
+  stringr::str_detect(
+    filters[2],
+    paste0("\\b", gsub(".", "\\\\.", variable, fixed = TRUE), "\\b")
+  )
+}
+
 ###########################
 ## Initialize Parameters ##
 ###########################
@@ -240,16 +249,15 @@ system.time({
       SNCT$RULE.NUM[which(rule.sel=="X.1 >= 1 & X.3 < 1" | rule.sel=="X.3 < 1 & X.1 >= 1")] <-4
 
       ## Variables Importance
-      vi.x1[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.1")[2] # the second element corresponds to the first split
-      vi.x2[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.2")[2]
-      vi.x3[1, which(seq==i)] <- str_detect(SNCT$FILTER, "X.3")[2]
-      vi.X[1, which(seq==i)] <-  cbind(str_detect(SNCT$FILTER, "X.4")[2] |
-                                         str_detect(SNCT$FILTER, "X.5")[2] |
-                                         str_detect(SNCT$FILTER, "X.6")[2] |
-                                         str_detect(SNCT$FILTER, "X.7")[2] |
-                                         str_detect(SNCT$FILTER, "X.8")[2] |
-                                         str_detect(SNCT$FILTER, "X.9")[2] |
-                                         str_detect(SNCT$FILTER, "X.10")[2])
+      vi.x1[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.1")
+      vi.x2[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.2")
+      vi.x3[1, which(seq == i)] <- first_split_uses(SNCT$FILTER, "X.3")
+
+      vi.X[1, which(seq == i)] <- any(vapply(
+        paste0("X.", 4:10),
+        function(x) first_split_uses(SNCT$FILTER, x),
+        logical(1)
+      ))
 
       ## Extract Values for the Estimation Set (Get 0 if the Causal Rule was not identified)
       if (correct==4) {
@@ -538,24 +546,24 @@ system.time({
 ###############
 
 ## Extract the Results
-correct_rules <- na.omit(matrix[[1]])
-tau_est_1000 <- na.omit(matrix[[2]])
-eta_est_0100 <- na.omit(matrix[[3]])
-se_tau_est_1000 <- na.omit(matrix[[4]])
-se_eta_est_0100 <- na.omit(matrix[[5]])
-vi_x1 <- na.omit(matrix[[6]])
-vi_x2 <- na.omit(matrix[[7]])
-vi_x3 <- na.omit(matrix[[8]])
-vi_X <- na.omit(matrix[[9]])
+correct_rules <- matrix[[1]]
+tau_est_1000 <- matrix[[2]]
+eta_est_0100 <- matrix[[3]]
+se_tau_est_1000 <- matrix[[4]]
+se_eta_est_0100 <- matrix[[5]]
+vi_x1 <- matrix[[6]]
+vi_x2 <- matrix[[7]]
+vi_x3 <- matrix[[8]]
+vi_X <- matrix[[9]]
 
 ## Correct Rules
 avg_correct_rules <- colMeans(correct_rules)
 
 ## Variable Importance
-vi_x1 <- colMeans(vi_x1)
-vi_x2 <- colMeans(vi_x2)
-vi_x3 <- colMeans(vi_x3)
-vi_X <- colMeans(vi_X)
+vi_x1 <- colMeans(vi_x1, na.rm = TRUE)
+vi_x2 <- colMeans(vi_x2, na.rm = TRUE)
+vi_x3 <- colMeans(vi_x3, na.rm = TRUE)
+vi_X <- colMeans(vi_X, na.rm = TRUE)
 
 ## Exclude Rules that were not discovered
 tau_est_1000[tau_est_1000==0] <- NA
@@ -699,9 +707,9 @@ write.csv(results_nctree, file = "two_main_spillover_four_effects_composite_3000
 #####################
 
 ## Extract Rules
-correct_rules_main <- na.omit(matrix[[10]])
-correct_rules_composite <- na.omit(matrix[[12]])
-correct_rules_spil <- na.omit(matrix[[14]])
+correct_rules_main <- matrix[[10]]
+correct_rules_composite <- matrix[[12]]
+correct_rules_spil <- matrix[[14]]
 
 
 ## Correct Rules
@@ -722,9 +730,9 @@ write.csv(results_nctree, file = "two_main_spillover_four_effects_singular_main_
 ##########################
 
 ## Extract Rules
-correct_rules_spil <- na.omit(matrix[[11]])
-correct_rules_composite <- na.omit(matrix[[13]])
-correct_rules_main <- na.omit(matrix[[15]])
+correct_rules_spil <- matrix[[11]]
+correct_rules_composite <- matrix[[13]]
+correct_rules_main <- matrix[[15]]
 
 
 ## Correct Rules
