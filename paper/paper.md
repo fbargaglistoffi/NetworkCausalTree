@@ -17,12 +17,15 @@ authors:
 - name: "Falco J. Bargagli-Stoffi"
   orcid: "0000-0002-6131-8165"
   affiliation: '1'
-- name: Charlie Wang
-  orcid: "0009-0003-1672-0774"
-  affiliation: '2'
+  equal-contrib: true
 - name: Costanza Tortù
   orcid: "0000-0003-2561-9726"
-  affiliation: '3'
+  affiliation: ‘2'
+  equal-contrib: true
+- name: Charlie Wang
+  orcid: "0009-0003-1672-0774"
+  affiliation: ‘3'
+  equal-contrib: true
 - name: Riccardo Cadei
   orcid: "0000-0003-2416-8943"
   affiliation: '4'
@@ -32,9 +35,9 @@ authors:
 affiliations:
 - name: Department of Biostatistics, University of California, Los Angeles, USA
   index: 1
-- name: Department of Statistics and Data Science, University of California, Los Angeles, USA
-  index: 2
 - name: Bank of Italy and Sant'Anna School for Advanced Studies, Italy
+  index: 2
+- name: Department of Statistics and Data Science, University of California, Los Angeles, USA
   index: 3
 - name: Causal Learning and Artificial Intelligence Lab, Institute of Science and Technology Austria, Austria
   index: 4
