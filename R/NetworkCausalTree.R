@@ -1,4 +1,4 @@
-#' @title 
+#' @title
 #' Network Causal Tree
 
 #' @description
@@ -56,7 +56,7 @@
 #' @importFrom stats decompose spectrum rnorm runif na.omit rbinom
 #' @importFrom stringi stri_detect_fixed
 #' @importFrom data.tree Node
-#' 
+#'
 #' @export
 
 
@@ -73,8 +73,40 @@ NetworkCausalTree <- function(X, Y, W,
                               output = "estimation"){
 
   N <- length(W)
+
+  if (is.null(K) || length(K) != N || anyNA(K)) {
+    stop("K must be a non-NULL cluster membership vector of length N without missing values.")
+  }
+
   k <- length(unique(K))
+
   if (is.null(p)) p <- rep(0.2, N)
+
+  if (!is.numeric(p) || length(p) != N ||
+      anyNA(p) || any(!is.finite(p)) ||
+      any(p <= 0 | p >= 1)) {
+    stop("p must be a numeric vector of length N with all values strictly between 0 and 1.")
+  }
+
+  if (!is.character(method) || length(method) != 1 ||
+      is.na(method) ||
+      !method %in% c("singular", "composite", "penalized")) {
+    stop("method must be one of: singular, composite, penalized.")
+  }
+
+  if (!is.character(output) || length(output) != 1 ||
+      is.na(output) ||
+      !output %in% c("detection", "estimation")) {
+    stop("output must be either detection or estimation.")
+  }
+
+  if (!is.numeric(effect_weights) ||
+      length(effect_weights) != 4 ||
+      anyNA(effect_weights) ||
+      any(!is.finite(effect_weights)) ||
+      any(effect_weights < 0)) {
+    stop("effect_weights must contain four finite, non-negative numeric values.")
+  }
 
   alpha <- effect_weights[1]
   beta <- effect_weights[2]
@@ -84,17 +116,17 @@ NetworkCausalTree <- function(X, Y, W,
   if (alpha + beta + gamma + delta != 1) {
     stop('Effect weights must add up to one.')
   }
-  
+
   # If method = singular or penalized, there should be one effect
   if ((length(which(effect_weights > 0)) > 1) & (method == "singular" | method == "penalized")) {
     stop('If method is set to singular or penalized there should be only one effect.')
   }
-  
+
   # If method = composite, there should be at least two effects
   if (1 %in% effect_weights & method == "composite") {
     stop('If method is set to composite there should be at least two effects.')
   }
-  
+
   # Check if there is an adjacency matrix
   if (is.null(A)) {
     stop('You have to specify the Adjacency Matrix A.')
@@ -117,49 +149,53 @@ NetworkCausalTree <- function(X, Y, W,
   if (any(diag(A) != 0)) {
     stop("A must have a zero diagonal (no self-loops).")
   }
-  
+
+  if (any(A[row(A) != col(A) & outer(K, K, "!=")] != 0)) {
+    stop("A must be block diagonal with respect to K (no between-cluster edges).")
+  }
+
   if (ratio_disc <= 0 || ratio_disc >= 1) {
     stop("ratio_disc must be strictly between 0 and 1.")
   }
-  
+
   if (k < 2) {
     stop("At least two clusters are required for honest sample splitting.")
   }
-  
+
   nclusters_disc <- round(k * ratio_disc)
-  
+
   if (nclusters_disc < 1) {
     stop("ratio_disc is too low; no clusters are assigned to the discovery sample. Please use a higher ratio_disc.")
   }
-  
+
   if (nclusters_disc >= k) {
     stop("ratio_disc is too high; no clusters remain for the estimation sample. Please use a lower ratio_disc.")
   }
-  
+
   # Compute network - specific information (the degree Ne, the number of treated friends Ne_treated,
   # The value of the neighborhood exposure G and the list of direct neighbors Ne_list)
-  
+
   Ne <- rowSums(A)
   Ne_treated <- as.vector(A %*% W)
   G = rep(1,N)
   G[Ne_treated == 0] <- 0
   Ne_list <- vector(mode = "list", length = N)
-  
+
   for (i in  1:N) {
     Ne_list[[i]] <- which(A[i,] > 0)
   }
-  
+
   # Sample the clusters to be assigned to the discovery set
   clusters_disc <- sample(unique(K), size = nclusters_disc, replace = FALSE)
   disc_units <- which(K %in% clusters_disc)
   N_tr <- length(disc_units)
   N_est <- N - N_tr
-  
+
   Ne_list_disc <- lapply(disc_units, function(id) {
     neigh <- intersect(Ne_list[[id]], disc_units)
     match(neigh, disc_units)
   })
-  
+
   # Compute the population effects
   population_effects <- compute_population_effects(
     N = length(disc_units),
@@ -170,7 +206,7 @@ NetworkCausalTree <- function(X, Y, W,
     Ne_list = Ne_list,
     unit_ids = disc_units
   )
-  
+
   # Generate the tree on the discovery set
   tree <- sprout_nct(method = method,
                      sampled_clusters = clusters_disc,
@@ -192,20 +228,20 @@ NetworkCausalTree <- function(X, Y, W,
                      Ne_list = Ne_list,
                      N_tr = N_tr,
                      N_est = N_est)
-  
-  
+
+
   # Replace NA in FILTER with "NA"
   tree$FILTER <- as.character(tree$FILTER)
   tree$FILTER[is.na(tree$FILTER)] <- "NA"
-  
+
   clusters_est <- setdiff(unique(K), clusters_disc)
   est_units <- which(K %in% clusters_est)
-  
+
   A_est <- A[est_units, est_units, drop = FALSE]
   Ne_est <- rowSums(A_est)
   G_est <- G[est_units]
   Ne_list_est <- Ne_list
-  
+
   # Compute estimates on the full tree
   tree_with_estimates <- compute_effects_nct(output = output,
                                              nct_partition = tree,
@@ -219,7 +255,7 @@ NetworkCausalTree <- function(X, Y, W,
                                              Ne_list = Ne_list,
                                              unit_ids = est_units,
                                              minsize = minsize)
-  
+
   return(tree_with_estimates)
-  
+
 }
