@@ -1,3 +1,20 @@
+nct_node_percentages <- function(NCT) {
+  root_idx <- which(NCT$NODE == 1)
+  
+  if (length(root_idx) != 1L) {
+    stop("NCT must contain exactly one root node (NODE == 1).")
+  }
+  
+  nobs <- NCT$NOBS_EST + NCT$NOBS_TR
+  total_n <- nobs[root_idx]
+  
+  if (is.na(total_n) || total_n <= 0) {
+    stop("Root sample size must be positive.")
+  }
+  
+  100 * nobs / total_n
+}
+
 #' @title
 #' Plot of a Network Causal Tree
 
@@ -63,23 +80,6 @@
 #' @importFrom graphics plot.new
 #'
 #' @export
-
-nct_node_percentages <- function(NCT) {
-  root_idx <- which(NCT$NODE == 1)
-  
-  if (length(root_idx) != 1L) {
-    stop("NCT must contain exactly one root node (NODE == 1).")
-  }
-  
-  nobs <- NCT$NOBS_EST + NCT$NOBS_TR
-  total_n <- nobs[root_idx]
-  
-  if (is.na(total_n) || total_n <= 0) {
-    stop("Root sample size must be positive.")
-  }
-  
-  100 * nobs / total_n
-}
 
 plot_NCT <- function(NCT,
                      cov_names,

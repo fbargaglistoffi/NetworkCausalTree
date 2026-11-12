@@ -20,7 +20,8 @@
 #' @details
 #' Neighborhood exposure is defined as a binary indicator:
 #' G_i = 1 if unit i has at least one treated neighbor, and G_i = 0 otherwise.
-#' Specifically, G_i = 1{sum_j A_ij W_j > 0}, where A is the adjacency
+#' Specifically, G_i equals 1 when the sum of A_ij W_j over all j is positive,
+#' and equals 0 otherwise. Here, A is the adjacency
 #' matrix and W is the individual treatment assignment vector.
 #' Isolated units have G_i = 0.
 #' @param K N x 1 Cluster Membership vector.
@@ -39,7 +40,7 @@
 #' and variances are computed
 #'
 #' @return A data.frame describing the obtained Network Causal Trees.
-#' Each row represents a partition (of a specific tree) with 10/14 entries.
+#' Each row represents a partition of the estimated tree.
 #' Columns summary:
 #' - `NOBS_TR`: number of training observations in the partition,
 #' - `FILTER`: values of the covariates `X` that identify the partition,
