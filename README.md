@@ -18,6 +18,18 @@ library("NetworkCausalTree")
 set.seed(123)
 ```
 
+### Neighborhood Exposure
+
+The package uses a binary neighborhood exposure mapping:
+
+\[
+G_i = \mathbb{1}\left\{\sum_{j=1}^{N} A_{ij}W_j > 0\right\}
+\]
+
+Here, \(A_{ij}\) indicates whether units \(i\) and \(j\) are connected, and \(W_j\) indicates whether unit \(j\) receives treatment.
+
+Thus, \(G_i = 1\) if unit \(i\) has at least one treated neighbor, and \(G_i = 0\) otherwise. Isolated units have \(G_i = 0\).
+
 ## Examples
 
 ### Example 1
@@ -101,7 +113,7 @@ plot_NCT(NCT = result,
 
 ## Code of Conduct
 
-Please note that the CRE project is released with a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct). By contributing to this project, you agree to abide by its terms. More information about the opening issues and contributing (i.e., git branching model) can be found [here](https://nsaph-software.github.io/CRE/articles/Contribution.html).
+Please note that the NetworkCausalTree project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct). By contributing to this project, you agree to abide by its terms.
 
 ## Cite
 

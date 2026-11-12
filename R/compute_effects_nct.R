@@ -40,7 +40,7 @@
 compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
                                 Ne, Ne_list, p, minsize,
                                 unit_ids = seq_len(N)) {
-  
+
   if (is.null(X) || ncol(X) == 0) {
     X <- NULL
   } else {
@@ -50,7 +50,7 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
       colnames(X) <- paste0("X.", seq_len(ncol(X)))
     }
   }
-  
+
   data_est <- data.frame(idunit = unit_ids, W = W, G = G, Y = Y)
   if (!is.null(X)) data_est <- cbind(data_est, X)
   if (!is.null(X)) {
@@ -58,7 +58,7 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
   } else {
     colnames(data_est) <- c("idunit", "W", "G", "Y")
   }
-  
+
   clean_filter_text = function(text) {
     text <- gsub("data_tree", "data_est", text)
     text <- gsub("\\bNA\\s*&\\s*", "", text)
@@ -68,26 +68,26 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
     text <- gsub("\\s*&$", "", text)
     trimws(text)
   }
-  
+
   # If output equals to "estimation", then compute the estimated conditional average
   # treatment effects and their estimated variance, in all the partitions
   # identified by the tree
-  
+
   if (output=="estimation") {
 
     NOBS_EST <- c(rep(0,nrow(nct_partition)))
-    
+
     EFFTAU1000 = EFFTAU1101 = EFFTAU1110 = EFFTAU0100 = c(rep(0, nrow(nct_partition)))
-    
+
     SETAU1000 = SETAU1101 = SETAU1110 = SETAU0100 = c(rep(0,nrow(nct_partition)))
-    
+
     nct_partition <- cbind(nct_partition, NOBS_EST, EFFTAU1000, SETAU1000, EFFTAU1101,
                            SETAU1101, EFFTAU1110, SETAU1110, EFFTAU0100, SETAU0100)
-    
+
     # Compute the effects
-    
+
     nct_partition$NOBS_EST[1]<-N
-    
+
     nct_partition$EFFTAU1000[1] <- EffTau1000(N = nrow(data_est), W = data_est$W, G = data_est$G,
                                               Y = data_est$Y, p = p,
                                               Ne_list = Ne_list,
@@ -104,7 +104,7 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
                                               Y = data_est$Y, p = p,
                                               Ne_list = Ne_list,
                                               unit_ids = data_est$idunit)
-    
+
     nct_partition$SETAU1000[1] <- sqrt(Vartau1000(N = nrow(data_est), W = data_est$W,
                                                   G = data_est$G, Y = data_est$Y, p = p,
                                                   Ne = Ne,
@@ -125,18 +125,18 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
                                                   Ne = Ne,
                                                   Ne_list = Ne_list,
                                                   unit_ids = data_est$idunit))
-    
+
     # loop over all the nodes except root
     if (nrow(nct_partition) > 1) {
-      
+
       for (j in 2 : nrow(nct_partition)) {
-        
+
         # Extract the filter condition
         if (!is.na(nct_partition[j, "FILTER"])) {
-          
+
           texts <- clean_filter_text(nct_partition[j, "FILTER"])
-        
-          tmp <- with(data_est, eval(parse(text = texts)))
+
+          tmp <- evaluate_nct_filter(texts, data_est)
 
           if (sum(tmp) == 0) {
             nct_partition$NOBS_EST[j] <- 0
@@ -150,10 +150,10 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
             nct_partition$SETAU0100[j] <- NA
             next
           }
-          
+
           this_data <- data_est[tmp, ]
           old_ids <- this_data$idunit
-          
+
         } else {
           this_data <- data_est
           old_ids <- this_data$idunit
@@ -164,7 +164,7 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
         }
 
         nct_partition$NOBS_EST[j] <- nrow(this_data)
-        
+
         # computed estimated effects
         nct_partition$EFFTAU1000[j] <- EffTau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                   Y = this_data$Y, p = p,
@@ -182,8 +182,8 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
                                                   Y = this_data$Y, p = p,
                                                   Ne_list = Ne_list,
                                                   unit_ids = old_ids)
-        
-        
+
+
         # compute standard errors
         nct_partition$SETAU1000[j] <- sqrt(Vartau1000(N = nrow(this_data), W = this_data$W, G = this_data$G,
                                                       Y = this_data$Y, p = p,
@@ -207,28 +207,36 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
                                                       unit_ids = old_ids))
       }
     }
-    
+
     names(nct_partition)[names(nct_partition) == "SETAU1000"] <- "SE1000_EST"
     names(nct_partition)[names(nct_partition) == "SETAU1101"] <- "SE1101_EST"
     names(nct_partition)[names(nct_partition) == "SETAU1110"] <- "SE1110_EST"
     names(nct_partition)[names(nct_partition) == "SETAU0100"] <- "SE0100_EST"
-    
+
+    # Compute 95% confidence intervals for each estimated effect
+    for (effect in c("1000", "1101", "1110", "0100")) {
+      estimate <- nct_partition[[paste0("EFFTAU", effect)]]
+      se <- nct_partition[[paste0("SE", effect, "_EST")]]
+
+      nct_partition[[paste0("CI", effect, "_LOWER")]] <- estimate - 1.96 * se
+      nct_partition[[paste0("CI", effect, "_UPPER")]] <- estimate + 1.96 * se
+    }
   }
-  
+
   # If output equals to "detection", then only compute the estimated conditional average
   # treatment effects  in all the partitions
   # identified by the tree
-  
+
   if (output == "detection") {
-    
+
     NOBS_EST = EFFTAU1000 = EFFTAU1101 = EFFTAU1110 = EFFTAU0100 = c(rep(0,nrow(nct_partition)))
-    
+
     nct_partition <- cbind(nct_partition, NOBS_EST, EFFTAU1000, EFFTAU1101, EFFTAU1110, EFFTAU0100)
-    
+
     nct_partition$NOBS_EST[1] <- N
-    
+
     # Compute the effects
-    
+
     nct_partition$EFFTAU1000[1] <- EffTau1000(N = nrow(data_est), W = data_est$W, G = data_est$G,
                                               Y = data_est$Y, p = p,
                                               Ne_list = Ne_list,
@@ -245,17 +253,17 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
                                               Y = data_est$Y, p = p,
                                               Ne_list = Ne_list,
                                               unit_ids = data_est$idunit)
-    
+
     if (nrow(nct_partition) > 1) {
-      
+
       for (j in 2 : nrow(nct_partition)){
-        
-        
+
+
         if (!is.na(nct_partition[j, "FILTER"])) {
-          
+
           texts <- clean_filter_text(nct_partition[j, "FILTER"])
-          
-          tmp <- with(data_est, eval(parse(text = texts)))
+
+          tmp <- evaluate_nct_filter(texts, data_est)
 
           if (sum(tmp) == 0) {
             nct_partition$NOBS_EST[j] <- 0
@@ -265,20 +273,20 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
             nct_partition$EFFTAU0100[j] <- NA
             next
           }
-          
+
           this_data <- data_est[tmp, ]
 
           old_ids <- this_data$idunit
-          
+
         } else {
           this_data <- data_est
           old_ids <- this_data$idunit
         }
-        
+
         if (any(as.numeric(table(this_data$W, this_data$G)) < minsize)){
           warning('subpopulations not sufficiently represented')
         }
-        
+
         nct_partition$NOBS_EST[j]<-nrow(this_data)
         nct_partition$EFFTAU1000[j] <- EffTau1000(N = nrow(this_data), W = this_data$W,
                                                   G = this_data$G, Y = this_data$Y,
@@ -292,10 +300,10 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
         nct_partition$EFFTAU0100[j] <- EffTau0100(N = nrow(this_data), W = this_data$W,
                                                   G = this_data$G, Y = this_data$Y,
                                                   p = p, Ne_list = Ne_list, unit_ids = old_ids)
-        
+
       } }
   }
-  
+
   names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
   nct_partition$NOBS_TR <- as.numeric(nct_partition$NOBS_TR)
   nct_partition$TERMINAL <- as.character(nct_partition$TERMINAL)
@@ -303,7 +311,7 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
   names(nct_partition)[names(nct_partition) == "EFFTAU1101"] <- "EFF1101_EST"
   names(nct_partition)[names(nct_partition) == "EFFTAU1110"] <- "EFF1110_EST"
   names(nct_partition)[names(nct_partition) == "EFFTAU0100"] <- "EFF0100_EST"
-  
+
   return(nct_partition)
 }
 

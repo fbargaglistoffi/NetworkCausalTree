@@ -17,6 +17,12 @@
 #' - delta: weight associated to the spillover effect 0100 (effect of the
 #' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
+#' @details
+#' Neighborhood exposure is defined as a binary indicator:
+#' G_i = 1 if unit i has at least one treated neighbor, and G_i = 0 otherwise.
+#' Specifically, G_i = 1{sum_j A_ij W_j > 0}, where A is the adjacency
+#' matrix and W is the individual treatment assignment vector.
+#' Isolated units have G_i = 0.
 #' @param K N x 1 Cluster Membership vector.
 #' @param p N x 1 Probability to be assigned to the active individual
 #' intervention vector.

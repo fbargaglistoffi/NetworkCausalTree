@@ -92,26 +92,26 @@ plot_NCT <- function(NCT,
                      margins = c(0.1, 1.5, 1.5, 1.5),
                      digits = 4
 ){
-  
+
   if (!("FILTER" %in% names(NCT)) ||
       nrow(NCT) == 1 ||
       all(is.na(NCT$FILTER)) ||
       length(unique(na.omit(NCT$FILTER))) <= 1) {
-    
+
     par(mar = c(1,1,2,1))
     plot.new()
     title(title)
     text(0.5, 0.5, "Single leaf tree\n(No splits)", cex = 1.3)
-    
+
     return(invisible(NCT))
   }
-  
+
   old_warn <- getOption("warn")
   options(warn = -1)
   on.exit(options(warn = old_warn), add = TRUE)
-  
+
   NCT$NOBS <- NCT$NOBS_EST + NCT$NOBS_TR
-  
+
   if (length(cov_names) > 10){
     for (p in 10 : length(cov_names)) {
       NCT$FILTER <- gsub(pattern = paste("X.", p, sep = ""),
@@ -124,7 +124,7 @@ plot_NCT <- function(NCT,
                        replacement = cov_names[p],
                        x = as.character(NCT$FILTER) )
   }
-  
+
   NCT$FILTER <- gsub(pattern = "data_tree", replacement = "",
                      x = as.character(NCT$FILTER))
   NCT$FILTER <- gsub(pattern = "[$]", replacement = "",
@@ -132,15 +132,15 @@ plot_NCT <- function(NCT,
   NCT$FILTER <- gsub(pattern = "_bin", replacement ="",
                      x = as.character(NCT$FILTER))
   NCT$FILTER[which(NCT$FILTER!="NA")] <- paste0("NA & ", NCT$FILTER[which(NCT$FILTER!="NA")])
-  
+
   tree_data <- data.tree::as.Node(NCT, mode = "table",
                                   pathName = "FILTER",
                                   pathDelimiter = " & ",
                                   colLevels = NULL,
                                   na.rm = TRUE)
-  
+
   edges_tree <- as.matrix(data.tree::ToDataFrameNetwork(tree_data))
-  
+
   if (nrow(edges_tree) == 0) {
     par(mar = c(1,1,2,1))
     plot.new()
@@ -148,16 +148,16 @@ plot_NCT <- function(NCT,
     text(0.5, 0.5, "Single leaf tree\n(No edges)", cex = 1.3)
     return(invisible(NCT))
   }
-  
+
   edges_names <- NULL
   for (i in 1 : nrow(edges_tree)) {
     edges_names_i <- utils::tail(strsplit(edges_tree[,2], "/")[[i]], n = 1)
     edges_names_i <- gsub(pattern = "X.", replacement = "", x = edges_names_i)
     edges_names = c(edges_names, edges_names_i)
   }
-  
+
   grafo_tree <- igraph::graph_from_edgelist(edges_tree, directed = TRUE)
-  
+
   if (output == "estimation") {
     V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
     V(grafo_tree)$SE1000 <- NCT$SE1000_EST
@@ -166,14 +166,14 @@ plot_NCT <- function(NCT,
     V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
     V(grafo_tree)$SE1110 <- NCT$SE1110_EST
     V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
-    V(grafo_tree)$SE0100 <- NCT$SE0100_EST    
+    V(grafo_tree)$SE0100 <- NCT$SE0100_EST
   } else {
     V(grafo_tree)$TAU1000 <- NCT$EFF1000_EST
     V(grafo_tree)$TAU1101 <- NCT$EFF1101_EST
     V(grafo_tree)$TAU1110 <- NCT$EFF1110_EST
     V(grafo_tree)$TAU0100 <- NCT$EFF0100_EST
   }
-  
+
   if (effect_color_nodes == "1000") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1000
   } else if (effect_color_nodes == "1101") {
@@ -183,7 +183,7 @@ plot_NCT <- function(NCT,
   } else if (effect_color_nodes == "1110") {
     V(grafo_tree)$stat <- V(grafo_tree)$TAU1110
   }
-  
+
   # Color palette
   if (is.null(vertex_color)) {
     if (effect_color_nodes == "1000" || effect_color_nodes == "1101" || effect_color_nodes == "1110") {
@@ -192,19 +192,19 @@ plot_NCT <- function(NCT,
       vertex_color <- c("lightgreen", "forestgreen")
     }
   }
-  
+
   stat_values <- V(grafo_tree)$stat
   positive_stats <- stat_values[stat_values >= 0]
-  
+
   V(grafo_tree)$color <- "white"
-  
+
   if (length(positive_stats) > 0) {
     n_colors <- 15
     cols <- grDevices::colorRampPalette(c(vertex_color[1], vertex_color[2]))(n_colors)
-    
+
     max_stat <- max(positive_stats)
     min_stat <- min(positive_stats)
-    
+
     if (max_stat > min_stat) {
       normalized <- (positive_stats - min_stat) / (max_stat - min_stat)
       color_indices <- pmax(1, pmin(n_colors, ceiling(normalized * n_colors)))
@@ -213,26 +213,26 @@ plot_NCT <- function(NCT,
       V(grafo_tree)$color[stat_values >= 0] <- cols[ceiling(n_colors/2)]
     }
   }
-  
+
   edges_names_final <- rep(NULL, length(edges_names))
   edgelabel <- vector(mode = "list", length = length(edges_names))
-  
+
   for (l in 1 : length(edges_names)) {
-    
+
     if (length(grep(x = edges_names[l], pattern = ">=")) > 0) {
       edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[>=])", perl = TRUE)[[1]][1]
       edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[>=])", perl = TRUE)[[1]][2:
                                                                                                   (lengths(gregexpr(",", strsplit(edges_names[l],"(?=[>=])", perl = TRUE)))
                                                                                                    + 1)],collapse = " ")
     }
-    
+
     if (length(grep(x = edges_names[l], pattern = "<=")) > 0) {
       edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[<=])", perl = TRUE)[[1]][1]
       edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[<=])",perl = TRUE)[[1]]
                                  [2 : (lengths(gregexpr(",", strsplit(edges_names[l],
                                                                       "(?=[<=])", perl = TRUE))) + 1)], collapse = " ")
     }
-    
+
     if (length(grep(x = edges_names[l], pattern = "<=")) == 0
         & length(grep(x = edges_names[l], pattern = "<")) > 0) {
       edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[<])", perl = TRUE)[[1]][1]
@@ -240,10 +240,10 @@ plot_NCT <- function(NCT,
                                  [2 : (lengths(gregexpr(",", strsplit(edges_names[l],
                                                                       "(?=[<])", perl = TRUE))) + 1)], collapse = " ")
     }
-    
+
     if (length(grep(x = edges_names[l], pattern=">=")) == 0 &
         length(grep(x = edges_names[l], pattern=">")) > 0) {
-      
+
       edgelabel[[l]][1] <- strsplit(edges_names[l], "(?=[>])",
                                     perl = TRUE)[[1]][1]
       edgelabel[[l]][2] <- paste(value = strsplit(edges_names[l], "(?=[>])",
@@ -251,45 +251,46 @@ plot_NCT <- function(NCT,
                                                                                          strsplit(edges_names[l], "(?=[>])", perl = TRUE))) + 1)],
                                  collapse = " ")
     }
-    
+
     edges_names_final[l] <- paste(edgelabel[[l]][1],
-                                  gsub("\\s", "", 
+                                  gsub("\\s", "",
                                        x = edgelabel[[l]][2]),
                                   sep = "\n")
-    
+
   }
-  
+
   edges_names_final <- gsub(pattern = "<\\(1\\)", replacement = "=0", x = as.character(edges_names_final))
   edges_names_final <- gsub(pattern = ">=\\(1\\)", replacement = "=1", x = as.character(edges_names_final))
   E(grafo_tree)$label <- edges_names_final
-  
+
   if (output == "estimation") {
     eff1 <- paste(round(NCT$EFF1000_EST, digits), "(", round(NCT$SE1000_EST, digits), ")", sep="")
     eff2 <- paste(round(NCT$EFF1101_EST, digits), "(", round(NCT$SE1101_EST, digits), ")", sep="")
     eff3 <- paste(round(NCT$EFF1110_EST, digits), "(", round(NCT$SE1110_EST, digits), ")", sep="")
-    eff4 <- paste(round(NCT$EFF0100_EST, digits), "(", round(NCT$SE0100_EST, digits), ")", sep="") 
+    eff4 <- paste(round(NCT$EFF0100_EST, digits), "(", round(NCT$SE0100_EST, digits), ")", sep="")
   }
   else {
     eff1 <- paste(round(NCT$EFF1000_EST, digits), sep="")
     eff2 <- paste(round(NCT$EFF1101_EST, digits), sep="")
     eff3 <- paste(round(NCT$EFF1110_EST, digits), sep="")
-    eff4 <- paste(round(NCT$EFF0100_EST, digits), sep="")  
+    eff4 <- paste(round(NCT$EFF0100_EST, digits), sep="")
   }
-  
-  # Calculate percentages
-  total_n <- sum(NCT$NOBS)
+
+  root_idx <- which(NCT$FILTER == "NA")
+  total_n <- NCT$NOBS[root_idx]
+
   percentages <- sprintf("%.1f%%", (NCT$NOBS / total_n) * 100)
   nobs_with_pct <- paste0(NCT$NOBS, " (", percentages, ")")
-  
+
   V(grafo_tree)$labels <- paste(eff1, eff4, nobs_with_pct, sep="\n")
-  
+
   par(mar = margins)
-  
+
   # Create layout with more horizontal spacing
   layout <- layout_as_tree(grafo_tree)
   # Increase horizontal spacing by spreading x-coordinates much more
   layout[, 1] <- layout[, 1] * 3.5
-  
+
   NCTPLOT <- plot(grafo_tree,
                   layout = layout,
                   edge.label.color = edge_label_color,
@@ -310,12 +311,12 @@ plot_NCT <- function(NCT,
                   vertex.shape = vertex_shape,
                   vertex.size = vertex_size * 1.4,
                   vertex.size2 = vertex_size2 * 1.4)
-  
+
   legend('topleft', text.font = 4, text.col = legend_color,
          xjust = 0, adj = 0.2, legend = c(expression(paste(tau, "(1,0;0,0)",sep = "")),
                                           expression(paste(tau,"(0,1;0,0)", sep = "")), "N"),
          title = "Legend", title.col  = legend_title_color)
-  
+
   title(title, cex.main = main_cex, col.main = main_color,
         adj = adj, font.main = main_font)
 }

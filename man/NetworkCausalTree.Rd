@@ -83,3 +83,10 @@ Additional columns summary (only if output = "estimation"):
 \description{
 Returns a Network Causal Tree, with the corresponding estimates
 }
+\details{
+Neighborhood exposure is defined as a binary indicator:
+G_i = 1 if unit i has at least one treated neighbor, and G_i = 0 otherwise.
+Specifically, G_i = 1{sum_j A_ij W_j > 0}, where A is the adjacency
+matrix and W is the individual treatment assignment vector.
+Isolated units have G_i = 0.
+}

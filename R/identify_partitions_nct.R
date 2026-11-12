@@ -120,7 +120,11 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
 
       if (!is.na(tree_info[j, "FILTER"])) {
         texts = tree_info[j, "FILTER"]
-        this_data <- subset(data_tree, eval(parse(text = texts)))
+        this_data <- data_tree[
+          evaluate_nct_filter(texts, data_tree),
+          ,
+          drop = FALSE
+        ]
       } else {this_data <- data_tree}
 
       nleafs = nrow(tree_info)
@@ -172,13 +176,14 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                FUN = function(x, y) x %in% y,
                                y = tree_info$FILTER)
         
-        tmp_nobs <- sapply(tmp_filter,
-                           FUN = function(i, x){
-                             nrow(subset(x = x, subset = eval(parse(text = i))))} ,
-                           x = this_data)
+        tmp_nobs <- vapply(
+          tmp_filter,
+          function(filter) sum(evaluate_nct_filter(filter, this_data)),
+          numeric(1)
+        )
         
-        child_right <- with(this_data, eval(parse(text = tmp_filter[1])))
-        child_left <- with(this_data, eval(parse(text = tmp_filter[2])))
+        child_right <- evaluate_nct_filter(tmp_filter[1], this_data)
+        child_left <- evaluate_nct_filter(tmp_filter[2], this_data)
         
         valid_partition <- !anyNA(child_right) &&
           !anyNA(child_left) &&
@@ -190,7 +195,11 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         
         for (child_idx in 1:2) {
           if (split_here[child_idx]) {
-            child_data <- subset(this_data, eval(parse(text = tmp_filter[child_idx])))
+            child_data <- this_data[
+              evaluate_nct_filter(tmp_filter[child_idx], this_data),
+              ,
+              drop = FALSE
+            ]
             child_table <- table(factor(child_data$W, levels = c(0,1)),
                                  factor(child_data$G, levels = c(0,1)))
             
@@ -219,8 +228,8 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
           
           if (method == "penalized") {
             
-            right_data <- subset(this_data, eval(parse(text = tmp_filter[1])))
-            left_data <- subset(this_data, eval(parse(text = tmp_filter[2])))
+            right_data <- this_data[child_right, , drop = FALSE]
+            left_data <- this_data[child_left, , drop = FALSE]
             
             v_right <- node_variance(right_data)
             v_left <- node_variance(left_data)
