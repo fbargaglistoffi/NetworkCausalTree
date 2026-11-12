@@ -64,6 +64,23 @@
 #'
 #' @export
 
+nct_node_percentages <- function(NCT) {
+  root_idx <- which(NCT$NODE == 1)
+  
+  if (length(root_idx) != 1L) {
+    stop("NCT must contain exactly one root node (NODE == 1).")
+  }
+  
+  nobs <- NCT$NOBS_EST + NCT$NOBS_TR
+  total_n <- nobs[root_idx]
+  
+  if (is.na(total_n) || total_n <= 0) {
+    stop("Root sample size must be positive.")
+  }
+  
+  100 * nobs / total_n
+}
+
 plot_NCT <- function(NCT,
                      cov_names,
                      title,
@@ -275,11 +292,8 @@ plot_NCT <- function(NCT,
     eff3 <- paste(round(NCT$EFF1110_EST, digits), sep="")
     eff4 <- paste(round(NCT$EFF0100_EST, digits), sep="")
   }
-
-  root_idx <- which(NCT$FILTER == "NA")
-  total_n <- NCT$NOBS[root_idx]
-
-  percentages <- sprintf("%.1f%%", (NCT$NOBS / total_n) * 100)
+  
+  percentages <- sprintf("%.1f%%", nct_node_percentages(NCT))
   nobs_with_pct <- paste0(NCT$NOBS, " (", percentages, ")")
 
   V(grafo_tree)$labels <- paste(eff1, eff4, nobs_with_pct, sep="\n")

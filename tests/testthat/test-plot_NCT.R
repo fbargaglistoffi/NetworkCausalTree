@@ -43,13 +43,16 @@ test_that("plot_NCT works in detection mode", {
   )
 })
 
-test_that("node percentages use root sample size", {
-  NOBS <- c(100, 60, 40)
-  FILTER <- c("NA", "X.1 < 1", "X.1 >= 1")
-
-  root_idx <- which(FILTER == "NA")
-  percentages <- (NOBS / NOBS[root_idx]) * 100
-
+test_that("node percentages use root size for a split tree", {
+  NCT <- data.frame(
+    NODE = c(1, 2, 3),
+    FILTER = c(NA, "X.1 >= 1", "X.1 < 1"),
+    NOBS_TR = c(50, 30, 20),
+    NOBS_EST = c(50, 30, 20)
+  )
+  
+  percentages <- nct_node_percentages(NCT)
+  
   expect_equal(percentages, c(100, 60, 40))
   expect_equal(sum(percentages[-1]), 100)
 })

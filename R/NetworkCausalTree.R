@@ -49,10 +49,17 @@
 #' - `EFF1110_EST`: estimated 1110 effects in the partitions,
 #' - `EFF0100_EST`: estimated 0100 effects in the partitions.
 #' Additional columns summary (only if output = "estimation"):
-#' - `SETAU1000_EST`: estimated std. error of the 1000 effect in the partition,
-#' - `SETAU1101_EST`: estimated std. error of the 1101 effect in the partition,
-#' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
-#' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
+#' - `SE1000_EST`: estimated standard error of effect 1000,
+#' - `SE1101_EST`: estimated standard error of effect 1101,
+#' - `SE1110_EST`: estimated standard error of effect 1110,
+#' - `SE0100_EST`: estimated standard error of effect 0100.
+#' When `output = "estimation"`, eight additional columns report
+#' approximate 95% Wald confidence intervals, calculated as
+#' the estimated effect plus or minus 1.96 times its standard error:
+#' - `CI1000_LOWER`, `CI1000_UPPER`: effect 1000,
+#' - `CI1101_LOWER`, `CI1101_UPPER`: effect 1101,
+#' - `CI1110_LOWER`, `CI1110_UPPER`: effect 1110,
+#' - `CI0100_LOWER`, `CI0100_UPPER`: effect 0100.
 #'
 #' @importFrom dplyr rename mutate summarise filter arrange count desc lag groups
 #' @importFrom igraph graph_from_data_frame V E

@@ -74,10 +74,17 @@ Columns summary:
 \item \code{EFF1110_EST}: estimated 1110 effects in the partitions,
 \item \code{EFF0100_EST}: estimated 0100 effects in the partitions.
 Additional columns summary (only if output = "estimation"):
-\item \code{SETAU1000_EST}: estimated std. error of the 1000 effect in the partition,
-\item \code{SETAU1101_EST}: estimated std. error of the 1101 effect in the partition,
-\item \code{SETAU1110_EST}: estimated std. error of the 1110 effect in the partition,
-\item \code{SETAU0100_EST}: estimated std. error of the 0100 effect in the partition.
+\item \code{SE1000_EST}: estimated standard error of effect 1000,
+\item \code{SE1101_EST}: estimated standard error of effect 1101,
+\item \code{SE1110_EST}: estimated standard error of effect 1110,
+\item \code{SE0100_EST}: estimated standard error of effect 0100.
+When \code{output = "estimation"}, eight additional columns report
+approximate 95\% Wald confidence intervals, calculated as
+the estimated effect plus or minus 1.96 times its standard error:
+\item \code{CI1000_LOWER}, \code{CI1000_UPPER}: effect 1000,
+\item \code{CI1101_LOWER}, \code{CI1101_UPPER}: effect 1101,
+\item \code{CI1110_LOWER}, \code{CI1110_UPPER}: effect 1110,
+\item \code{CI0100_LOWER}, \code{CI0100_UPPER}: effect 0100.
 }
 }
 \description{
