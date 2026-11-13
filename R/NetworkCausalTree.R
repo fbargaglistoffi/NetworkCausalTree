@@ -17,6 +17,13 @@
 #' - delta: weight associated to the spillover effect 0100 (effect of the
 #' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
+#' @details
+#' Neighborhood exposure is defined as a binary indicator:
+#' G_i = 1 if unit i has at least one treated neighbor, and G_i = 0 otherwise.
+#' Specifically, G_i equals 1 when the sum of A_ij W_j over all j is positive,
+#' and equals 0 otherwise. Here, A is the adjacency
+#' matrix and W is the individual treatment assignment vector.
+#' Isolated units have G_i = 0.
 #' @param K N x 1 Cluster Membership vector.
 #' @param p N x 1 Probability to be assigned to the active individual
 #' intervention vector.
@@ -33,7 +40,7 @@
 #' and variances are computed
 #'
 #' @return A data.frame describing the obtained Network Causal Trees.
-#' Each row represents a partition (of a specific tree) with 10/14 entries.
+#' Each row represents a partition of the estimated tree.
 #' Columns summary:
 #' - `NOBS_TR`: number of training observations in the partition,
 #' - `FILTER`: values of the covariates `X` that identify the partition,
@@ -43,10 +50,17 @@
 #' - `EFF1110_EST`: estimated 1110 effects in the partitions,
 #' - `EFF0100_EST`: estimated 0100 effects in the partitions.
 #' Additional columns summary (only if output = "estimation"):
-#' - `SETAU1000_EST`: estimated std. error of the 1000 effect in the partition,
-#' - `SETAU1101_EST`: estimated std. error of the 1101 effect in the partition,
-#' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
-#' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
+#' - `SE1000_EST`: estimated standard error of effect 1000,
+#' - `SE1101_EST`: estimated standard error of effect 1101,
+#' - `SE1110_EST`: estimated standard error of effect 1110,
+#' - `SE0100_EST`: estimated standard error of effect 0100.
+#' When `output = "estimation"`, eight additional columns report
+#' approximate 95% Wald confidence intervals, calculated as
+#' the estimated effect plus or minus 1.96 times its standard error:
+#' - `CI1000_LOWER`, `CI1000_UPPER`: effect 1000,
+#' - `CI1101_LOWER`, `CI1101_UPPER`: effect 1101,
+#' - `CI1110_LOWER`, `CI1110_UPPER`: effect 1110,
+#' - `CI0100_LOWER`, `CI0100_UPPER`: effect 0100.
 #'
 #' @importFrom dplyr rename mutate summarise filter arrange count desc lag groups
 #' @importFrom igraph graph_from_data_frame V E
