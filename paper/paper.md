@@ -1,4 +1,3 @@
-
 ---
 title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover
   effects under network interference'
@@ -20,11 +19,11 @@ authors:
   equal-contrib: true
 - name: Costanza Tortù
   orcid: "0000-0003-2561-9726"
-  affiliation: ‘2'
+  affiliation: '2'
   equal-contrib: true
 - name: Charlie Wang
   orcid: "0009-0003-1672-0774"
-  affiliation: ‘3'
+  affiliation: '3'
   equal-contrib: true
 - name: Riccardo Cadei
   orcid: "0000-0003-2416-8943"
@@ -44,7 +43,6 @@ affiliations:
 - name: Department of Biostatistics, Yale University, USA
   index: 5
 ---
-
 # Summary
 
 Interference occurs when treatment assigned to one unit influences the outcomes of other units [@cox1958planning]. In the realm of policy interventions, interference can manifest through various interactions, encompassing social, physical, or virtual connections. The conventional Rubin Causal Model, employed in causal inference studies [@rubin1986comment], excludes interference. However, when interference is present, it must be taken into account to prevent a biased estimation of the treatment effect [@forastiere2016identification] and to be able to estimate spillover effects, that is, the effects on a unit's outcome of the treatment received by other units. Consequently, recent research has devised new methodologies to tackle interference on networks [@forastiere2016identification; @aronow2017estimating; @athey2018exact; @leung2020treatment]. Concurrently, alongside the interference research domain, scholars have crafted machine learning algorithms to appraise treatment effect heterogeneity with respect to individual characteristics [@athey2016recursive]. These algorithms identify heterogeneous sub-populations by iteratively segregating groups whose estimate conditional average treatment effect differs the most from others, and enabling researchers to understand which sub-populations are particularly responsive to the treatment.
@@ -98,9 +96,9 @@ where $N(l(\mathbf{x}))$ is the number of units within the leaf $l(\mathbf{x})$.
 
 These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025heterogeneous], which employs both the marginal probability of an individual $ik$ to be exposed to the treatment level $(w,g)$ $\pi_{ik}(w,g)$ and the joint probability of two individuals $ik$ and $jk'$ to be simultaneously exposed to the treatment levels $(w,g)$ and $(w',g')$, respectively, $\pi_{ikjk'}(w,g;w',g')$.
 
-`NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate more than one causal estimand simultaneously: researchers rule the extent of which the four estimands contribute to the objective function used to partition the covariate space by assigning customized weights, included in the vector $\omega(w,g;w',g')$ . `NetworkCausalTree` procedure is divided into two steps: discovery and estimation. Each cluster is randomly assigned to either the discovery or the estimation set (using a procedure that is commonly referred to as *honest splitting*). In the discovery step, `NetworkCausalTree` builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves that are not sufficiently representative of the four exposure conditions. In the estimation step, `NetworkCausalTree` estimates the CACEs and their standard errors in each leaf. The steps of the `NetworkCausalTree` algorithm are illustrated in the Algorithm 1 table.
+`NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate more than one causal estimand simultaneously: researchers rule the extent of which the four estimands contribute to the objective function used to partition the covariate space by assigning customized weights, included in the vector $\omega(w,g;w',g')$ . `NetworkCausalTree` procedure is divided into two steps: discovery and estimation. Each cluster is randomly assigned to either the discovery or the estimation set (using a procedure that is commonly referred to as *honest splitting*). In the discovery step, `NetworkCausalTree` builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves that are not sufficiently representative of the four exposure conditions. In the estimation step, `NetworkCausalTree` estimates the CACEs and their standard errors in each leaf. When `output = "estimation"`, the package also returns approximate, pointwise 95% Wald confidence intervals based on those standard errors. The main steps of the algorithm are summarized in the figure below.
 
-The current implementation further refines the splitting procedure. In particular,candidate splits are evaluated using sample-size-weighted contributions from the two child nodes, and a split is accepted only when both children satisfy the minimum-size requirements and form a complete partition of the parent node. For the variance-penalized splitting criterion (`method = "penalized"`), the software evaluates the improvement in the overall partition objective. For a parent node $P$ and candidate children $L$ and $R$, the change in the objective is
+The current implementation further refines the splitting procedure. In particular, candidate splits are evaluated using sample-size-weighted contributions from the two child nodes, and a split is accepted only when both children satisfy the minimum-size requirements and form a complete partition of the parent node. For the variance-penalized splitting criterion (`method = "penalized"`), the software evaluates the improvement in the overall partition objective. For a parent node $P$ and candidate children $L$ and $R$, the change in the objective is
 
 $$
 \Delta Q^H =
@@ -122,7 +120,7 @@ $$
 
 where $N^{tr}$ and $N^{est}$ denote the total discovery and estimation sample sizes, respectively. The variance contribution of the parent is replaced by those of its children, while contributions from other terminal leaves remain unchanged. A penalized split is accepted only if it improves the objective and satisfies the usual stopping criteria.
 
-![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png) 
+![Image of the Network Causal Tree Algorithm.](images/nct_algorithm.png)
 
 # Software Design
 
@@ -157,22 +155,22 @@ install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 The `data_generator_direct()` and `data_generator_direct_indirect()` functions return as output a list of synthetic data including the covariates matrix (`X`), the outcome vector (`Y`), the individual intervention vector (`W`), the adjacency matrix (`A`), the neighborhood intervention vector (`G`), the group membership vector (`K`) and the vector describing the probability to be assigned to the active individual intervention vector (`p`).
 
 ``` r
-dataset_direct <- data_generator_direct(N = 4000,
+dataset_direct <- data_generator_direct(N = 4000, 
                                         M = 4,
-                                        k = 80,
-                                        p = rep(0.2,4000),
-                                        het = TRUE,
-                                        h = 2,
-                                        method_networks = "er",
+                                        k = 80, 
+                                        p = rep(0.2,4000), 
+                                        het = TRUE, 
+                                        h = 2, 
+                                        method_networks = "er", 
                                         param_er = 0.1)
-
-dataset_direct_indirect <- data_generator_direct_indirect(N = 4000,
+                                        
+dataset_direct_indirect <- data_generator_direct_indirect(N = 4000, 
                                                           M = 4,
-                                                          k = 80,
-                                                          p = rep(0.2,4000),
-                                                          het = TRUE,
-                                                          h = 2,
-                                                          method_networks = "er",
+                                                          k = 80, 
+                                                          p = rep(0.2,4000), 
+                                                          het = TRUE, 
+                                                          h = 2, 
+                                                          method_networks = "er", 
                                                           param_er = 0.1)
 ```
 
@@ -181,16 +179,16 @@ We propose here two examples of how to run the Network Causal Tree algorithm by 
 **Example 1.** Running Network Causal Tree while relying on a singular in-sample splitting criterion function, that assesses the heterogeneity of the main treatment effect ($\tau_{(1,0;0,0)}$) only
 
 ``` r
-result <- NetworkCausalTree(X = dataset_direct[["X"]],
+result_direct <- NetworkCausalTree(X = dataset_direct[["X"]],
                             Y = dataset_direct[["Y"]],
-                            W = dataset_direct[["W"]],
+                            W = dataset_direct[["W"]], 
                             A = dataset_direct[["A"]],
                             K = dataset_direct[["K"]],
-                            p = dataset_direct[["p"]],
+                            p = dataset_direct[["p"]], 
                             effect_weights = c(1,0,0,0),
                             ratio_disc = 0.5,
                             depth = 2,
-                            minsize = 5,
+                            minsize = 5, 
                             method = "singular",
                             output = "estimation")
 ```
@@ -198,21 +196,21 @@ result <- NetworkCausalTree(X = dataset_direct[["X"]],
 **Example 2.** Running Network Causal Tree while relying on a composite in-sample splitting criterion function, which accounts for all the four estimands simultaneously
 
 ``` r
-result <- NetworkCausalTree(X = dataset_direct_indirect[["X"]],
+result_composite <- NetworkCausalTree(X = dataset_direct_indirect[["X"]],
                             Y = dataset_direct_indirect[["Y"]],
-                            W = dataset_direct_indirect[["W"]],
+                            W = dataset_direct_indirect[["W"]], 
                             A = dataset_direct_indirect[["A"]],
                             K = dataset_direct_indirect[["K"]],
-                            p = dataset_direct_indirect[["p"]],
+                            p = dataset_direct_indirect[["p"]], 
                             effect_weights = c(0.25,0.25,0.25,0.25),
                             ratio_disc = 0.5,
                             depth = 2,
-                            minsize = 5,
+                            minsize = 5, 
                             method = "composite",
                             output = "estimation")
 ```
 
-The results are included in a `data.frame` object which provides information about i) the nodes identified by the tree (`FILTER`), and their role in the tree - parent or leaf - (`TERMINAL`), ii) the number of units included in all nodes, both in the discovery set (`NOBS_TR`) and in the estimation set (`NOBS_EST`), iii) the estimated CACE's (`EFF(w,g;w',g')_EST`), with their corresponding standard errors (`SE(w,g;w',g')_EST`), in all nodes. The function `print()` displays these results and the `plot_NCT()` function visualizes the tree with the estimated effects in each leaf. In each node, we display, from top to bottom, the estimates of the main treatment effect, $\tau(1,0;0,0)$ and of the main spillover effect, $\tau(0,1;0,0)$, and the size of the selected subpopulations. The colors indicate the sign and magnitude of either the main treatment effect, $\tau(1,0;0,0)$, or the main spillover effect, $\tau(0,1;0,0)$. Blue nodes correspond to positive estimated treatment effects, while green nodes represent positive estimated spillover effects. The intensity of the color indicates the strength of the effect: darker shades correspond to stronger effects, and negative effects are shown in white.
+The results are included in a `data.frame` object which provides information about i) the nodes identified by the tree (`FILTER`), and their role in the tree - parent or leaf - (`TERMINAL`), ii) the number of units included in all nodes, both in the discovery set (`NOBS_TR`) and in the estimation set (`NOBS_EST`), iii) the estimated CACEs (`EFF(w,g;w',g')_EST`) and their standard errors (`SE(w,g;w',g')_EST`) in all nodes, along with approximate 95% Wald confidence intervals when `output = "estimation"`. The function `print()` displays these results and the `plot_NCT()` function visualizes the tree with the estimated effects in each leaf. In each node, we display, from top to bottom, the estimates of the main treatment effect, $\tau(1,0;0,0)$ and of the main spillover effect, $\tau(0,1;0,0)$, and the size of the selected subpopulations. The colors indicate the sign and magnitude of either the main treatment effect, $\tau(1,0;0,0)$, or the main spillover effect, $\tau(0,1;0,0)$. Blue nodes correspond to positive estimated treatment effects, while green nodes represent positive estimated spillover effects. The intensity of the color indicates the strength of the effect: darker shades correspond to stronger effects, and negative effects are shown in white.
 
 For instance, Figure 2 shows the tree obtained from **Example 1**. The code used to produce the plot is as follows:
 
@@ -220,7 +218,7 @@ For instance, Figure 2 shows the tree obtained from **Example 1**. The code used
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset_direct[["X"]])
 
-plot_NCT(NCT = result,
+plot_NCT(NCT = result_direct, 
          cov_names = cov_names,
          title = title)
 ```
@@ -233,7 +231,7 @@ Figure 3 shows the tree obtained from **Example 2**.
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
 cov_names <- colnames(dataset_direct_indirect[["X"]])
 
-plot_NCT(NCT = result,
+plot_NCT(NCT = result_composite, 
          cov_names = cov_names,
          title = title)
 ```
