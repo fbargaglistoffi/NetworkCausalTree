@@ -1,36 +1,171 @@
-"""Apply change sets 01--04 from the user-approved hardening bundle locally.
-This changes the CI workspace only; it does not commit or push the R sources.
-The decoded payload is SHA256-verified and every replacement is exact-anchored.
+"""Apply the runtime edits from hardening change sets 01--04 in CI only.
+The original bundle's documentation edits are not needed for this smoke run.
+No source edits are committed or pushed by this script.
 """
-import base64
-import hashlib
-import json
 from pathlib import Path
-import zlib
+import hashlib
 
-PAYLOAD = """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"""
-# The payload is checked before any source file is changed.
-raw = zlib.decompress(base64.b64decode(PAYLOAD))
-expected = "c6f6517bd2fcf96cf9fcb3daaa3ee46c246f9f5c1c81a92db2a3ef29dd3ff7ea"
-if hashlib.sha256(raw).hexdigest() != expected:
-    raise RuntimeError("Hardening payload checksum mismatch")
-data = json.loads(raw)
 root = Path(__file__).resolve().parents[2]
 updated = {}
-for edit in data['edits']:
-    target = root / edit['path']
+
+def replace(path, old, new):
+    target = root / path
     text = updated.get(target, target.read_text())
-    count = text.count(edit['old'])
-    if count != edit['expected_occurrences']:
-        raise RuntimeError(f"Anchor mismatch in {edit['path']}: {count}")
-    updated[target] = text.replace(edit['old'], edit['new'])
-for name, content in data['new_files'].items():
-    target = root / name
-    if target.exists():
-        raise RuntimeError(f"New file already exists: {name}")
-    updated[target] = content
+    count = text.count(old)
+    if count != 1:
+        raise RuntimeError(f"Expected one exact anchor in {path}; found {count}")
+    updated[target] = text.replace(old, new)
+
+replace('R/compute_OF_Split.R',
+'''                             N_tr = length(W), N_est = NULL) {''',
+'''                             N_tr = length(W), N_est = NULL,
+                             minsize = 1) {
+
+  if (!is.numeric(minsize) || length(minsize) != 1L ||
+      !is.finite(minsize) || minsize < 1 || minsize != floor(minsize)) {
+    stop("minsize must be a positive integer.")
+  }''')
+replace('R/compute_OF_Split.R',
+'''      if (any(left_table < 1) || any(right_table < 1)) {''',
+'''      # Enforce feasibility before selecting the best-scoring candidate.
+      if (any(left_table < minsize) || any(right_table < minsize)) {''')
+replace('R/identify_partitions_nct.R',
+'''        N_tr = N_tr,
+        N_est = N_est
+      )''',
+'''        N_tr = N_tr,
+        N_est = N_est,
+        minsize = minsize
+      )''')
+replace('R/NetworkCausalTree.R',
+'''  N <- length(W)
+
+  if (is.null(K)''',
+'''  N <- length(W)
+
+  if (!is.numeric(minsize) || length(minsize) != 1L ||
+      !is.finite(minsize) || minsize < 1 || minsize != floor(minsize)) {
+    stop("minsize must be a positive integer.")
+  }
+
+  if (is.null(K)''')
+
+replace('R/compute_OF_Value.R',
+'''    if (any(!is.finite(population_effects))) {
+      stop("population_effects contains non-finite values: cannot normalize composite OF")
+    }
+    if (any(population_effects == 0, na.rm = TRUE)) {
+      stop("population_effects contains zero: cannot normalize composite OF")
+    }
+
+    inof <- alpha * ((EffTau1000(N = N, W = W, G = G, Y = Y,
+                                 p = p, Ne_list = Ne_list,
+                                 unit_ids = unit_ids) ^ 2) /
+                       (population_effects[1]) ^ 2) +
+            beta * ((EffTau1101(N = N, W = W, G = G, Y = Y,
+                                p = p, Ne_list = Ne_list,
+                                unit_ids = unit_ids) ^ 2) /
+                      (population_effects[2]) ^ 2) +
+            gamma * ((EffTau1110(N = N, W = W, G = G, Y = Y,
+                                 p = p, Ne_list = Ne_list,
+                                 unit_ids = unit_ids) ^ 2) /
+                       (population_effects[3]) ^ 2) +
+            delta * ((EffTau0100(N = N, W = W, G = G, Y = Y,
+                                 p = p, Ne_list = Ne_list,
+                                 unit_ids = unit_ids) ^ 2) /
+                       (population_effects[4]) ^ 2)''',
+'''    weights <- c(alpha, beta, gamma, delta)
+    if (any(!is.finite(weights)) || any(weights < 0) || !any(weights > 0)) {
+      stop("Composite weights must be finite, non-negative, and include a positive weight.")
+    }
+    active <- which(weights > 0)
+    if (any(!is.finite(population_effects[active]))) {
+      stop("Selected population_effects contains non-finite values: cannot normalize composite OF")
+    }
+    if (any(population_effects[active] == 0)) {
+      stop("Selected population_effects contains zero: cannot normalize composite OF")
+    }
+
+    effect_functions <- list(EffTau1000, EffTau1101, EffTau1110, EffTau0100)
+    inof <- sum(vapply(active, function(j) {
+      effect <- effect_functions[[j]](
+        N = N, W = W, G = G, Y = Y, p = p,
+        Ne_list = Ne_list, unit_ids = unit_ids
+      )
+      weights[j] * (effect / population_effects[j]) ^ 2
+    }, numeric(1)))''')
+
+replace('R/sprout_nct.R',
+r'''    if (!all(grepl("^X\\.", colnames(X)))) {
+      colnames(X) <- paste0("X.", seq_len(ncol(X)))
+    }''',
+'''    # Stored filters use positional names accepted by evaluate_nct_filter().
+    colnames(X) <- paste0("X.", seq_len(ncol(X)))''')
+for path in ['R/identify_partitions_nct.R', 'R/compute_effects_nct.R']:
+    replace(path,
+r'''    cn <- colnames(X)
+    if (is.null(cn) || length(cn) != ncol(X) || !all(grepl("^X\\.", cn))) {
+      colnames(X) <- paste0("X.", seq_len(ncol(X)))
+    }''',
+'''    # Match discovery and estimation columns by their original position.
+    colnames(X) <- paste0("X.", seq_len(ncol(X)))''')
+
+replace('R/NetworkCausalTree.R',
+'''  if (anyNA(A)) {
+    stop("A cannot contain missing values.")
+  }
+''',
+'''  if (anyNA(A)) {
+    stop("A cannot contain missing values.")
+  }
+
+  if ((!is.numeric(A) && !is.logical(A)) ||
+      any(!is.finite(A)) || any(A != 0 & A != 1)) {
+    stop("A must contain only finite binary entries (0 or 1).")
+  }
+''')
+replace('R/NetworkCausalTree.R',
+'''  # Sample the clusters to be assigned to the discovery set
+''',
+'''  # All four contrasts are reported, so each of their exposure states must
+  # be supported for every focal unit. Do not silently redefine the population.
+  validate_nct_exposure_support(seq_len(N), p, Ne_list)
+
+  # Sample the clusters to be assigned to the discovery set
+''')
+
+helper = root / 'R/validate_nct_exposure_support.R'
+if helper.exists():
+    raise RuntimeError('Exposure-support helper already exists')
+updated[helper] = '''# Internal input-domain check for the four contrasts reported by NCT.
+# A zero pairwise probability is allowed; a zero marginal probability is not.
+validate_nct_exposure_support <- function(unit_ids, p, Ne_list) {
+  if (any(lengths(Ne_list[unit_ids]) == 0L)) {
+    stop(
+      "Exposure positivity is not satisfied: isolated units cannot have G = 1. ",
+      "The current NetworkCausalTree interface reports all four contrasts ",
+      "for the supplied target population and therefore requires non-isolated units. ",
+      "No units have been removed automatically.",
+      call. = FALSE
+    )
+  }
+  for (w in 0:1) {
+    for (g in 0:1) {
+      probability <- pi(unit_ids, w, g, p, Ne_list)
+      if (any(!is.finite(probability)) || any(probability <= 0)) {
+        stop(
+          "Exposure probabilities must be finite and strictly positive for ",
+          "every unit and each reported exposure state. A zero may also ",
+          "indicate numerical underflow; no denominator has been regularized.",
+          call. = FALSE
+        )
+      }
+    }
+  }
+  invisible(TRUE)
+}
+'''
 for target, content in updated.items():
-    target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content)
-print(f"Applied original bundle change sets 01--04 to {len(updated)} files")
-print(f"Baseline: {data['base_commit']}; payload SHA256: {expected}")
+    print(hashlib.sha256(content.encode()).hexdigest(), target.relative_to(root))
+print('Applied all runtime edits from hardening change sets 01--04.')
