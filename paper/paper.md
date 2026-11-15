@@ -140,6 +140,10 @@ Importantly, when estimating leaf-specific causal effects, the original exposure
 
 These design choices involve several trade-offs. Honest sample splitting avoids reusing discovery outcomes for final estimation but reduces the sample size available to each stage. Exact marginal and joint exposure probabilities accommodate heterogeneous assignment probabilities and network dependence, although they can be computationally more demanding than simplified approximations. Similarly, conservative variance estimation supports inference when some joint exposure probabilities are zero, potentially at the cost of wider uncertainty estimates. The modular implementation allows these components to be tested independently and facilitates future methodological extensions.
 
+# Research Impact Statement
+
+The Network Causal Tree methodology was published in *The Annals of Applied Statistics* [@bargagli2025heterogeneous]. `NetworkCausalTree` makes this methodology available as open-source R software for randomized studies of networked populations. It enables researchers to discover interpretable subgroups with different direct and spillover responses and to estimate effects within those subgroups, supporting analyses that conventional no-interference tree methods do not directly address. The public repository includes worked examples, simulation scripts, and automated tests, providing resources for reproducible analyses and future methodological comparisons. By lowering the implementation barrier for studying effect heterogeneity under clustered network interference, the package offers a practical foundation for near-term applied research.
+
 # Usage
 
 `NetworkCausalTree` is available on [GitHub](https://github.com/fbargaglistoffi/NetworkCausalTree) and can be installed and loaded into the R session using:
