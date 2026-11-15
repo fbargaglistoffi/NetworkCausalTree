@@ -7,11 +7,9 @@ test_that("NetworkCausalTree runs and returns expected structure", {
   
   K <- rep(1:k, each = N / k)
   
-  X <- matrix(
-    rbinom(N * M, size = 1, prob = 0.5),
-    nrow = N,
-    ncol = M
-  )
+  # Each covariate-defined child contains the same exposure pattern in
+  # every cluster, including clusters held out for estimation.
+  X <- cbind(rep(rep(c(0, 1), each = 10), k), rep(0, N))
   
   A <- matrix(0, nrow = N, ncol = N)
   
@@ -185,7 +183,8 @@ test_that("missing p triggers a warning", {
   N <- 80
   K <- rep(1:4, each = 20)
   
-  X <- matrix(rbinom(N * 2, 1, 0.5), nrow = N)
+  # This test isolates the assignment-probability warning, not leaf size.
+  X <- matrix(0, nrow = N, ncol = 2)
   Y <- rnorm(N)
   W <- rep(c(0, 0, 0, 1, 0, 1, 1, 0), length.out = N)
   
@@ -225,7 +224,8 @@ test_that("explicit p does not trigger a warning", {
   N <- 80
   K <- rep(1:4, each = 20)
   
-  X <- matrix(rbinom(N * 2, 1, 0.5), nrow = N)
+  # This test isolates the assignment-probability warning, not leaf size.
+  X <- matrix(0, nrow = N, ncol = 2)
   Y <- rnorm(N)
   W <- rep(c(0, 0, 0, 1, 0, 1, 1, 0), length.out = N)
   
@@ -258,7 +258,4 @@ test_that("explicit p does not trigger a warning", {
     )
   )
 })
-
-
-
 

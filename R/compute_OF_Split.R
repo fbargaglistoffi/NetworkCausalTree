@@ -26,6 +26,8 @@
 #' @param unit_ids Original network indices of the observations in W, G, and Y
 #' @param N_tr Total number of observations in the discovery sample
 #' @param N_est Total number of observations in the estimation sample
+#' @param minsize Minimum number of observations in every joint exposure cell
+#' in each child. Infeasible candidates are excluded before ranking.
 #'
 #' @return A numeric vector made up by three elements: the first one identifies the
 #' value of the  Objective Function is max , the second one reports the value of the variable that maximizes the  Objective Function,
@@ -35,11 +37,16 @@ compute_OF_Split <- function(method, alpha, beta, gamma, delta,
                              W, G, Y, X, p, Ne, Ne_list,
                              population_effects, total_variance, nleafs,
                              unit_ids = seq_along(W),
-                             N_tr = length(W), N_est = NULL) {
+                             N_tr = length(W), N_est = NULL,
+                             minsize = 1) {
   
   if (method == "penalized" &&
       (is.null(N_est) || N_tr <= 0 || N_est <= 0)) {
     stop("Penalized splitting requires positive N_tr and N_est.")
+  }
+  if (!is.numeric(minsize) || length(minsize) != 1L ||
+      !is.finite(minsize) || minsize < 1) {
+    stop("minsize must be a finite numeric value of at least 1.")
   }
   
   # Initialize
@@ -97,7 +104,9 @@ compute_OF_Split <- function(method, alpha, beta, gamma, delta,
       left_table  <- table(factor(W[idx_left],  levels = c(0,1)), factor(G[idx_left],  levels = c(0,1)))
       right_table <- table(factor(W[idx_right], levels = c(0,1)), factor(G[idx_right], levels = c(0,1)))
       
-      if (any(left_table < 1) || any(right_table < 1)) {
+      # Screen feasibility before choosing the best score; rejecting only the
+      # maximizer would miss a lower-scoring but admissible candidate.
+      if (any(left_table < minsize) || any(right_table < minsize)) {
         ofx[i] <- NA
         next
       }
