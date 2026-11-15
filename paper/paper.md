@@ -53,11 +53,15 @@ This paper introduces the `NetworkCausalTree` R package, the first open-source i
 
 # Statement of need
 
+To account for the current lack of existing methods for a data-driven discovery of the heterogeneity of causal effects in the presence of network interference, we propose `NetworkCausalTree`, an R package providing a flexible implementation of the Network Causal Tree algorithm. `NetworkCausalTree` provides i) an interpretable representation of the heterogeneity of treatment and spillover effects in the presence of CNI, within randomized settings; ii) the possibility for the researcher to simultaneously model the heterogeneity of both treatment and spillover effects. To the best of our knowledge, there aren't existing packages to explore, in a data-driven manner, the heterogeneity of treatment and spillover effects in the presence of network interference.
+
+# State of the field
+
 Existing R packages and algorithms are designed either to detect and estimate Heterogeneous Treatment Effects (HTEs) in the absence of interference or to estimate average causal effects in the presence of interference.
 
 On the one hand, there are a plethora of methods to discover and estimate HTEs employing decision trees in the absence of interference. Some of them have also been implemented in R. For instance: i) the `aVirtualTwins` package, which implements the Virtual Twins algorithm introduced by [@foster2011subgroup]; ii) the `causalTree` package, which implements the Causal Honest Tree algorithm introduced by Athey and Imbens [@athey2016recursive]; iii) the `policytree` which implements the Policy Tree methodology as proposed by [@athey2021policy]; iv) the `CRE` package [@Cadei2023], which implements the Causal Rule Ensemble algorithm introduced by [@bargagli2020causal].
 
-On the other hand, there are three main packages to estimate average causal effects in the presence of interference: i) the `inferference` package implements the inverse probability weighting estimator proposed by @tchetgen2012causal to evaluate the causal effect of an intervention in the presence of partial interference in observational studies; ii) the `interference` package estimates causal effects under network interference in randomized experiments [@aronow2017estimating]; iii) the `inferference` `latenetwork` package [@hoshino2024causal] estimates the causal effect of an intervention under noncompliance and unknown network interference.
+On the other hand, there are three main packages to estimate average causal effects in the presence of interference: i) the `inferference` package implements the inverse probability weighting estimator proposed by @tchetgen2012causal to evaluate the causal effect of an intervention in the presence of partial interference in observational studies; ii) the `interference` package estimates causal effects under network interference in randomized experiments [@aronow2017estimating]; iii) the `latenetwork` package [@hoshino2024causal] estimates the causal effect of an intervention under noncompliance and unknown network interference.
 
 Existing methods for causal inference either handle treatment effect heterogeneity *without interference* or interference *without heterogeneity*. The table below summarizes this gap:
 
@@ -72,8 +76,6 @@ Existing methods for causal inference either handle treatment effect heterogenei
 | **`NetworkCausalTree` (ours)** | **Yes** | **Yes** | **Yes** |
 
 NetworkCausalTree fills this hole by providing the first interpretable, decision-tree-based approach for discovering heterogeneity in both treatment and spillover effects under network interference.
-
-To account for the current lack of existing methods for a data-driven discovery of the heterogeneity of causal effects in the presence of network interference, we propose `NetworkCausalTree`, an R package providing a flexible implementation of the Network Causal Tree algorithm. `NetworkCausalTree` provides i) an interpretable representation of the heterogeneity of treatment and spillover effects in the presence of CNI, within randomized settings; ii) the possibility for the researcher to simultaneously model the heterogeneity of both treatment and spillover effects. To the best of our knowledge, there aren't existing packages to explore, in a data-driven manner, the heterogeneity of treatment and spillover effects in the presence of network interference.
 
 # Algorithm
 
@@ -94,11 +96,11 @@ $$
 
 where $N(l(\mathbf{x}))$ is the number of units within the leaf $l(\mathbf{x})$.
 
-These effects will be estimated by a Horvitz-Thompson estimator [@bargagli2025heterogeneous], which employs both the marginal probability of an individual $ik$ to be exposed to the treatment level $(w,g)$ $\pi_{ik}(w,g)$ and the joint probability of two individuals $ik$ and $jk'$ to be simultaneously exposed to the treatment levels $(w,g)$ and $(w',g')$, respectively, $\pi_{ikjk'}(w,g;w',g')$.
+Leaf-specific effects are estimated using a Horvitz--Thompson estimator based on marginal exposure probabilities $\pi_{ik}(w,g)$ [@bargagli2025heterogeneous]. Joint exposure probabilities $\pi_{ikjk'}(w,g;w',g')$ additionally enter the design-based variance and covariance calculations.
 
 `NetworkCausalTree` relies on a flexible in-sample splitting criterion function that can potentially accommodate more than one causal estimand simultaneously: researchers rule the extent of which the four estimands contribute to the objective function used to partition the covariate space by assigning customized weights, included in the vector $\omega(w,g;w',g')$ . `NetworkCausalTree` procedure is divided into two steps: discovery and estimation. Each cluster is randomly assigned to either the discovery or the estimation set (using a procedure that is commonly referred to as *honest splitting*). In the discovery step, `NetworkCausalTree` builds a tree according to the in-sample splitting criterion and stops when either the tree has reached its maximum depth or any additional split would generate leaves that are not sufficiently representative of the four exposure conditions. In the estimation step, `NetworkCausalTree` estimates the CACEs and their standard errors in each leaf. When `output = "estimation"`, the package also returns approximate, pointwise 95% Wald confidence intervals based on those standard errors. The main steps of the algorithm are summarized in the figure below.
 
-The current implementation further refines the splitting procedure. In particular, candidate splits are evaluated using sample-size-weighted contributions from the two child nodes, and a split is accepted only when both children satisfy the minimum-size requirements and form a complete partition of the parent node. For the variance-penalized splitting criterion (`method = "penalized"`), the software evaluates the improvement in the overall partition objective. For a parent node $P$ and candidate children $L$ and $R$, the change in the objective is
+The current implementation further refines the splitting procedure. In particular, candidate splits are screened against the minimum exposure-cell sizes in both children before they are ranked using sample-size-weighted objectives. Accepted children must also form a complete partition of the parent node. For the variance-penalized splitting criterion (`method = "penalized"`), the software evaluates the improvement in the overall partition objective. For a parent node $P$ and candidate children $L$ and $R$, the change in the objective is
 
 $$
 \Delta Q^H =
@@ -126,11 +128,11 @@ where $N^{tr}$ and $N^{est}$ denote the total discovery and estimation sample si
 
 The implementation separates tree construction, leaf-specific causal effect estimation, and uncertainty quantification into distinct computational components. This modular structure allows the discovery and estimation stages to operate on separate sets of clusters and facilitates independent validation of the probability and variance calculations.
 
-The package supports effect-specific, composite, and variance-penalized splitting criteria, allowing researchers to investigate heterogeneity in individual treatment effects, spillover effects, or both simultaneously. The revised splitting procedure uses sample-size-weighted objectives and ensures that accepted splits preserve the partition structure of the tree. The variance-penalized option additionally accounts for the change in estimated uncertainty associated with a candidate split.
+The package supports effect-specific, composite, and variance-penalized splitting criteria, allowing researchers to investigate heterogeneity in individual treatment effects, spillover effects, or both simultaneously. The revised splitting procedure uses sample-size-weighted objectives and ensures that accepted splits preserve the partition structure of the tree. The variance-penalized option additionally accounts for the change in estimated uncertainty associated with a candidate split. For the composite criterion, only positively weighted effects are evaluated and normalized, using discovery-sample estimates; a zero or non-finite normalizer for a selected effect produces an informative error.
 
 ## Exposure probabilities and conservative inference
 
-The `NetworkCausalTree` package implements design-based estimation and inference under clustered network interference. The current implementation considers a binary network exposure, defined by whether an individual has at least one treated neighbor, and supports independent Bernoulli treatment assignment with potentially heterogeneous unit-level assignment probabilities.
+The `NetworkCausalTree` package implements design-based estimation and inference under clustered network interference. The current implementation considers a binary network exposure, defined by whether an individual has at least one treated neighbor, and supports independent Bernoulli treatment assignment with potentially heterogeneous unit-level assignment probabilities. The adjacency matrix must be finite, binary, symmetric, and free of self-loops and between-cluster edges. Because the interface reports all four contrasts, it rejects networks containing isolated units, for whom exposure to a treated neighbor is impossible, rather than silently removing them or redefining the target population.
 
 Marginal exposure probabilities are computed using the known assignment probabilities of the units belonging to each exposure-defining neighborhood. Joint exposure probabilities are calculated exactly by conditioning on individual treatment assignments and applying inclusion--exclusion over the relevant network neighborhoods. This approach accommodates direct connections, shared neighbors, and zero joint-exposure probabilities without requiring exhaustive enumeration of treatment assignments. Numerically stable calculations are used to distinguish genuinely small positive probabilities from structurally impossible exposure configurations.
 
@@ -142,7 +144,7 @@ These design choices involve several trade-offs. Honest sample splitting avoids 
 
 # Research Impact Statement
 
-The Network Causal Tree methodology was published in *The Annals of Applied Statistics* [@bargagli2025heterogeneous]. `NetworkCausalTree` makes this methodology available as open-source R software for randomized studies of networked populations. It enables researchers to discover interpretable subgroups with different direct and spillover responses and to estimate effects within those subgroups, supporting analyses that conventional no-interference tree methods do not directly address. The public repository includes worked examples, simulation scripts, and automated tests, providing resources for reproducible analyses and future methodological comparisons. By lowering the implementation barrier for studying effect heterogeneity under clustered network interference, the package offers a practical foundation for near-term applied research.
+The Network Causal Tree methodology was published in *The Annals of Applied Statistics* [@bargagli2025heterogeneous]. That article illustrates the methodology in a randomized study of information sessions and weather-insurance uptake in rural China. This application provides a concrete motivating use case for discovering heterogeneous direct and spillover responses. `NetworkCausalTree` makes this methodology available as open-source R software for randomized studies of networked populations. It enables researchers to discover interpretable subgroups with different direct and spillover responses and to estimate effects within those subgroups, supporting analyses that conventional no-interference tree methods do not directly address. The public repository includes worked examples, simulation scripts, and automated tests, providing resources for reproducible analyses and future methodological comparisons. By lowering the implementation barrier for studying effect heterogeneity under clustered network interference, the package offers a practical foundation for near-term applied research.
 
 # Usage
 
@@ -151,6 +153,7 @@ The Network Causal Tree methodology was published in *The Annals of Applied Stat
 ``` r
 library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
+library(NetworkCausalTree)
 ```
 
 `data_generator_direct()` and `data_generator_direct_indirect()` are flexible synthetic dataset generators, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. Both accept key arguments `N` (sample size), `M` (number of binary covariates), `k` (number of clusters), `p` (vector of individual treatment assignment probabilities), `het` (whether treatment effects are heterogeneous), `h` (effect magnitude), and `method_networks`
@@ -258,7 +261,9 @@ Future extensions will include support for continuous exposures (e.g., multiple 
 
 # AI usage disclosure
 
-AI-assisted tools, including GitHub Copilot and a large language model, were used to support code review, suggestions for code and test revisions, and copy-editing of the manuscript. Technical content, methodological decisions, and software design choices pertain to the human authors.
+GitHub Copilot and ChatGPT were used for code review, implementation and regression-test preparation, manuscript editing, and algorithm-figure preparation. The final software audit and targeted revisions used ChatGPT (GPT-6 Astra Pro); model versions used for earlier assistance were not recorded in the available project materials. Technical content, methodological decisions, and software design choices remain the responsibility of the human authors. All AI-assisted changes require human review and validation before submission.
+
+<!-- AUTHOR CONFIRMATION BEFORE SUBMISSION: Verify the historical tool/model record and the scope above. After the human team has reviewed, modified as necessary, and validated all AI-assisted code, text, tests, and figures, replace the final sentence with an accurate confirmation of that completed verification. This draft does not attest that the authors have already reviewed these new changes. -->
 
 # Acknowledgements
 
