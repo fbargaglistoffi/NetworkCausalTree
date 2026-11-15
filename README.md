@@ -34,7 +34,9 @@ G_i = \mathbb{1}\left\{\sum_{j=1}^{N} A_{ij}W_j > 0\right\}
 
 Here, \(A_{ij}\) indicates whether units \(i\) and \(j\) are connected, and \(W_j\) indicates whether unit \(j\) receives treatment.
 
-Thus, \(G_i = 1\) if unit \(i\) has at least one treated neighbor, and \(G_i = 0\) otherwise. Isolated units have \(G_i = 0\).
+Thus, \(G_i = 1\) if unit \(i\) has at least one treated neighbor, and \(G_i = 0\) otherwise.
+
+`A` must be a finite binary, symmetric adjacency matrix with a zero diagonal and no between-cluster edges. Assignment positivity (\(0<p_i<1\)) is distinct from exposure positivity: an isolated unit can never have \(G_i=1\). Because `NetworkCausalTree()` reports all four contrasts, it rejects networks containing isolated units, including when the splitting criterion targets only effect 1000. It does not silently remove units or change the target population. Under independent Bernoulli assignment, the supported no-isolates input domain gives each unit positive marginal probability of all four exposure states; zero joint probabilities for pairs remain possible and are handled by the variance routines.
 
 ## Examples
 

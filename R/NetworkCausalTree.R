@@ -16,14 +16,23 @@
 #' neighborhood treatment, with the individual treatment set at 1),
 #' - delta: weight associated to the spillover effect 0100 (effect of the
 #' neighborhood treatment, with the individual treatment set at 0).
-#' @param A N x N Adjacency matrix.
+#' @param A N x N finite binary adjacency matrix of a simple undirected
+#' network, with no isolated units and no edges between clusters.
 #' @details
 #' Neighborhood exposure is defined as a binary indicator:
 #' G_i = 1 if unit i has at least one treated neighbor, and G_i = 0 otherwise.
 #' Specifically, G_i equals 1 when the sum of A_ij W_j over all j is positive,
 #' and equals 0 otherwise. Here, A is the adjacency
 #' matrix and W is the individual treatment assignment vector.
-#' Isolated units have G_i = 0.
+#' Isolated units would have G_i = 0 under every assignment, so contrasts
+#' involving G_i = 1 are not identified for a population containing them.
+#' Because this function reports all four contrasts, it rejects networks
+#' containing isolated units, even when the splitting criterion targets only
+#' effect 1000. It does not silently remove units or redefine the population.
+#' Under the supported independent Bernoulli design, 0 < p_i < 1 and at
+#' least one neighbor per unit imply positive marginal probabilities for
+#' all four exposure states. Zero joint probabilities for pairs can still
+#' occur and are handled by the conservative variance calculations.
 #' @param K N x 1 Cluster Membership vector.
 #' @param p N x 1 Probability to be assigned to the active individual
 #' intervention vector.
@@ -165,6 +174,11 @@ NetworkCausalTree <- function(X, Y, W,
     stop("A cannot contain missing values.")
   }
 
+  if (!(is.numeric(A) || is.logical(A) || inherits(A, "Matrix")) ||
+      any(!is.finite(A)) || any(A != 0 & A != 1)) {
+    stop("A must contain only finite binary entries (0 or 1).")
+  }
+
   if (!isTRUE(all(A == t(A)))) {
     stop("A must be symmetric (undirected network).")
   }
@@ -199,6 +213,13 @@ NetworkCausalTree <- function(X, Y, W,
   # The value of the neighborhood exposure G and the list of direct neighbors Ne_list)
 
   Ne <- rowSums(A)
+  # All four contrasts are reported, independently of the splitting weights.
+  # Reject the unsupported population instead of changing its membership.
+  if (any(Ne == 0)) {
+    stop("A contains isolated units: exposure G = 1 has zero probability for these units. ",
+         "NetworkCausalTree reports all four contrasts and requires no isolated units; ",
+         "no units have been removed.")
+  }
   Ne_treated <- as.vector(A %*% W)
   G = rep(1,N)
   G[Ne_treated == 0] <- 0

@@ -38,7 +38,8 @@ neighborhood treatment, with the individual treatment set at 1),
 neighborhood treatment, with the individual treatment set at 0).
 }}
 
-\item{A}{N x N Adjacency matrix.}
+\item{A}{N x N finite binary adjacency matrix of a simple undirected
+network, with no isolated units and no edges between clusters.}
 
 \item{K}{N x 1 Cluster Membership vector.}
 
@@ -96,5 +97,13 @@ G_i = 1 if unit i has at least one treated neighbor, and G_i = 0 otherwise.
 Specifically, G_i equals 1 when the sum of A_ij W_j over all j is positive,
 and equals 0 otherwise. Here, A is the adjacency
 matrix and W is the individual treatment assignment vector.
-Isolated units have G_i = 0.
+Isolated units would have G_i = 0 under every assignment, so contrasts
+involving G_i = 1 are not identified for a population containing them.
+Because this function reports all four contrasts, it rejects networks
+containing isolated units, even when the splitting criterion targets only
+effect 1000. It does not silently remove units or redefine the population.
+Under the supported independent Bernoulli design, 0 < p_i < 1 and at
+least one neighbor per unit imply positive marginal probabilities for
+all four exposure states. Zero joint probabilities for pairs can still
+occur and are handled by the conservative variance calculations.
 }
