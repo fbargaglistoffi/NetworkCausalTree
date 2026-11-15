@@ -6,6 +6,9 @@ on:
       - '.github/workflows/nct-hardening-smoke.yml'
 permissions:
   contents: read
+concurrency:
+  group: nct-smoke-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   smoke:
     runs-on: ubuntu-latest
@@ -17,6 +20,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+      - name: Select the exact merged revised source
+        run: |
+          cp -R tools/nct-smoke /tmp/nct-smoke
+          git fetch --depth=1 origin 7b14bc10d473d86ff369b1acd0f0a522d54c01d6
+          git checkout --detach 7b14bc10d473d86ff369b1acd0f0a522d54c01d6
+          mkdir -p nct-smoke-results
+          git rev-parse HEAD > nct-smoke-results/validation_commit.txt
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
@@ -27,16 +37,10 @@ jobs:
             any::pkgload
             any::testthat
           needs: check
-      - name: Apply the prepared runtime fixes to the CI workspace
-        run: |
-          python3 tools/nct-smoke/apply_hardening.py
-          mkdir -p nct-smoke-results
-          git diff -- R > nct-smoke-results/applied_runtime.patch
-          git rev-parse HEAD > nct-smoke-results/validation_commit.txt
       - name: Run the known-effect simulation
-        run: Rscript tools/nct-smoke/run_smoke.R 2>&1 | tee nct-smoke-results/simulation.log
+        run: Rscript /tmp/nct-smoke/run_smoke.R 2>&1 | tee nct-smoke-results/simulation.log
         shell: bash
-      - name: Run the existing package regression tests against revised code
+      - name: Run all package regression tests against the merged revised code
         if: success()
         run: Rscript -e 'testthat::test_local(".", reporter = "summary", stop_on_failure = TRUE)' 2>&1 | tee nct-smoke-results/regression-tests.log
         shell: bash
