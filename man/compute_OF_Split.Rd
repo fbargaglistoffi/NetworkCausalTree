@@ -22,7 +22,8 @@ compute_OF_Split(
   nleafs,
   unit_ids = seq_along(W),
   N_tr = length(W),
-  N_est = NULL
+  N_est = NULL,
+  minsize = 1
 )
 }
 \arguments{
@@ -69,6 +70,9 @@ whole population}
 \item{N_tr}{Total number of observations in the discovery sample}
 
 \item{N_est}{Total number of observations in the estimation sample}
+
+\item{minsize}{Minimum number of observations in every joint exposure cell
+in each child. Infeasible candidates are excluded before ranking.}
 }
 \value{
 A numeric vector made up by three elements: the first one identifies the

@@ -149,7 +149,8 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         nleafs = nleafs,
         total_variance = if (method == "penalized") current_total_variance() else NULL,
         N_tr = N_tr,
-        N_est = N_est
+        N_est = N_est,
+        minsize = minsize
       )
 
       tmp_filter <- NULL
