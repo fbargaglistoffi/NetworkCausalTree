@@ -51,10 +51,8 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   if (ncol(X) == 0) {
     X <- matrix(nrow = N, ncol = 0)
   } else {
-    cn <- colnames(X)
-    if (is.null(cn) || length(cn) != ncol(X) || !all(grepl("^X\\.", cn))) {
-      colnames(X) <- paste0("X.", seq_len(ncol(X)))
-    }
+    # Names encode positions, not arbitrary caller-supplied labels.
+    colnames(X) <- paste0("X.", seq_len(ncol(X)))
   }
   
   data_tree <- cbind(data_tree, X)

@@ -67,9 +67,8 @@ sprout_nct = function(method, alpha, beta, gamma, delta,
     }
     
     X <- as.data.frame(X)
-    if (!all(grepl("^X\\.", colnames(X)))) {
-      colnames(X) <- paste0("X.", seq_len(ncol(X)))
-    }
+    # Use positional internal names, consistently with partitioning and estimation.
+    colnames(X) <- paste0("X.", seq_len(ncol(X)))
     data <- cbind(data, X)
   }
   
