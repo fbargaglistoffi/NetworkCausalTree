@@ -2,6 +2,12 @@
 
 The `NetworkCausalTree` package introduces a machine learning method that uses tree-based algorithms and an Horvitz-Thompson estimator to assess the heterogeneity of treatment and spillover effects in clustered network interference. Causal inference studies typically assume no interference between individuals, but in real-world scenarios where individuals are interconnected through social, physical, or virtual ties, the effect of a treatment can spill over to other connected individuals in the network. To avoid biased estimates of treatment effects, interference should be considered. Understanding the heterogeneity of treatment and spillover effects can help policy-makers scale up interventions, target strategies more effectively, and generalize treatment spillover effects to other populations.
 
+## Statement of Need
+
+`NetworkCausalTree` is intended for researchers analyzing randomized interventions in populations with observed network ties and clustered network interference. Standard tools for discovering heterogeneous treatment effects, such as `causalTree` and `grf`, do not directly model spillover from treated neighbors. Conversely, software for causal inference under interference generally focuses on average effects rather than discovering interpretable subgroups with different direct and spillover responses.
+
+The package addresses this gap by combining honest, cluster-level tree discovery with design-based estimation of leaf-specific treatment and spillover effects. Users should consider it when interference is confined within clusters, neighborhood exposure can be represented by having at least one treated neighbor, and individual treatment assignment follows a known independent Bernoulli design. For designs or exposure mappings outside these assumptions, methods tailored to those settings are more appropriate.
+
 ## Getting Started
 
 Installing the latest developing version:
