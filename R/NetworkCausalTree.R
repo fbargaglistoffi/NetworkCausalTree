@@ -94,7 +94,16 @@ NetworkCausalTree <- function(X, Y, W,
 
   k <- length(unique(K))
 
-  if (is.null(p)) p <- rep(0.2, N)
+  if (is.null(p)) {
+    warning(
+      "No treatment assignment probabilities 'p' supplied. ",
+      "Using the default p = rep(0.2, N), which is only appropriate ",
+      "for a homogeneous Bernoulli design with assignment probability 0.2. ",
+      "Estimates may be incorrect under other treatment assignment designs.",
+      call. = FALSE
+    )
+    p <- rep(0.2, N)
+  }
 
   if (!is.numeric(p) || length(p) != N ||
       anyNA(p) || any(!is.finite(p)) ||

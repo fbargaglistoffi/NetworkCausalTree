@@ -178,3 +178,87 @@ test_that("held-out estimation outcomes do not affect composite splitting", {
   expect_equal(fit_original$NOBS_TR, fit_modified$NOBS_TR)
   expect_equal(fit_original$OF, fit_modified$OF)
 })
+
+test_that("missing p triggers a warning", {
+  set.seed(100)
+  
+  N <- 80
+  K <- rep(1:4, each = 20)
+  
+  X <- matrix(rbinom(N * 2, 1, 0.5), nrow = N)
+  Y <- rnorm(N)
+  W <- rep(c(0, 0, 0, 1, 0, 1, 1, 0), length.out = N)
+  
+  A <- matrix(0, N, N)
+  
+  for (cluster in unique(K)) {
+    idx <- which(K == cluster)
+    
+    for (j in seq_along(idx)) {
+      current <- idx[j]
+      next_unit <- idx[ifelse(j == length(idx), 1, j + 1)]
+      
+      A[current, next_unit] <- 1
+      A[next_unit, current] <- 1
+    }
+  }
+  
+  expect_warning(
+    NetworkCausalTree(
+      X = X,
+      Y = Y,
+      W = W,
+      A = A,
+      K = K,
+      ratio_disc = 0.5,
+      depth = 1,
+      minsize = 2,
+      output = "detection"
+    ),
+    "No treatment assignment probabilities"
+  )
+})
+
+test_that("explicit p does not trigger a warning", {
+  set.seed(100)
+  
+  N <- 80
+  K <- rep(1:4, each = 20)
+  
+  X <- matrix(rbinom(N * 2, 1, 0.5), nrow = N)
+  Y <- rnorm(N)
+  W <- rep(c(0, 0, 0, 1, 0, 1, 1, 0), length.out = N)
+  
+  A <- matrix(0, N, N)
+  
+  for (cluster in unique(K)) {
+    idx <- which(K == cluster)
+    
+    for (j in seq_along(idx)) {
+      current <- idx[j]
+      next_unit <- idx[ifelse(j == length(idx), 1, j + 1)]
+      
+      A[current, next_unit] <- 1
+      A[next_unit, current] <- 1
+    }
+  }
+  
+  expect_no_warning(
+    NetworkCausalTree(
+      X = X,
+      Y = Y,
+      W = W,
+      A = A,
+      K = K,
+      p = rep(0.2, N),
+      ratio_disc = 0.5,
+      depth = 1,
+      minsize = 2,
+      output = "detection"
+    )
+  )
+})
+
+
+
+
