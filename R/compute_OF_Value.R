@@ -44,29 +44,28 @@ compute_OF_Value <- function(method, alpha, beta, gamma, delta,
     if (!is.numeric(population_effects) || length(population_effects) != 4) {
       stop("population_effects must be a numeric vector of length 4")
     }
-    if (any(!is.finite(population_effects))) {
-      stop("population_effects contains non-finite values: cannot normalize composite OF")
+    weights <- c(alpha, beta, gamma, delta)
+    active <- which(weights > 0)
+    if (length(active) == 0L) {
+      stop("Composite objective requires at least one selected treatment effect.")
     }
-    if (any(population_effects == 0, na.rm = TRUE)) {
-      stop("population_effects contains zero: cannot normalize composite OF")
+    if (any(!is.finite(population_effects[active]))) {
+      stop("population_effects contains non-finite values for selected effects: cannot normalize composite OF")
+    }
+    if (any(population_effects[active] == 0)) {
+      stop("population_effects contains zero for selected effects: cannot normalize composite OF")
     }
 
-    inof <- alpha * ((EffTau1000(N = N, W = W, G = G, Y = Y,
-                                 p = p, Ne_list = Ne_list,
-                                 unit_ids = unit_ids) ^ 2) /
-                       (population_effects[1]) ^ 2) +
-            beta * ((EffTau1101(N = N, W = W, G = G, Y = Y,
-                                p = p, Ne_list = Ne_list,
-                                unit_ids = unit_ids) ^ 2) /
-                      (population_effects[2]) ^ 2) +
-            gamma * ((EffTau1110(N = N, W = W, G = G, Y = Y,
-                                 p = p, Ne_list = Ne_list,
-                                 unit_ids = unit_ids) ^ 2) /
-                       (population_effects[3]) ^ 2) +
-            delta * ((EffTau0100(N = N, W = W, G = G, Y = Y,
-                                 p = p, Ne_list = Ne_list,
-                                 unit_ids = unit_ids) ^ 2) /
-                       (population_effects[4]) ^ 2)
+    # Do not evaluate or normalize contrasts with zero weight: 0 * NA and
+    # 0 / 0 would otherwise contaminate a well-defined selected criterion.
+    effect_functions <- list(EffTau1000, EffTau1101, EffTau1110, EffTau0100)
+    inof <- sum(vapply(active, function(j) {
+      effect <- effect_functions[[j]](
+        N = N, W = W, G = G, Y = Y,
+        p = p, Ne_list = Ne_list, unit_ids = unit_ids
+      )
+      weights[j] * (effect / population_effects[j]) ^ 2
+    }, numeric(1)))
   } else if (method == "penalized") {
     
     if (is.null(N_est) || N_tr <= 0 || N_est <= 0) {
