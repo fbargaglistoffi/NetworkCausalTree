@@ -45,10 +45,8 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
     X <- NULL
   } else {
     X <- as.data.frame(X)
-    cn <- colnames(X)
-    if (is.null(cn) || length(cn) != ncol(X) || !all(grepl("^X\\.", cn))) {
-      colnames(X) <- paste0("X.", seq_len(ncol(X)))
-    }
+    # Match the positional names used to construct the discovery filters.
+    colnames(X) <- paste0("X.", seq_len(ncol(X)))
   }
 
   data_est <- data.frame(idunit = unit_ids, W = W, G = G, Y = Y)
@@ -314,4 +312,3 @@ compute_effects_nct <- function(output, nct_partition, N, W, G, Y, X,
 
   return(nct_partition)
 }
-
