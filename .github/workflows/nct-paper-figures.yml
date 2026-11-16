@@ -1,0 +1,54 @@
+name: Regenerate JOSS worked-example figures
+on:
+  push:
+    branches:
+      - 'figures/joss-worked-examples-20261116'
+    paths:
+      - 'tools/nct-paper-figures/**'
+      - '.github/workflows/nct-paper-figures.yml'
+permissions:
+  contents: read
+concurrency:
+  group: nct-paper-figures-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  figures:
+    name: Figure - ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [direct, composite]
+    env:
+      R_KEEP_PKG_SOURCE: yes
+      NCT_FIGURE_OUTPUT: nct-paper-figures
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify the exact revised package source
+        run: |
+          git diff --exit-code c93e2c3fa1e8b0d3d28d4fdbefb154c036ed749d -- R DESCRIPTION NAMESPACE
+          mkdir -p nct-paper-figures
+          printf '%s\n' c93e2c3fa1e8b0d3d28d4fdbefb154c036ed749d > nct-paper-figures/source_commit.txt
+          cp tools/nct-paper-figures/regenerate_figures.R nct-paper-figures/
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::pkgload
+            any::jsonlite
+          needs: check
+      - name: Run manuscript example and render PDF PNG SVG
+        run: Rscript tools/nct-paper-figures/regenerate_figures.R ${{ matrix.example }} 2>&1 | tee nct-paper-figures/execution.log
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: joss-paper-figure-${{ matrix.example }}
+          path: nct-paper-figures/
+          retention-days: 30
