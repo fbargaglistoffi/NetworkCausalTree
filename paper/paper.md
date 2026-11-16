@@ -75,7 +75,7 @@ Existing methods for causal inference either handle treatment effect heterogenei
 | `inferference` [@tchetgen2012causal] | Yes | No | Yes |
 | **`NetworkCausalTree` (ours)** | **Yes** | **Yes** | **Yes** |
 
-NetworkCausalTree fills this hole by providing the first interpretable, decision-tree-based approach for discovering heterogeneity in both treatment and spillover effects under network interference.
+`NetworkCausalTree` addresses this software gap by implementing the interpretable decision-tree methodology introduced by @bargagli2025heterogeneous for discovering heterogeneity in treatment and spillover effects under clustered network interference.
 
 # Algorithm
 
@@ -232,7 +232,7 @@ plot_NCT(NCT = result_direct,
 
 ![Network Causal Tree targeted to the main treatment effect](images/nct1.png)
 
-Figure 3 shows the tree obtained from **Example 2**.
+Figure 3 shows the tree obtained from **Example 2**. In Example 2, the spillover effect is similarly heterogeneous, with $\tau_{(0,1;0,0)}=2$ for $x_1=0$ and $\tau_{(0,1;0,0)}=-2$ for $x_1=1$.
 
 ``` r
 title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(0.25,0.25;0.25,0.25)"),sep="")
